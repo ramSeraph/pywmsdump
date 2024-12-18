@@ -173,10 +173,10 @@ class WMSDumper:
 
             return resp.text
 
-    def get_geom(self, georss_polygon):
+    def get_points(self, vals):
         points = []
         curr_p = []
-        for c in georss_polygon.split(' '):
+        for c in vals.split(' '):
             if len(curr_p) == 2:
                 curr_p.reverse()
                 points.append(curr_p)
@@ -186,8 +186,8 @@ class WMSDumper:
             curr_p.reverse()
             points.append(curr_p)
             curr_p = []
+        return points
 
-        return { 'type': 'Polygon', 'coordinates': [points] }
 
     def get_props(self, content):
         soup = BeautifulSoup(content, 'html.parser')
@@ -206,8 +206,19 @@ class WMSDumper:
         content = entry.get('content', {}).get('#text', '')
         props = self.get_props(content)
     
-        geom = self.get_geom(entry['georss:where']['georss:polygon'])
-    
+        where = entry['georss:where']
+        if 'georss:polygon' in where:
+            points = self.get_points(where['georss:polygon'])
+            geom = { 'type': 'Polygon', 'coordinates': [points] }
+        elif 'georss:line' in where:
+            points = self.get_points(where['georss:line'])
+            geom = { 'type': 'LineString', 'coordinates': points }
+        elif 'georss:point' in where:
+            points = self.get_points(where['georss:point'])
+            geom = { 'type': 'Point', 'coordinates': points[0] }
+        else:
+            raise Exception(f'unexpected content in {where}')
+
         return { 'type': 'Feature', 'geometry': geom, 'properties': props }
 
 
