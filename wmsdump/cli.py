@@ -28,6 +28,12 @@ def add_to_url(url, piece):
         return url + piece
     return url + '/' + piece
 
+def print_wms_info(info):
+    for req_type, formats in info.items():
+        print(f'{req_type}:')
+        for fmt in formats:
+            print(f'\t{fmt}')
+
 
 def handle_layer_list(layer_list, output_file):
     if output_file is None:
@@ -99,17 +105,20 @@ def explore(geoserver_url, wms_url, wms_version, scrape_webpage, output_file):
         logger.info(f'setting wms url to "{wms_url}"')
 
     layer_list = []
+    wms_info = {}
     try:
-        fill_layer_list(layer_list, wms_url, wms_version, **req_params)
+        fill_layer_list(layer_list, wms_info, wms_url, wms_version, **req_params)
     except Exception:
         logger.exception('Unable to get layer list using "GetCapabilities" call')
         logger.info('Consider parsing the geoserver webpage using '
                     '"--geoserver-url" and "--scrape-webpage" if the url is known '
                     'and has a functioning webpage')
-        if len(layer_list) > 0:
-            logger.info('Could obtain some partial results.. dumping them')
-            handle_layer_list(layer_list, output_file)
-        return
+
+        if len(layer_list) == 0:
+            return
+        logger.info('Could obtain some partial results.. dumping them')
+
+    print_wms_info(wms_info)
     handle_layer_list(layer_list, output_file)
 
 

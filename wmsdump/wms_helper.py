@@ -24,8 +24,15 @@ def get_capabilities(url, wms_version='1.1.1', **req_args):
     return resp.text
  
 
-def fill_layer_list(layer_list, url, wms_version, **req_args):
+def fill_layer_list(layer_list, wms_info, url, wms_version, **req_args):
     xml_txt = get_capabilities(url, wms_version, **req_args)
+
+    for request_type in ['GetMap', 'GetFeatureInfo']:
+        req_xpath = f'//WMT_MS_Capabilities/Capability/Request/{request_type}/Format/text() | ' + \
+                    f'//WMS_Capabilities/Capability/Request/{request_type}/Format/text()'
+        results, errors = extract_xml_elements(xml_txt, req_xpath)
+        if len(results) > 0:
+            wms_info[request_type] = results
 
     result_xpath = "//WMT_MS_Capabilities/Capability/Layer/Layer/Name/text() | " + \
                    "//WMS_Capabilities/Capability/Layer/Layer/Name/text()"
