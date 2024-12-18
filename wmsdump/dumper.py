@@ -103,7 +103,7 @@ class WMSDumper:
 
         self.req_count = 0
 
-    def get_params_WFS(self, count, no_index):
+    def get_params_WFS(self, count, no_index, no_sort):
 
         params = {
             'service': 'WFS',
@@ -119,12 +119,12 @@ class WMSDumper:
         fc_key = 'count' if self.wfs_version == '2.0.0' else 'maxFeatures'
         params[fc_key] = count
 
-        if self.sort_key is not None:
+        if not no_sort and self.sort_key is not None:
             params['sortBy'] = self.sort_key
 
         return params
 
-    def get_params_WMS(self, count, no_index):
+    def get_params_WMS(self, count, no_index, no_sort):
         bbox_str =  '-180,-90,180,90'
         params = {
             'service': 'WMS',
@@ -141,17 +141,17 @@ class WMSDumper:
         }
         if not no_index:
             params['startIndex'] = self.state.index_done_till
-        if self.sort_key is not None:
+        if not no_sort and self.sort_key is not None:
             params['sortBy'] = self.sort_key
 
         return params
 
 
-    def get_params(self, count, no_index):
+    def get_params(self, count, no_index, no_sort):
         if self.service == 'WFS':
-            return self.get_params_WFS(count, no_index)
+            return self.get_params_WFS(count, no_index, no_sort)
 
-        return self.get_params_WMS(count, no_index)
+        return self.get_params_WMS(count, no_index, no_sort)
 
 
     def make_request(self, params):
@@ -257,8 +257,8 @@ class WMSDumper:
 
         return self.parse_response_WMS(resp_text)
 
-    def get_features(self, count, no_index=False):
-        params = self.get_params(count, no_index)
+    def get_features(self, count, no_index=False, no_sort=False):
+        params = self.get_params(count, no_index, no_sort)
 
         resp_text = self.make_request(params)
 

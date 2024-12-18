@@ -235,7 +235,7 @@ def extract(layername, output_file, geoserver_url, wms_url,
 
     if dump_samples:
         logger.info('dumping a couple of records to inspect and pick a sorting key')
-        feats = dumper.get_features(2, no_index=True)
+        feats = dumper.get_features(2, no_index=True, no_sort=True)
         for feat in feats:
             pprint(feat['properties'])
         
