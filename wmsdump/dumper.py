@@ -7,8 +7,8 @@ from pprint import pprint, pformat
 import xmltodict
 import requests
 
-from bs4 import BeautifulSoup
 from .state import State
+from .georss_helper import extract_feature
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +63,6 @@ class WMSDumper:
 
     def __init__(self, url, layername, service,
                  wms_version='1.1.1',
-                 geometry_precision=7,
                  wfs_version='1.0.0',
                  batch_size=1000,
                  outSRS='EPSG:4326',
@@ -72,21 +71,17 @@ class WMSDumper:
                  requests_to_pause=10,
                  pause_seconds=2,
                  max_attempts=5,
+                 geometry_precision=7,
                  session=None,
                  req_params={}):
+        self.wms_version = wms_version
+        self.wfs_version = wfs_version
+
         # common
         self.url = url
         self.layername = layername
         self.service = service
-
-        # wms specific
-        self.wms_version = wms_version
         self.geometry_precision = geometry_precision
-
-        # wfs specific
-        self.wfs_version = wfs_version
-
-        # common
         self.batch_size = batch_size
         self.sort_key = sort_key
         self.state = state
@@ -161,68 +156,19 @@ class WMSDumper:
 
         while True:
             attempt += 1
-            if attempt > self.max_attempts:
-                raise Exception('Request failed')
 
             try:
                 resp = self.session.get(self.url, params=params, **self.req_params)
                 if not resp.ok:
-                    raise Exception('Request failed')
+                    raise Exception(f'Request failed - status: {resp.status_code}, text: {resp.text}')
             except Exception:
                 logger.info(f'request failed - attempt:{attempt}/{self.max_attempts}.. retrying in {self.pause_seconds*attempt} secs') 
+                if attempt > self.max_attempts:
+                    raise
                 time.sleep(self.pause_seconds * attempt)
                 continue
 
             return resp.text
-
-    def get_points(self, vals):
-        points = []
-        curr_p = []
-        for c in vals.split(' '):
-            if len(curr_p) == 2:
-                curr_p.reverse()
-                points.append(curr_p)
-                curr_p = []
-            curr_p.append(round(float(c), self.geometry_precision))
-        if len(curr_p) == 2:
-            curr_p.reverse()
-            points.append(curr_p)
-            curr_p = []
-        return points
-
-
-    def get_props(self, content):
-        soup = BeautifulSoup(content, 'html.parser')
-        lis = soup.find_all('li')
-        props = {}
-        for li in lis:
-            txt = li.text.strip()
-            parts = txt.split(':', 1)
-            if len(parts) != 2:
-                return { 'unparsed': content }
-            props[parts[0]] = parts[1].strip()
-        return props
-
-
-    def extract_feature(self, entry):
-        content = entry.get('content', {}).get('#text', '')
-        props = self.get_props(content)
-    
-        where = entry['georss:where']
-        if 'georss:polygon' in where:
-            points = self.get_points(where['georss:polygon'])
-            geom = { 'type': 'Polygon', 'coordinates': [points] }
-        elif 'georss:line' in where:
-            points = self.get_points(where['georss:line'])
-            geom = { 'type': 'LineString', 'coordinates': points }
-        elif 'georss:point' in where:
-            points = self.get_points(where['georss:point'])
-            geom = { 'type': 'Point', 'coordinates': points[0] }
-        else:
-            raise Exception(f'unexpected content in {where}')
-
-        return { 'type': 'Feature', 'geometry': geom, 'properties': props }
-
 
     def parse_response_WFS(self, resp_text):
         try:
@@ -232,6 +178,8 @@ class WMSDumper:
             logger.info(f'resp: {resp_text}')
             raise
 
+        for feat in data['features']:
+            self.truncate_geometry(feat.get('geometry', None))
         return data['features']
 
     def parse_response_WMS(self, resp_text):
@@ -258,11 +206,24 @@ class WMSDumper:
 
         feats = []
         for entry in entries:
-            feat = self.extract_feature(entry)
+            feat = extract_feature(entry)
+            self.truncate_geometry(feat.get('geometry', None))
             feats.append(feat)
 
         return feats
 
+    def truncate_nested_coordinates(self, coords):
+        if type(coords) != list:
+            return round(float(coords), self.geometry_precision)
+
+        return [ self.truncate_nested_coordinates(c) for c in coords ]
+
+    def truncate_geometry(self, geom):
+        if geom['type'] == 'MultiGeometry':
+            for subgeom in geom['geometries']:
+                self.truncate_geometry(subgeom)
+
+        geom['coordinates'] = self.truncate_nested_coordinates(geom['coordinates'])
 
     def parse_response(self, resp_text):
         if self.service == 'WFS':

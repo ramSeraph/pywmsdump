@@ -9,6 +9,8 @@ from urllib.parse import urljoin
 
 logger = logging.getLogger(__name__)
 
+# TODO: review and cleanup
+
 def _get_layer_names(soup):
     lnames = []
     table = soup.find('table')
@@ -79,7 +81,7 @@ def _get_next_link(soup):
 
 
 def _parse_page(resp_text):
-    soup = BeautifulSoup(resp_text, 'html.parser')
+    soup = BeautifulSoup(resp_text, 'lxml')
     lnames = _get_layer_names(soup)
     next_link, next_link_id = _get_next_link(soup)
     return lnames, next_link, next_link_id
@@ -88,7 +90,7 @@ def _parse_page(resp_text):
 def _parse_page_ajax(resp_text):
     data = xmltodict.parse(resp_text)
     all_text = '\n'.join([e['#text'] for e in data['ajax-response']['component']])
-    soup = BeautifulSoup(all_text, 'html.parser')
+    soup = BeautifulSoup(all_text, 'lxml')
     lnames = _get_layer_names(soup)
     next_link, next_link_id = _get_next_link_ajax(soup, data['ajax-response']['evaluate'])
     return lnames, next_link, next_link_id
@@ -96,7 +98,7 @@ def _parse_page_ajax(resp_text):
 
 
 def _get_preview_url(resp_text):
-    soup = BeautifulSoup(resp_text, 'html.parser')
+    soup = BeautifulSoup(resp_text, 'lxml')
     links = soup.find_all('a')     
     preview_link = None
     for link in links:
