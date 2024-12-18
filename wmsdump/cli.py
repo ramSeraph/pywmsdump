@@ -13,7 +13,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 from wmsdump.state import get_state_from_files
 from wmsdump.page_scraper import get_layer_list_from_page
-from wmsdump.wms_helper import get_layer_list
+from wmsdump.wms_helper import fill_layer_list
 from wmsdump.dumper import (
     WMSDumper, SortKeyRequiredException,
     InvalidSortKeyException, WFSUnsupportedException
@@ -98,13 +98,17 @@ def explore(geoserver_url, wms_url, wms_version, scrape_webpage, output_file):
         wms_url = add_to_url(geoserver_url, './ows')
         logger.info(f'setting wms url to "{wms_url}"')
 
+    layer_list = []
     try:
-        layer_list = get_layer_list(wms_url, wms_version, **req_params)
+        fill_layer_list(layer_list, wms_url, wms_version, **req_params)
     except Exception:
         logger.exception('Unable to get layer list using "GetCapabilities" call')
         logger.info('Consider parsing the geoserver webpage using '
                     '"--geoserver-url" and "--scrape-webpage" if the url is known '
                     'and has a functioning webpage')
+        if len(layer_list) > 0:
+            logger.info('Could obtain some partial results.. dumping them')
+            handle_layer_list(layer_list, output_file)
         return
     handle_layer_list(layer_list, output_file)
 
