@@ -41,6 +41,22 @@ def get_error_msg(data):
             return val['ows:ExceptionText']
     return None
 
+def handle_non_json_response(resp_text):
+    try:
+        data = xmltodict.parse(resp_text)
+    except Exception:
+        return None, None
+    err_msg = get_error_msg(data)
+    if err_msg is None:
+        return data, None
+    if err_msg.find(SORT_KEY_ERR_MSG) != -1:
+        raise SortKeyRequiredException()
+    if err_msg.find(INVALID_PROP_NAME_ERR_MSG) != -1:
+        raise InvalidSortKeyException()
+    if err_msg.find(WFS_DISABLED_ERR_MSG) != -1:
+        raise WFSUnsupportedException()
+
+    return data, err_msg
 
 class WMSDumper:
 
@@ -199,17 +215,7 @@ class WMSDumper:
         try:
             data = json.loads(resp_text)
         except ValueError:
-            data = xmltodict.parse(resp_text)
-            err_msg = get_error_msg(data)
-            if err_msg is None:
-                logger.info(f'resp: {resp_text}')
-                raise
-            if err_msg.find(SORT_KEY_ERR_MSG) != -1:
-                raise SortKeyRequiredException()
-            if err_msg.find(INVALID_PROP_NAME_ERR_MSG) != -1:
-                raise InvalidSortKeyException()
-            if err_msg.find(WFS_DISABLED_ERR_MSG) != -1:
-                raise WFSUnsupportedException()
+            handle_non_json_response(resp_text)
             logger.info(f'resp: {resp_text}')
             raise
 
@@ -218,15 +224,21 @@ class WMSDumper:
     def parse_response_WMS(self, resp_text):
         xml = re.sub(r'&#([a-zA-Z0-9]+);?', r'[#\1;]', resp_text)
 
-        parsed = xmltodict.parse(xml)
+        data, err_msg = handle_non_json_response(xml)
 
-        if 'ServiceExceptionReport' in parsed:
-            logger.error(pformat(parsed))
+        if data is None:
+            logger.error(xml)
+            raise Exception('Unable to parse server response as xml')
+
+        if err_msg is not None:
+            logger.error(pformat(err_msg))
             raise Exception('got error when requesting features')
-        if 'feed' not in parsed:
-            return []
 
-        feed = parsed['feed']
+        if 'feed' not in data:
+            logger.error(pformat(data))
+            raise Exception('no feed in data')
+
+        feed = data['feed']
         if 'entry' not in feed:
             return []
         entries = feed['entry']
