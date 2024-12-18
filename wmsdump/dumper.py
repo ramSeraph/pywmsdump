@@ -12,7 +12,8 @@ from .state import State
 
 logger = logging.getLogger(__name__)
 
-SORT_KEY_ERR_MSG = 'Cannot do natural order without a primary key, please add it or specify a manual sort over existing attributes'
+SORT_KEY_ERR_MSG = 'Cannot do natural order without a primary key, ' + \
+                   'please add it or specify a manual sort over existing attributes'
 INVALID_PROP_NAME_ERR_MSG = 'Illegal property name'
 WFS_DISABLED_ERR_MSG = 'Service WFS is disabled'
 
@@ -155,6 +156,7 @@ class WMSDumper:
 
 
     def make_request(self, params):
+        logger.debug(pformat(params))
         attempt = 0
 
         while True:
@@ -167,7 +169,7 @@ class WMSDumper:
                 if not resp.ok:
                     raise Exception('Request failed')
             except Exception:
-                logger.info(f'request failed - attempt:{attempt}.. retrying in {self.pause_seconds*attempt}') 
+                logger.info(f'request failed - attempt:{attempt}/{self.max_attempts}.. retrying in {self.pause_seconds*attempt} secs') 
                 time.sleep(self.pause_seconds * attempt)
                 continue
 
@@ -281,7 +283,7 @@ class WMSDumper:
             self.req_count += 1
 
             if self.req_count == self.requests_to_pause:
-                logger.info(f'pausing for {self.pause_seconds}')
+                logger.info(f'pausing for {self.pause_seconds} secs')
                 time.sleep(self.pause_seconds)
                 self.req_count = 0
 
