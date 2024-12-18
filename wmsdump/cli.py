@@ -3,6 +3,7 @@ import json
 import logging
 
 from pprint import pprint
+from pathlib import Path
 
 import click
 import xmltodict
@@ -148,7 +149,7 @@ def explore(geoserver_url, wms_url, wms_version, scrape_webpage, output_file):
               help='decimal point precision of geometry to be returned, '
                    'only applies to the wms mode. truncation done on client side')
 @click.option('--output-dir', '-d',
-              type=click.Path(), default='.',
+              type=click.Path(file_okay=False), default='.',
               help='directory to write output files in. Only used when "output-file" is not given')
 def extract(layername, output_file, geoserver_url, wms_url,
             service, sort_key, batch_size, wms_version,
@@ -161,6 +162,10 @@ def extract(layername, output_file, geoserver_url, wms_url,
 
     if output_file is None:
         output_file = re.sub(r'[^\w\d-]','_', layername) + '.geojsonl'
+        output_dir_p = Path(output_dir)
+        output_dir_p.mkdir(exist_ok=True, parents=True)
+        ouput_file_p = output_dir_p / output_file
+        output_file = str(ouput_file_p)
         logger.info(f'output file not specified.. writing to {output_file}')
 
     if geoserver_url is not None:
@@ -203,6 +208,8 @@ def extract(layername, output_file, geoserver_url, wms_url,
                 f = open(output_file, 'a')
             f.write(json.dumps(feat))
             f.write('\n')
+        Path(state_file).unlink()
+        logger.info('Done!!!')
     except SortKeyRequiredException:
         logger.error('failed to iterate over records as a sorting key is not specified using "--sort-key"')
         dump_samples = True
