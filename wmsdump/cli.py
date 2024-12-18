@@ -151,10 +151,14 @@ def explore(geoserver_url, wms_url, wms_version, scrape_webpage, output_file):
 @click.option('--output-dir', '-d',
               type=click.Path(file_okay=False), default='.',
               help='directory to write output files in. Only used when "output-file" is not given')
+@click.option('--skip-index', 
+              type=int, default=0, show_default=True,
+              help='skip n elements in index.. useful to skip records causing failure')
 def extract(layername, output_file, geoserver_url, wms_url,
             service, sort_key, batch_size, wms_version,
             wfs_version, geometry_precision, output_dir,
-            requests_to_pause, pause_seconds, max_attempts):
+            requests_to_pause, pause_seconds, max_attempts,
+            skip_index):
     if geoserver_url is None and wms_url is None:
         logger.error('Invalid invocation: '
                      'One of "--wms-url" or "--geoserver-url" must be provided')
@@ -186,6 +190,13 @@ def extract(layername, output_file, geoserver_url, wms_url,
     state = get_state_from_files(state_file, output_file, wms_url, service, sort_key, layername)
     if state is None:
         return
+
+    if skip_index < 0:
+        logger.error('skip index can\'t be negative')
+        return
+
+    if skip_index > 0:
+        state.update(skip_index, 0)
 
     dumper = WMSDumper(wms_url, layername, service,
                        wfs_version=wfs_version,
