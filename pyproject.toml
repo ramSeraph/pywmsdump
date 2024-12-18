@@ -1,0 +1,15 @@
+[project]
+name = "wmsdump"
+version = "0.1.0"
+description = "Library for extraction data from WMS endpoints"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "bs4>=0.0.2",
+    "click>=8.1.7",
+    "requests>=2.32.3",
+    "xmltodict>=0.14.2",
+]
+
+[project.scripts]
+wms-extracter = "wmsdump.cli:main"
