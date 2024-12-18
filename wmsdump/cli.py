@@ -101,7 +101,7 @@ def explore(geoserver_url, wms_url, wms_version, scrape_webpage, output_file):
         return
 
     if wms_url is None:
-        wms_url = add_to_url(geoserver_url, './ows')
+        wms_url = add_to_url(geoserver_url, 'ows')
         logger.info(f'setting wms url to "{wms_url}"')
 
     layer_list = []

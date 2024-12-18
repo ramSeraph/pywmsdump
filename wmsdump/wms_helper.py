@@ -45,6 +45,6 @@ def fill_layer_list(layer_list, wms_info, url, wms_version, **req_args):
     #exception_xpath = '//ServiceExceptionReport | //ows:ExceptionReport'
     exception_xpath = '//ServiceExceptionReport'
 
-    exceptions = extract_xml_elements(xml_txt, exception_xpath)
+    exceptions, errors = extract_xml_elements(xml_txt, exception_xpath)
     if len(exceptions) > 0:
         raise Exception(exceptions[0])
