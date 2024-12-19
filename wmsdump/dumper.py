@@ -163,7 +163,7 @@ class WMSDumper:
                     raise Exception(f'Request failed - status: {resp.status_code}, text: {resp.text}')
             except Exception:
                 logger.info(f'request failed - attempt:{attempt}/{self.max_attempts}.. retrying in {self.pause_seconds*attempt} secs') 
-                if attempt > self.max_attempts:
+                if attempt >= self.max_attempts:
                     raise
                 time.sleep(self.pause_seconds * attempt)
                 continue
