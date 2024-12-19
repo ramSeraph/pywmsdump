@@ -17,6 +17,18 @@ SORT_KEY_ERR_MSG = 'Cannot do natural order without a primary key, ' + \
 INVALID_PROP_NAME_ERR_MSG = 'Illegal property name'
 WFS_DISABLED_ERR_MSG = 'Service WFS is disabled'
 
+DEFAULTS = {
+    'wms_version': '1.1.1',
+    'wfs_version': '1.0.0',
+    'batch_size': 1000,
+    'requests_to_pause': 10,
+    'pause_seconds': 2,
+    'max_attempts': 5,
+    'retry_delay': 5,
+    'geometry_precision': 7,
+    'out_srs': 'EPSG:4326',
+}
+
 class SortKeyRequiredException(Exception):
     pass
 
@@ -59,33 +71,37 @@ def handle_non_json_response(resp_text):
 
     return data, err_msg
 
-class WMSDumper:
+class ServiceDumper:
 
     def __init__(self, url, layername, service,
-                 wms_version='1.1.1',
-                 wfs_version='1.0.0',
-                 batch_size=1000,
-                 outSRS='EPSG:4326',
+                 service_version=None,
+                 batch_size=DEFAULTS['batch_size'],
+                 out_srs=DEFAULTS['out_srs'],
                  sort_key=None,
                  state=None,
-                 requests_to_pause=10,
-                 pause_seconds=2,
-                 max_attempts=5,
-                 geometry_precision=7,
+                 requests_to_pause=DEFAULTS['requests_to_pause'],
+                 pause_seconds=DEFAULTS['pause_seconds'],
+                 retry_delay=DEFAULTS['retry_delay'],
+                 max_attempts=DEFAULTS['max_attempts'],
+                 geometry_precision=DEFAULTS['geometry_precision'],
                  session=None,
                  req_params={}):
-        self.wms_version = wms_version
-        self.wfs_version = wfs_version
 
-        # common
+        if service not in ['WMS', 'WFS']:
+            raise Exception('Service expected to be one of WMS or WFS')
+        self.service = service
+
+        if service_version is None:
+            service_version = DEFAULTS['wms_version'] if service == 'WMS' else DEFAULTS['wfs_version']
+        self.service_version = service_version
+
         self.url = url
         self.layername = layername
-        self.service = service
         self.geometry_precision = geometry_precision
         self.batch_size = batch_size
         self.sort_key = sort_key
         self.state = state
-        self.outSRS = outSRS
+        self.out_srs = out_srs
         self.requests_to_pause = requests_to_pause
         self.pause_seconds = pause_seconds
         self.max_attempts = max_attempts
@@ -103,11 +119,11 @@ class WMSDumper:
 
         params = {
             'service': 'WFS',
-            'version': self.wfs_version,
+            'version': self.service_version,
             'request': 'GetFeature',
             'typeName': self.layername,
             'outputFormat': "application/json",
-            'srsName': self.outSRS,
+            'srsName': self.out_srs,
         }
         if not no_index:
             params['startIndex'] = self.state.index_done_till
@@ -124,11 +140,11 @@ class WMSDumper:
         bbox_str =  '-180,-90,180,90'
         params = {
             'service': 'WMS',
-            'version': self.wms_version,
+            'version': self.service_version,
             'request': 'GetMap',
             'layers': self.layername,
             'maxFeatures': count,
-            'srs': self.outSRS,
+            'srs': self.out_srs,
             'format': 'application/atom xml',
             'width': 256,
             'height': 256,
@@ -162,10 +178,10 @@ class WMSDumper:
                 if not resp.ok:
                     raise Exception(f'Request failed - status: {resp.status_code}, text: {resp.text}')
             except Exception:
-                logger.info(f'request failed - attempt:{attempt}/{self.max_attempts}.. retrying in {self.pause_seconds*attempt} secs') 
+                logger.info(f'request failed - attempt:{attempt}/{self.max_attempts}.. retrying in {self.retry_delay*attempt} secs') 
                 if attempt >= self.max_attempts:
                     raise
-                time.sleep(self.pause_seconds * attempt)
+                time.sleep(self.retry_delay * attempt)
                 continue
 
             return resp.text

@@ -14,8 +14,9 @@ from wmsdump.state import get_state_from_files
 from wmsdump.page_scraper import get_layer_list_from_page
 from wmsdump.wms_helper import fill_layer_list
 from wmsdump.dumper import (
-    WMSDumper, SortKeyRequiredException,
-    InvalidSortKeyException, WFSUnsupportedException
+    ServiceDumper, SortKeyRequiredException,
+    InvalidSortKeyException, WFSUnsupportedException,
+    DEFAULTS
 )
 
 logger = logging.getLogger(__name__)
@@ -129,35 +130,36 @@ def explore(geoserver_url, wms_url, wms_version, scrape_webpage, output_file):
 @click.option('--geoserver-url', '-g',
               help='Url of the geoserver endpoint.'
                    ' wms endpoint is assumed to be <geoserver_url>/<layer_group>/ows')
-@click.option('--wms-url', '-w',
-              help='Url of the wms endpoint from which we can retrieve data.'
+@click.option('--service-url', '-u',
+              help='Url of the wms/wfs endpoint from which we can retrieve data. '
                    'If not provided, will be derived from geoserver-url')
-@click.option('--wms-version',
-              default='1.1.1', show_default=True,
-              help='set the wms api version to use')
-@click.option('--wfs-version',
-              default='1.0.0', show_default=True,
-              help='set the wfs api version to use')
 @click.option('--service', '-s',
               type=click.Choice(['WMS', 'WFS'], case_sensitive=False),
               default='WFS', show_default=True,
               help='service to use for extracting data, one of WFS or WMS')
+@click.option('--service-version', '-v',
+              help='the protocol version to use. defaults to'
+                   f' \'{DEFAULTS["wms_version"]}\' for WMS and \'{DEFAULTS["wfs_version"]}\' for WFS')
 @click.option('--sort-key', '-k',
               help='key to use to do paged retrieval')
 @click.option('--batch-size', '-b',
-              type=int, default=1000, show_default=True,
+              type=int, default=DEFAULTS['batch_size'], show_default=True,
               help='batch size to use for retrieval')
 @click.option('--pause-seconds', '-p',
-              type=int, default=2, show_default=True,
+              type=int, default=DEFAULTS['pause_seconds'], show_default=True,
               help='amount of time to pause between a batch of requests')
 @click.option('--requests-to-pause', 
-              type=int, default=10, show_default=True,
+              type=int, default=DEFAULTS['requests_to_pause'], show_default=True,
               help='number of requests to make before pausing for --pause-seconds')
 @click.option('--max-attempts', 
-              type=int, default=5, show_default=True,
+              type=int, default=DEFAULTS['max_attempts'], show_default=True,
               help='number of times to attempt a request before giving up')
+@click.option('--retry-delay', '-r',
+              type=int, default=DEFAULTS['retry_delay'], show_default=True,
+              help='number of secs to wait before retrying on failure.. '
+                   'for each failure the delay is incremented by the same number')
 @click.option('--geometry-precision', '-g',
-              type=int, default=7, show_default=True,
+              type=int, default=DEFAULTS['geometry_precision'], show_default=True,
               help='decimal point precision of geometry to be returned, '
                    'only applies to the wms mode. truncation done on client side')
 @click.option('--output-dir', '-d',
@@ -166,14 +168,19 @@ def explore(geoserver_url, wms_url, wms_version, scrape_webpage, output_file):
 @click.option('--skip-index', 
               type=int, default=0, show_default=True,
               help='skip n elements in index.. useful to skip records causing failure')
-def extract(layername, output_file, geoserver_url, wms_url,
-            service, sort_key, batch_size, wms_version,
-            wfs_version, geometry_precision, output_dir,
+def extract(layername, output_file, output_dir,
+            geoserver_url, service_url,
+            service, service_version,
+            sort_key, batch_size, geometry_precision, 
             requests_to_pause, pause_seconds, max_attempts,
-            skip_index):
-    if geoserver_url is None and wms_url is None:
+            retry_delay, skip_index):
+
+    if service_version is None:
+        service_version = DEFAULTS['wms_version'] if service == 'WMS' else DEFAULTS['wfs_version']
+
+    if geoserver_url is None and service_url is None:
         logger.error('Invalid invocation: '
-                     'One of "--wms-url" or "--geoserver-url" must be provided')
+                     'One of "--service-url" or "--geoserver-url" must be provided')
         return
 
     if output_file is None:
@@ -187,19 +194,19 @@ def extract(layername, output_file, geoserver_url, wms_url,
     if geoserver_url is not None:
         parts = layername.split(':')
         if len(parts) == 1:
-            wms_url = add_to_url(geoserver_url, 'ows')
+            service_url = add_to_url(geoserver_url, 'ows')
         elif len(parts) == 2:
             layername = parts[1]
-            wms_url = add_to_url(geoserver_url, f'{parts[0]}/ows')
+            service_url = add_to_url(geoserver_url, f'{parts[0]}/ows')
         else:
             logger.error(f'{layername} is of unexpected format.. has more than one ":"')
             return
 
-    logger.info(f'working with {wms_url=} and {layername=}')
+    logger.info(f'working with {service_url=} and {layername=}')
 
     state_file = output_file + '.state'
 
-    state = get_state_from_files(state_file, output_file, wms_url, service, sort_key, layername)
+    state = get_state_from_files(state_file, output_file, service_url, service, sort_key, layername)
     if state is None:
         return
 
@@ -210,17 +217,17 @@ def extract(layername, output_file, geoserver_url, wms_url,
     if skip_index > 0:
         state.update(skip_index, 0)
 
-    dumper = WMSDumper(wms_url, layername, service,
-                       wfs_version=wfs_version,
-                       wms_version=wms_version,
-                       batch_size=batch_size,
-                       sort_key=sort_key,
-                       state=state,
-                       requests_to_pause=requests_to_pause,
-                       pause_seconds=pause_seconds,
-                       max_attempts=max_attempts,
-                       geometry_precision=geometry_precision,
-                       req_params=req_params)
+    dumper = ServiceDumper(service_url, layername, service,
+                           service_version=service_version,
+                           batch_size=batch_size,
+                           sort_key=sort_key,
+                           state=state,
+                           requests_to_pause=requests_to_pause,
+                           pause_seconds=pause_seconds,
+                           retry_delay=retry_delay,
+                           max_attempts=max_attempts,
+                           geometry_precision=geometry_precision,
+                           req_params=req_params)
 
     dump_samples = False
     f = None
