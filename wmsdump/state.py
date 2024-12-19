@@ -22,6 +22,7 @@ class State:
         self.updatecb = updatecb
 
 
+
     def validate(self):
         if self.service not in ['WMS', 'WFS']:
             return False, f'Invalid value for service - {self.service}.' + \
@@ -89,10 +90,10 @@ def get_state_from_files(state_file, output_file, url, service, sort_key, layern
 
     state = State(url=url, service=service, sort_key=sort_key, layername=layername)
     if state_file_exists and output_file_exists:
-        logger.info(f'Both the output file and state file exists.. trying to resume extraction')
+        logger.info('Both the output file and state file exists.. trying to resume extraction')
         try:
             state_data = json.loads(Path(state_file).read_text())
-        except:
+        except Exception:
             logger.exception('Unable to read {state_file}')
             return None
 

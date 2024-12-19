@@ -6,7 +6,6 @@ from pprint import pprint
 from pathlib import Path
 
 import click
-import xmltodict
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 

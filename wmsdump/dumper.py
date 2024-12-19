@@ -2,7 +2,7 @@ import re
 import time
 import json
 import logging
-from pprint import pprint, pformat
+from pprint import pformat
 
 import xmltodict
 import requests
@@ -213,7 +213,7 @@ class WMSDumper:
         return feats
 
     def truncate_nested_coordinates(self, coords):
-        if type(coords) != list:
+        if type(coords) is not list:
             return round(float(coords), self.geometry_precision)
 
         return [ self.truncate_nested_coordinates(c) for c in coords ]

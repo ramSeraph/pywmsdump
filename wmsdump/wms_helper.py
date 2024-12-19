@@ -1,7 +1,4 @@
-import io
 import logging
-
-from pprint import pformat
 
 import requests
 

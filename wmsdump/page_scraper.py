@@ -131,13 +131,13 @@ def get_layer_list_from_page(url, **req_args):
     logger.info('getting main page')
     resp = session.get(url, **req_args)
     if not resp.ok:
-        raise Exception(f'unable to access geoserver page')
+        raise Exception('unable to access geoserver page')
 
     logger.info('getting web page')
     new_url = urljoin(resp.url, 'web/')
     resp = session.get(new_url, **req_args)
     if not resp.ok:
-        raise Exception(f'unable to get web page')
+        raise Exception('unable to get web page')
 
     # extract preview url
     preview_url, cookies = _get_preview_url(resp.text)
@@ -148,7 +148,7 @@ def get_layer_list_from_page(url, **req_args):
     logger.info(f'getting preview page {pno}')
     resp = session.get(preview_url, **req_args)
     if not resp.ok:
-        raise Exception(f'unable to get preview page')
+        raise Exception('unable to get preview page')
     curr_url = resp.url
     wicket_base_url = '/'.join(preview_url.split('/')[5:])
     headers = {
