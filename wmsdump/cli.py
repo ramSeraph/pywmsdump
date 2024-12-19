@@ -11,8 +11,8 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 
 from wmsdump.state import get_state_from_files
-from wmsdump.page_scraper import get_layer_list_from_page
-from wmsdump.wms_helper import fill_layer_list
+from wmsdump.geoserver import get_layer_list_from_page
+from wmsdump.capabilities import fill_layer_list
 from wmsdump.dumper import (
     ServiceDumper, SortKeyRequiredException,
     InvalidSortKeyException, WFSUnsupportedException,
