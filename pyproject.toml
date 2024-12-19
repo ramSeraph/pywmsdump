@@ -1,7 +1,7 @@
 [project]
 name = "wmsdump"
 version = "0.1.0"
-description = "Library for extraction data from WMS endpoints"
+description = "Library for extraction of data from WMS/WFS endpoints"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

@@ -266,7 +266,7 @@ class ServiceDumper:
 
             logger.info(f'making a request for {self.batch_size} records with '
                         f'start_index: {self.state.index_done_till}, '
-                        f'already_dowmloaded: {self.state.downloaded_count}')
+                        f'already_downloaded: {self.state.downloaded_count}')
 
             feats = self.get_features(self.batch_size)
             for feat in feats:
