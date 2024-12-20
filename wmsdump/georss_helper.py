@@ -31,6 +31,7 @@ def get_props(content):
 
 
 def extract_feature(entry):
+    title = entry.get('title', None)
     content = entry.get('content', {}).get('#text', '')
     props = get_props(content)
 
@@ -47,6 +48,6 @@ def extract_feature(entry):
     else:
         raise Exception(f'unexpected content in {where}')
 
-    return { 'type': 'Feature', 'geometry': geom, 'properties': props }
+    return { 'type': 'Feature', 'id': title, 'geometry': geom, 'properties': props }
 
 
