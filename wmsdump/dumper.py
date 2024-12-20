@@ -105,6 +105,7 @@ class ServiceDumper:
         self.requests_to_pause = requests_to_pause
         self.pause_seconds = pause_seconds
         self.max_attempts = max_attempts
+        self.retry_delay = retry_delay
         self.req_params = req_params
         self.state = state
         if self.state is None:
