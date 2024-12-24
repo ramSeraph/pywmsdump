@@ -9,14 +9,12 @@ import click
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
-
 from wmsdump.state import get_state_from_files
 from wmsdump.geoserver import get_layer_list_from_page
 from wmsdump.capabilities import fill_layer_list
-from wmsdump.dumper import (
-    ServiceDumper, SortKeyRequiredException,
-    InvalidSortKeyException, WFSUnsupportedException,
-    DEFAULTS
+from wmsdump.dumper import OGCServiceDumper, DEFAULTS
+from wmsdump.georss_helper import (
+    SortKeyRequiredException, InvalidSortKeyException, WFSUnsupportedException
 )
 
 logger = logging.getLogger(__name__)
@@ -46,6 +44,55 @@ def handle_layer_list(layer_list, output_file):
             for lname in layer_list:
                 f.write(lname)
                 f.write('\n')
+
+class FileWriter:
+    def __init__(self, fname, keep_idx):
+        self.file = Path(fname)
+        self.fh = None
+        self.keep_idx = keep_idx
+        self.count = 0
+        self.idx_map = {}
+        if self.keep_idx:
+            self.init_idx()
+
+    def init_idx(self):
+        self.idx_map[self.count] = 0
+        if not self.file.exists():
+            return
+        with open(self.file, 'r') as f:
+            while True:
+                line = f.readline()
+                self.count += 1
+                self.idx_map[self.count] = f.tell()
+                if line == '':
+                    break
+
+    def get(self, n):
+        if not self.keep_idx or \
+           n >= self.count or \
+           not self.file.exists():
+            return None
+
+        with open(self.file, 'r') as f:
+            f.seek(self.idx_map[n])
+            line = f.readline()
+            return json.loads(line)
+
+    def write(self, feat):
+        if self.fh is None:
+            self.fh = open(self.file, 'a')
+
+        self.fh.write(json.dumps(feat))
+        self.fh.write('\n')
+        if self.keep_idx:
+            self.count += 1
+            self.idx_map[self.count] = self.fh.tell()
+
+    def close(self):
+        if self.fh is not None:
+            self.fh.close()
+            self.fh = None
+
 
 
 @click.group()
@@ -127,9 +174,12 @@ def explore(geoserver_url, wms_url, wms_version, scrape_webpage, output_file):
                 required=True)
 @click.argument('output-file',
                 type=click.Path(), required=False)
+@click.option('--output-dir', '-d',
+              type=click.Path(file_okay=False), default='.',
+              help='directory to write output files in. Only used when "output-file" is not given')
 @click.option('--geoserver-url', '-g',
               help='Url of the geoserver endpoint.'
-                   ' wms endpoint is assumed to be <geoserver_url>/<layer_group>/ows')
+                   ' service-url is assumed to be <geoserver_url>/[<layer_namespace>/]ows')
 @click.option('--service-url', '-u',
               help='Url of the wms/wfs endpoint from which we can retrieve data. '
                    'If not provided, will be derived from geoserver-url')
@@ -140,6 +190,16 @@ def explore(geoserver_url, wms_url, wms_version, scrape_webpage, output_file):
 @click.option('--service-version', '-v',
               help='the protocol version to use. defaults to'
                    f' \'{DEFAULTS["wms_version"]}\' for WMS and \'{DEFAULTS["wfs_version"]}\' for WFS')
+@click.option('--retrieval-mode', '-m',
+              type=click.Choice(['OFFSET', 'EXTENT'], case_sensitive=False),
+              default='OFFSET', show_default=True,
+              help='which method to use to batch record retrieval, OFFSET uses record offset paging, '
+                   'EXTENT uses bbox splitting and drilling down by spatial extent, '
+                   'when using GetFeatureInfo this will be overriden to EXTENT')
+@click.option('--operation', '-o',
+              type=click.Choice(['GetMap', 'GetFeatureInfo'], case_sensitive=False),
+              default='GetMap', show_default=True,
+              help='which operation to use for querying a WMS endpoint')
 @click.option('--sort-key', '-k',
               help='key to use to do paged retrieval')
 @click.option('--batch-size', '-b',
@@ -161,22 +221,29 @@ def explore(geoserver_url, wms_url, wms_version, scrape_webpage, output_file):
 @click.option('--geometry-precision', '-g',
               type=int, default=DEFAULTS['geometry_precision'], show_default=True,
               help='decimal point precision of geometry to be returned, '
-                   'only applies to the wms mode. truncation done on client side')
-@click.option('--output-dir', '-d',
-              type=click.Path(file_okay=False), default='.',
-              help='directory to write output files in. Only used when "output-file" is not given')
+                   'truncation is done on client side. -1 means no truncation')
 @click.option('--skip-index', 
               type=int, default=0, show_default=True,
-              help='skip n elements in index.. useful to skip records causing failure')
+              help='skip n elements in index.. useful to skip records causing failure. '
+                   'only applicable when using OFFSET based retrieval') 
 def extract(layername, output_file, output_dir,
             geoserver_url, service_url,
             service, service_version,
+            retrieval_mode, operation,
             sort_key, batch_size, geometry_precision, 
             requests_to_pause, pause_seconds, max_attempts,
             retry_delay, skip_index):
 
     if service_version is None:
         service_version = DEFAULTS['wms_version'] if service == 'WMS' else DEFAULTS['wfs_version']
+
+    if service == 'WMS' and operation == 'GetFeatureInfo':
+        if retrieval_mode != 'EXTENT':
+            logger.info('Using GetFeatureInfo for retrieval.. overriding mode to EXTENT')
+            retrieval_mode = 'EXTENT'
+
+    if service == 'WFS':
+        operation = 'GetFeature'
 
     if geoserver_url is None and service_url is None:
         logger.error('Invalid invocation: '
@@ -202,12 +269,24 @@ def extract(layername, output_file, output_dir,
             logger.error(f'{layername} is of unexpected format.. has more than one ":"')
             return
 
-    logger.info(f'working with {service_url=} and {layername=}')
+    logger.info(f'working with {service_url=} and {layername=}, '
+                f'{service=} and {operation=}, mode={retrieval_mode}')
 
     state_file = output_file + '.state'
 
-    state = get_state_from_files(state_file, output_file, service_url, service, sort_key, layername)
+    state = get_state_from_files(state_file, output_file,
+                                 url=service_url,
+                                 layername=layername,
+                                 service=service,
+                                 version=service_version,
+                                 operation=operation,
+                                 mode=retrieval_mode,
+                                 sort_key=sort_key)
     if state is None:
+        return
+
+    if skip_index != 0 and retrieval_mode != 'OFFSET':
+        logger.error('skip-index can\'t be used for non OFFSET based retrieval')
         return
 
     if skip_index < 0:
@@ -217,40 +296,41 @@ def extract(layername, output_file, output_dir,
     if skip_index > 0:
         state.update(skip_index, 0)
 
-    dumper = ServiceDumper(service_url, layername, service,
-                           service_version=service_version,
-                           batch_size=batch_size,
-                           sort_key=sort_key,
-                           state=state,
-                           requests_to_pause=requests_to_pause,
-                           pause_seconds=pause_seconds,
-                           retry_delay=retry_delay,
-                           max_attempts=max_attempts,
-                           geometry_precision=geometry_precision,
-                           req_params=req_params)
+
+    writer = FileWriter(output_file,
+                        keep_idx=(retrieval_mode == 'EXTENT'))
+
+    dumper = OGCServiceDumper(service_url, layername, service,
+                              service_version=service_version,
+                              operation=operation,
+                              retrieval_mode=retrieval_mode,
+                              batch_size=batch_size,
+                              sort_key=sort_key,
+                              state=state,
+                              requests_to_pause=requests_to_pause,
+                              pause_seconds=pause_seconds,
+                              retry_delay=retry_delay,
+                              max_attempts=max_attempts,
+                              geometry_precision=geometry_precision,
+                              get_nth=writer.get,
+                              req_params=req_params)
 
     dump_samples = False
-    f = None
     try:
         for feat in dumper:
-            # only open if you are about to write
-            if f is None:
-                f = open(output_file, 'a')
-            f.write(json.dumps(feat))
-            f.write('\n')
+            writer.write(feat)
         Path(state_file).unlink()
         logger.info('Done!!!')
     except SortKeyRequiredException:
-        logger.error('failed to iterate over records as a sorting key is not specified using "--sort-key"')
+        logger.error('failed to iterate over records as no sorting key is specified. use "--sort-key"?')
         dump_samples = True
     except InvalidSortKeyException:
-        logger.error('failed to iterate over records as a sorting key specified is invalid')
+        logger.error('failed to iterate over records as the sorting key specified is invalid')
         dump_samples = True
     except WFSUnsupportedException:
         logger.error('WFS is not supported on this endpoint.. try using --service WMS')
     finally:
-        if f is not None:
-            f.close()
+        writer.close()
 
     if dump_samples:
         logger.info('dumping a couple of records to inspect and pick a sorting key')
