@@ -1,13 +1,19 @@
+import os
+import io
 import math
 import time
 import json
 import logging
+
 from pprint import pformat
+from pathlib import Path
 
 import requests
+import kml2geojson
 
 from .state import State, Extent
-from .georss_helper import extract_features, ExpectedException, ZeroAreaException
+from .georss_helper import extract_features, get_props
+from .errors import handle_error_xml, KnownException, ZeroAreaException
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +29,19 @@ DEFAULTS = {
     'retry_delay': 5,
     'geometry_precision': -1,
     'out_srs': 'EPSG:4326',
+    'getmap_format': 'GEORSS',
+    'bounds': GLOBAL_BOUNDS
 }
+
+def optionally_save_to_file(txt):
+    to_file = os.environ.get('WMSDUMP_SAVE_RESPONSE_TO_FILE', None)
+    if to_file is None:
+        return
+    p = Path(to_file)
+    try:
+        p.write_text(txt)
+    except Exception:
+        pass
 
 def truncate_nested_coordinates(coords, precision):
     if type(coords) is not list:
@@ -40,7 +58,7 @@ def truncate_geometry(geom, precision):
     else:
         geom['coordinates'] = truncate_nested_coordinates(geom['coordinates'], precision)
 
-def get_bbox_str(bounds, crs):
+def bbox_to_str(bounds, crs):
     b = bounds
 
     b_str = f'{b["xmin"]}, {b["ymin"]}, {b["xmax"]}, {b["ymax"]}'
@@ -48,6 +66,18 @@ def get_bbox_str(bounds, crs):
         b_str += f', {crs}'
 
     return b_str
+
+def convert_kml_props(feat):
+    if 'properties' not in feat:
+        return 
+
+    props = feat['properties']
+    if 'description' not in props:
+        return
+
+    new_props = get_props(props['description'])
+
+    feat['properties'] = new_props
 
 class OGCServiceDumper:
 
@@ -64,6 +94,8 @@ class OGCServiceDumper:
                  retry_delay=DEFAULTS['retry_delay'],
                  max_attempts=DEFAULTS['max_attempts'],
                  geometry_precision=DEFAULTS['geometry_precision'],
+                 getmap_format=DEFAULTS['getmap_format'],
+                 bounds=DEFAULTS['bounds'],
                  session=None,
                  get_nth=None,
                  req_params={}):
@@ -93,6 +125,8 @@ class OGCServiceDumper:
         self.url = url
         self.layername = layername
         self.geometry_precision = geometry_precision
+        self.getmap_format = getmap_format
+        self.initial_bounds = bounds
         self.batch_size = batch_size
         self.sort_key = sort_key
         self.state = state
@@ -143,12 +177,13 @@ class OGCServiceDumper:
             params['sortBy'] = self.sort_key
 
         if bounds is not None:
-            params['bbox'] = get_bbox_str(bounds, self.out_srs)
+            params['bbox'] = bbox_to_str(bounds, self.out_srs)
 
         return params
 
-    def get_params_WMS(self, count, bounds, no_index, no_sort):
-        bbox_str =  get_bbox_str(bounds, None)
+    def get_params_WMS_GetMap(self, count, bounds, no_index, no_sort):
+        bbox_str =  bbox_to_str(bounds, None)
+        fmt = 'application/atom xml' if self.getmap_format == 'GEORSS' else 'application/vnd.google-earth.kml+xml'
         params = {
             'service': 'WMS',
             'version': self.service_version,
@@ -156,7 +191,7 @@ class OGCServiceDumper:
             'layers': self.layername,
             'maxFeatures': count,
             'srs': self.out_srs,
-            'format': 'application/atom xml',
+            'format': fmt,
             'width': 256,
             'height': 256,
             'styles': '',
@@ -169,8 +204,8 @@ class OGCServiceDumper:
 
         return params
 
-    def get_params_feature_info(self, count, bounds):
-        bbox_str = get_bbox_str(bounds, None)
+    def get_params_WMS_GetFeatureInfo(self, count, bounds):
+        bbox_str = bbox_to_str(bounds, None)
 
         WIDTH = 256
 
@@ -204,7 +239,7 @@ class OGCServiceDumper:
         if self.service == 'WFS':
             return self.get_params_WFS(count, None, no_index, no_sort)
 
-        return self.get_params_WMS(count, GLOBAL_BOUNDS, no_index, no_sort)
+        return self.get_params_WMS_GetMap(count, self.initial_bounds, no_index, no_sort)
 
 
     def get_bounded_params(self, bounds, count):
@@ -212,10 +247,10 @@ class OGCServiceDumper:
             return self.get_params_WFS(count, bounds, True, True)
 
         if self.operation == 'GetMap':
-            return self.get_params_WMS(count, bounds, True, True)
+            return self.get_params_WMS_GetMap(count, bounds, True, True)
 
         if self.operation == 'GetFeatureInfo':
-            return self.get_params_feature_info(count, bounds)
+            return self.get_params_WMS_GetFeatureInfo(count, bounds)
 
         raise Exception(f'Unexpected operation: {self.operation}')
 
@@ -244,7 +279,7 @@ class OGCServiceDumper:
         try:
             data = json.loads(resp_text)
         except ValueError:
-            extract_features(resp_text, only_error=True)
+            handle_error_xml(resp_text)
             logger.info(f'resp: {resp_text}')
             raise
 
@@ -256,7 +291,7 @@ class OGCServiceDumper:
     def parse_response_georss(self, resp_text):
         try:
             feats = extract_features(resp_text)
-        except ExpectedException:
+        except KnownException:
             raise
         except Exception:
             logger.error('Unable to process response')
@@ -269,15 +304,32 @@ class OGCServiceDumper:
 
         return feats
 
+    def parse_response_kml(self, resp_text):
+        handle_error_xml(resp_text)
+        fh = io.StringIO(resp_text)
+        feature_collections = kml2geojson.main.convert(fh)
+        data = feature_collections[0]
+        for feat in data['features']:
+            truncate_geometry(feat.get('geometry', None),
+                              self.geometry_precision)
+            convert_kml_props(feat)
+        return data['features']
+
+    def parse_response_getmap(self, resp_text):
+        if self.getmap_format == 'GEORSS':
+            return self.parse_response_georss(resp_text)
+        return self.parse_response_kml(resp_text)
+
     def parse_response(self, resp_text):
+        optionally_save_to_file(resp_text)
         if self.service == 'WFS':
             return self.parse_response_geojson(resp_text)
 
-        return self.parse_response_georss(resp_text)
+        return self.parse_response_getmap(resp_text)
 
     def parse_bounded_response(self, resp_text):
         if self.operation == 'GetMap':
-            return self.parse_response_georss(resp_text)
+            return self.parse_response_getmap(resp_text)
 
         return self.parse_response_geojson(resp_text)
 
@@ -391,6 +443,6 @@ class OGCServiceDumper:
                 if len(feats) < self.batch_size:
                     break
         else:
-            for feature in self.scrape_an_envelope(GLOBAL_BOUNDS, "0"):
+            for feature in self.scrape_an_envelope(self.initial_bounds, "0"):
                 if self.state.add_feature(feature):
                     yield feature

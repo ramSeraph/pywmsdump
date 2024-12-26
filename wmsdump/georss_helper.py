@@ -4,28 +4,7 @@ import xmltodict
 
 from bs4 import BeautifulSoup
 
-SORT_KEY_ERR_MSG = 'Cannot do natural order without a primary key, ' + \
-                   'please add it or specify a manual sort over existing attributes'
-INVALID_PROP_NAME_ERR_MSG = 'Illegal property name'
-WFS_DISABLED_ERR_MSG = 'Service WFS is disabled'
-ZERO_AREA_ERR_MSG = 'The request bounding box has zero area'
-
-
-class ExpectedException(Exception):
-    pass
-
-class SortKeyRequiredException(ExpectedException):
-    pass
-
-class InvalidSortKeyException(ExpectedException):
-    pass
-
-class WFSUnsupportedException(ExpectedException):
-    pass
-
-class ZeroAreaException(ExpectedException):
-    pass
-
+from .errors import handle_error
 
 def get_points(vals):
     points = []
@@ -77,55 +56,64 @@ def extract_feature(entry):
     return { 'type': 'Feature', 'id': title, 'geometry': geom, 'properties': props }
 
 
-def get_error_msg(data):
-    if 'ServiceExceptionReport' in data and 'ServiceException' in data['ServiceExceptionReport']:
-        val = data['ServiceExceptionReport']['ServiceException']
-        if isinstance(val, str):
-            return val
-        if isinstance(val, dict) and '#text' in val:
-            return val['#text']
+def combine_geoms(geoms):
+    g_types = set()
 
-    if 'ows:ExceptionReport' in data and 'ows:Exception' in data['ows:ExceptionReport']:
-        val = data['ows:ExceptionReport']['ows:Exception']
-        if isinstance(val, str):
-            return val
-        if isinstance(val, dict) and 'ows:ExceptionText' in val:
-            return val['ows:ExceptionText']
-    return None
+    for g in geoms:
+        g_types.add(g['type'])
+    if len(g_types) > 1:
+        return { 'type': 'GeometryCollection', 'geometries': geoms }
 
+    g_type = g_types.pop()
+    out_type = None
+    if g_type not in ['Point', 'LineString', 'Polygon']:
+        raise Exception(f'Unexpected geom type: {g_type}')
+    out_type = 'Multi' + g_type
 
-def handle_non_json_response(resp_text):
-    try:
-        data = xmltodict.parse(resp_text)
-    except Exception:
-        return None, None
-    err_msg = get_error_msg(data)
-
-    return data, err_msg
+    coords = [ g['coordinates'] for g in geoms ]
+    return { 'type': out_type, 'coordinates': coords }
 
 
-def extract_features(xml_text, only_error=False):
+
+def combine_features(feats):
+    by_fid = {}
+    for feat in feats:
+        fid = feat.get('id', None)
+        if fid not in by_fid:
+            by_fid[fid] = []
+        by_fid[fid].append(feat)
+
+    new_feats = []
+    for fid, f_feats in by_fid.items():
+        if fid is None:
+            new_feats.extend(f_feats)
+            continue
+
+        if len(f_feats) == 1:
+            new_feats.extend(f_feats)
+            continue
+
+        non_empty_props = [ f['properties'] for f in f_feats if f['properties'] != {} ]
+        if len(non_empty_props) > 1:
+            new_feats.extend(f_feats)
+            continue
+
+        props = non_empty_props[0] if len(non_empty_props) > 0 else {}
+        new_geom = combine_geoms([ f['geometry'] for f in f_feats ])
+        new_feat = { 'type': 'Feature', 'id': fid, 'properties': props, 'geometry': new_geom }
+        new_feats.append(new_feat)
+
+    return new_feats
+
+
+def extract_features(xml_text):
     # deal with some xml/unicode messups
     # TODO: add a test case for this?
     xml_text = re.sub(r'&#([a-zA-Z0-9]+);?', r'[#\1;]', xml_text)
 
     data = xmltodict.parse(xml_text)
 
-    err_msg = get_error_msg(data)
-    if err_msg is not None:
-        if err_msg.find(SORT_KEY_ERR_MSG) != -1:
-            raise SortKeyRequiredException()
-        if err_msg.find(INVALID_PROP_NAME_ERR_MSG) != -1:
-            raise InvalidSortKeyException()
-        if err_msg.find(WFS_DISABLED_ERR_MSG) != -1:
-            raise WFSUnsupportedException()
-        if err_msg.find(ZERO_AREA_ERR_MSG) != -1:
-            raise ZeroAreaException()
-
-        raise Exception(err_msg)
-
-    if only_error:
-        return []
+    handle_error(data)
 
     if 'feed' not in data:
        raise Exception('no feed in data')
@@ -142,4 +130,12 @@ def extract_features(xml_text, only_error=False):
     for entry in entries:
         feat = extract_feature(entry)
         feats.append(feat)
+
+    # sometimes multipolygons show up as multiple seperate polygon features with the same id
+    # combine them into one feature where possible
+    # the assumption here is that.. they show up in the same batch and that
+    # the properties dict for the split pieces is empty
+    # TODO: how are polygons with inner rings represented?
+    feats = combine_features(feats)
+
     return feats

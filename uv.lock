@@ -149,6 +149,18 @@ wheels = [
 ]
 
 [[package]]
+name = "kml2geojson"
+version = "5.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2f/eb/45891463bdd2117cf468aa1cda382edd293799bb79ee2b6660709ad3f63f/kml2geojson-5.1.0.tar.gz", hash = "sha256:76a69f598e55d2eff90332e87ee9480c36120f60e6f5d6b5aaeba63ce92a3dfa", size = 10679 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8d/71/1346b2f1530c7cb027d61b8e323919b77a19ace9e9aafcff978b1043c888/kml2geojson-5.1.0-py3-none-any.whl", hash = "sha256:1fc3096a6feb3728e97521db30f4c55982f3f7ad299892687a41b1b5528f55df", size = 9884 },
+]
+
+[[package]]
 name = "lxml"
 version = "5.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -324,6 +336,7 @@ dependencies = [
     { name = "bs4" },
     { name = "click" },
     { name = "jsonschema" },
+    { name = "kml2geojson" },
     { name = "lxml" },
     { name = "requests" },
     { name = "xmltodict" },
@@ -339,6 +352,7 @@ requires-dist = [
     { name = "bs4", specifier = ">=0.0.2" },
     { name = "click", specifier = ">=8.1.7" },
     { name = "jsonschema", specifier = ">=4.23.0" },
+    { name = "kml2geojson", specifier = ">=5.1.0" },
     { name = "lxml", specifier = ">=5.3.0" },
     { name = "requests", specifier = ">=2.32.3" },
     { name = "xmltodict", specifier = ">=0.14.2" },

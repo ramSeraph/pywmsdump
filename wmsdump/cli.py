@@ -12,9 +12,10 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from wmsdump.state import get_state_from_files
 from wmsdump.geoserver import get_layer_list_from_page
 from wmsdump.capabilities import fill_layer_list
-from wmsdump.dumper import OGCServiceDumper, DEFAULTS
-from wmsdump.georss_helper import (
-    SortKeyRequiredException, InvalidSortKeyException, WFSUnsupportedException
+from wmsdump.dumper import OGCServiceDumper, DEFAULTS, bbox_to_str
+from wmsdump.errors import (
+    SortKeyRequiredException, InvalidSortKeyException,
+    WFSUnsupportedException, KMLUnsupportedException
 )
 
 logger = logging.getLogger(__name__)
@@ -93,6 +94,40 @@ class FileWriter:
             self.fh.close()
             self.fh = None
 
+EXPECTED_BOUNDS_FORMAT = '<minlon>, <minlat>, <maxlon>, <maxlat>'
+
+class BoundsParamType(click.ParamType):
+    name = "bounds"
+
+    def convert(self, value, param, ctx):
+        if not isinstance(value, dict):
+            parts = value.split(',')
+            if len(parts) != 4:
+                self.fail(f'Invalid value, expected: {EXPECTED_BOUNDS_FORMAT}', param, ctx)
+            nos = []
+            for part in parts:
+                try:
+                    n = float(part)
+                    nos.append(n)
+                except Exception:
+                    self.fail(f'Invalid number: {part}, expected floating point', param, ctx)
+            value = { 'xmin': nos[0], 'ymin': nos[1], 'xmax': nos[2], 'ymax': nos[3] }
+            
+        if value['xmin'] < -180 or value['xmin'] > 180:
+            self.fail(f'Invalid longitude: xmin: {value["xmin"]}, expected value between -180, 180', param, ctx)
+        if value['xmax'] < -180 or value['xmax'] > 180:
+            self.fail(f'Invalid longitude: xmax: {value["xmax"]}, expected value between -180, 180', param, ctx)
+        if value['ymin'] < -90 or value['ymin'] > 90:
+            self.fail(f'Invalid latitude: ymin: {value["ymin"]}, expected value between -90, 90', param, ctx)
+        if value['ymax'] < -90 or value['ymax'] > 90:
+            self.fail(f'Invalid latitude: ymax: {value["ymax"]}, expected value between -90, 90', param, ctx)
+
+        if value['xmin'] > value['xmax']:
+            self.fail(f'Invalid latitudes: xmax: {value["xmax"]} less thab xmin: {value["xmin"]}', param, ctx)
+        if value['ymin'] > value['ymax']:
+            self.fail(f'Invalid latitudes: ymax: {value["ymax"]} less thab ymin: {value["ymin"]}', param, ctx)
+
+        return value
 
 
 @click.group()
@@ -222,6 +257,14 @@ def explore(geoserver_url, wms_url, wms_version, scrape_webpage, output_file):
               type=int, default=DEFAULTS['geometry_precision'], show_default=True,
               help='decimal point precision of geometry to be returned, '
                    'truncation is done on client side. -1 means no truncation')
+@click.option('--getmap-format', '-f',
+              type=click.Choice(['KML', 'GEORSS'], case_sensitive=False),
+              default=DEFAULTS['getmap_format'], show_default=True,
+              help='which format to use while pulling using WMS GetMap')
+@click.option('--bounds', 
+              type=BoundsParamType(),
+              default=bbox_to_str(DEFAULTS['bounds'], None), show_default=True,
+              help=f'bounds to restrict query to. format: "{EXPECTED_BOUNDS_FORMAT}"')
 @click.option('--skip-index', 
               type=int, default=0, show_default=True,
               help='skip n elements in index.. useful to skip records causing failure. '
@@ -232,7 +275,8 @@ def extract(layername, output_file, output_dir,
             retrieval_mode, operation,
             sort_key, batch_size, geometry_precision, 
             requests_to_pause, pause_seconds, max_attempts,
-            retry_delay, skip_index):
+            getmap_format, retry_delay, bounds,
+            skip_index):
 
     if service_version is None:
         service_version = DEFAULTS['wms_version'] if service == 'WMS' else DEFAULTS['wfs_version']
@@ -312,6 +356,8 @@ def extract(layername, output_file, output_dir,
                               retry_delay=retry_delay,
                               max_attempts=max_attempts,
                               geometry_precision=geometry_precision,
+                              getmap_format=getmap_format,
+                              bounds=bounds,
                               get_nth=writer.get,
                               req_params=req_params)
 
@@ -322,13 +368,15 @@ def extract(layername, output_file, output_dir,
         Path(state_file).unlink()
         logger.info('Done!!!')
     except SortKeyRequiredException:
-        logger.error('failed to iterate over records as no sorting key is specified. use "--sort-key"?')
+        logger.error('failed to iterate over records as no sorting key is specified. use "--sort-key/-k"?')
         dump_samples = True
     except InvalidSortKeyException:
         logger.error('failed to iterate over records as the sorting key specified is invalid')
         dump_samples = True
     except WFSUnsupportedException:
-        logger.error('WFS is not supported on this endpoint.. try using --service WMS')
+        logger.error('WFS is not supported on this endpoint.. try using --service/-s WMS')
+    except KMLUnsupportedException:
+        logger.error('kml is not supported on this endpoint.. try using --getmap-format/-f GEORSS')
     finally:
         writer.close()
 
