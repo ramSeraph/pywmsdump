@@ -1,4 +1,3 @@
-import os
 import io
 import math
 import time
@@ -6,14 +5,16 @@ import json
 import logging
 
 from pprint import pformat
-from pathlib import Path
 
 import requests
 import kml2geojson
 
 from .state import State, Extent
 from .georss_helper import extract_features, get_props
-from .errors import handle_error_xml, KnownException, ZeroAreaException
+from .errors import (
+    handle_error_xml, KnownException, ZeroAreaException,
+    optionally_save_to_file
+)
 
 logger = logging.getLogger(__name__)
 
@@ -32,16 +33,6 @@ DEFAULTS = {
     'getmap_format': 'GEORSS',
     'bounds': GLOBAL_BOUNDS
 }
-
-def optionally_save_to_file(txt):
-    to_file = os.environ.get('WMSDUMP_SAVE_RESPONSE_TO_FILE', None)
-    if to_file is None:
-        return
-    p = Path(to_file)
-    try:
-        p.write_text(txt)
-    except Exception:
-        pass
 
 def truncate_nested_coordinates(coords, precision):
     if type(coords) is not list:

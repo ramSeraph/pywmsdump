@@ -27,9 +27,9 @@ def add_to_url(url, piece):
         return url + piece
     return url + '/' + piece
 
-def print_wms_info(info):
+def print_service_info(service, info):
     for req_type, formats in info.items():
-        print(f'{req_type}:')
+        print(f'{service}-{req_type}:')
         for fmt in formats:
             print(f'\t{fmt}')
 
@@ -153,12 +153,19 @@ def main(log_level, no_ssl_verify, request_timeout):
 @click.option('--geoserver-url', '-g',
               help='Url of the geoserver endpoint.'
                    ' wms endpoint is assumed to be <geoserver_url>/ows')
-@click.option('--wms-url', '-w',
-              help='Url of the wms endpoint from which we can probe for capabilities.'
+@click.option('--service-url', '-u',
+              help='Url of the wms/wfs endpoint from which we can probe for capabilities.'
                    'If not provided, will be derived from geoserver-url')
-@click.option('--wms-version',
-              default='1.1.1', show_default=True,
-              help='set the wms api version to use')
+@click.option('--service', '-s',
+              type=click.Choice(['WMS', 'WFS'], case_sensitive=False),
+              default='WFS', show_default=True,
+              help='service to use for extracting data, one of WFS or WMS')
+@click.option('--service-version', '-v',
+              help='the protocol version to use. defaults to'
+                   f' \'{DEFAULTS["wms_version"]}\' for WMS and \'{DEFAULTS["wfs_version"]}\' for WFS')
+@click.option('--namespace', '-n',
+              help='only look for layers in a given namespace at the server,'
+                   'only supported on geoserver implementations of wms')
 @click.option('--output-file', '-o',
               type=click.Path(),
               help='file to write layer list to')
@@ -166,10 +173,10 @@ def main(log_level, no_ssl_verify, request_timeout):
               is_flag=True, default=False, show_default=True,
               help='scrape the geoserver web page instead of reading capabilities.'
                    ' Useful when capabilities is broken because of large number of layers')
-def explore(geoserver_url, wms_url, wms_version, scrape_webpage, output_file):
-    if geoserver_url is None and wms_url is None:
+def explore(geoserver_url, service_url, service, service_version, namespace, scrape_webpage, output_file):
+    if geoserver_url is None and service_url is None:
         logger.error('Invalid invocation: '
-                     'One of "--wms-url" or "--geoserver-url" must be provided')
+                     'One of "--service-url" or "--geoserver-url" must be provided')
         return
 
     if scrape_webpage:
@@ -182,14 +189,21 @@ def explore(geoserver_url, wms_url, wms_version, scrape_webpage, output_file):
         handle_layer_list(layer_list, output_file)
         return
 
-    if wms_url is None:
-        wms_url = add_to_url(geoserver_url, 'ows')
-        logger.info(f'setting wms url to "{wms_url}"')
+    if service_url is None:
+        service_url = add_to_url(geoserver_url, 'ows')
+        logger.info(f'setting wms url to "{service_url}"')
+
+    if service_version is None:
+        service_version = DEFAULTS['wms_version'] if service == 'WMS' else DEFAULTS['wfs_version']
 
     layer_list = []
-    wms_info = {}
+    service_info = {}
     try:
-        fill_layer_list(layer_list, wms_info, wms_url, wms_version, **req_params)
+        fill_layer_list(layer_list, service_info, service_url,
+                        service, service_version,
+                        namespace=namespace, **req_params)
+    except WFSUnsupportedException:
+        logger.error('WFS not supported on server. Try exploring WMS with --service/-s WMS')
     except Exception:
         logger.exception('Unable to get layer list using "GetCapabilities" call')
         logger.info('Consider parsing the geoserver webpage using '
@@ -200,7 +214,7 @@ def explore(geoserver_url, wms_url, wms_version, scrape_webpage, output_file):
             return
         logger.info('Could obtain some partial results.. dumping them')
 
-    print_wms_info(wms_info)
+    print_service_info(service, service_info)
     handle_layer_list(layer_list, output_file)
 
 
