@@ -56,7 +56,7 @@ def parse_capabilities(service, xml_txt, layer_list, service_info):
         raise Exception(errors[0])
 
     exception_xpath = '//ServiceExceptionReport/ServiceException/text() | ' + \
-                      '//ExceptionReport/Exception/text()'
+                      '//ExceptionReport/Exception/ExceptionText/text()'
     exceptions, errors = extract_xml_elements(xml_txt, exception_xpath)
     if len(exceptions) > 0:
         check_error_msg(exceptions[0])
