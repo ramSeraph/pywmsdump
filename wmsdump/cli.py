@@ -22,6 +22,25 @@ logger = logging.getLogger(__name__)
 
 req_params = {}
 
+def setup_logging(log_level):
+    from colorlog import ColoredFormatter
+    formatter = ColoredFormatter("%(log_color)s%(asctime)s [%(levelname)-5s][%(process)d][%(threadName)s] %(message)s",
+                                 datefmt='%Y-%m-%d %H:%M:%S',
+                                 reset=True,
+                                 log_colors={
+                                     'DEBUG':    'cyan',
+                                     'INFO':     'green',
+                                     'WARNING':  'yellow',
+                                     'ERROR':    'red',
+                                     'CRITICAL': 'red',
+                                     },
+                                 secondary_log_colors={},
+                                 style='%')
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    logging.basicConfig(level=log_level, handlers=[handler])
+
+
 def add_to_url(url, piece):
     if url.endswith('/'):
         return url + piece
@@ -142,7 +161,7 @@ class BoundsParamType(click.ParamType):
 @click.option('--request-timeout', '-t', type=int,
               help='timeout for the http requests') 
 def main(log_level, no_ssl_verify, request_timeout):
-    logging.basicConfig(level=log_level)
+    setup_logging(log_level)
     req_params['verify'] = not no_ssl_verify
     req_params['timeout'] = request_timeout
     if no_ssl_verify:
