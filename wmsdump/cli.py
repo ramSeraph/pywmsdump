@@ -188,7 +188,7 @@ def main(log_level, no_ssl_verify, request_timeout):
 @click.option('--output-file', '-o',
               type=click.Path(),
               help='file to write layer list to')
-@click.option('--scrape-webpage', '-s',
+@click.option('--scrape-webpage', '-w',
               is_flag=True, default=False, show_default=True,
               help='scrape the geoserver web page instead of reading capabilities.'
                    ' Useful when capabilities is broken because of large number of layers')
