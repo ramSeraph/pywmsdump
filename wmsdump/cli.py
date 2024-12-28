@@ -20,7 +20,8 @@ from wmsdump.dumper import (
 )
 from wmsdump.errors import (
     SortKeyRequiredException, InvalidSortKeyException,
-    WFSUnsupportedException, KMLUnsupportedException
+    WFSUnsupportedException, KMLUnsupportedException,
+    LayerMissingException
 )
 
 logger = logging.getLogger(__name__)
@@ -427,15 +428,21 @@ def extract(layername, output_file, output_dir,
         Path(state_file).unlink()
         logger.info('Done!!!')
     except SortKeyRequiredException:
-        logger.error('failed to iterate over records as no sorting key is specified. use "--sort-key/-k"?')
+        logger.error('failed to iterate over records as no sorting key is specified. '
+                     'use "--sort-key/-k"?')
         dump_samples = True
     except InvalidSortKeyException:
         logger.error('failed to iterate over records as the sorting key specified is invalid')
         dump_samples = True
     except WFSUnsupportedException:
-        logger.error('WFS is not supported on this endpoint.. try using --service/-s WMS')
+        logger.error('WFS is not supported on this endpoint.. '
+                     'try using --service/-s WMS')
     except KMLUnsupportedException:
-        logger.error('kml is not supported on this endpoint.. try using --getmap-format/-f GEORSS')
+        logger.error('kml is not supported on this endpoint.. '
+                     'try using --getmap-format/-f GEORSS')
+    except LayerMissingException:
+        logger.error('the layer specified is not supported on this endpoint.. '
+                     'check available layers using the "explore" command')
     finally:
         writer.close()
 

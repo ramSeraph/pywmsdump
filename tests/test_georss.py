@@ -4,8 +4,9 @@ from unittest import TestCase
 from pathlib import Path
 
 from wmsdump.georss_helper import extract_features
+from wmsdump.errors import LayerMissingException
 
-class TestPrecision(TestCase):
+class TestGeorssParsing(TestCase):
     def setUp(self):
         pass
 
@@ -17,13 +18,13 @@ class TestPrecision(TestCase):
     def load_jsonl_file(self, fname):
         txt = self.load_file(fname)
         lines = txt.split('\n')
-        lines = [ l for l in lines if l.strip() != '' ]
-        return [ json.loads(l) for l in lines ]
+        lines = [ line for line in lines if line.strip() != '' ]
+        return [ json.loads(line) for line in lines ]
 
     def match_output(self, inp_fname, outp_fname):
-        xml_txt = self.load_file(inp_fname)
         expected_feats = self.load_jsonl_file(outp_fname)
 
+        xml_txt = self.load_file(inp_fname)
         feats = extract_features(xml_txt)
 
         self.assertEqual(feats, expected_feats)
@@ -42,3 +43,7 @@ class TestPrecision(TestCase):
 
     def test_empty_feed(self):
         self.match_output('empty_feed.xml', 'empty_feed.geojsonl')
+
+    def test_layer_missing(self):
+        xml_txt = self.load_file('layer_missing.xml')
+        self.assertRaises(LayerMissingException, extract_features, xml_txt)

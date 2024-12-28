@@ -10,6 +10,7 @@ INVALID_PROP_NAME_ERR_MSG = 'Illegal property name'
 WFS_DISABLED_ERR_MSGS = ['Service WFS is disabled', 'WFS request not enabled']
 ZERO_AREA_ERR_MSG = 'The request bounding box has zero area'
 KML_NOT_SUPPORTED_MSG = 'There is no support for creating maps in kml format'
+LAYER_MISSING_MSG = 'Could not find layer'
 
 
 class KnownException(Exception):
@@ -28,6 +29,9 @@ class ZeroAreaException(KnownException):
     pass
 
 class KMLUnsupportedException(KnownException):
+    pass
+
+class LayerMissingException(KnownException):
     pass
 
 
@@ -60,6 +64,8 @@ def check_error_msg(err_msg):
         raise ZeroAreaException()
     if err_msg.find(KML_NOT_SUPPORTED_MSG) != -1:
         raise KMLUnsupportedException()
+    if err_msg.find(LAYER_MISSING_MSG) != -1:
+        raise LayerMissingException()
 
     raise Exception(err_msg)
 
