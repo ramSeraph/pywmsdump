@@ -7,12 +7,17 @@ from pathlib import Path
 
 import click
 import requests
+
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from pyproj import CRS
 
 from wmsdump.state import get_state_from_files
 from wmsdump.geoserver import get_layer_list_from_page
 from wmsdump.capabilities import fill_layer_list
-from wmsdump.dumper import OGCServiceDumper, DEFAULTS, bbox_to_str
+from wmsdump.dumper import (
+    OGCServiceDumper, DEFAULTS,
+    bbox_to_str, get_global_bounds
+)
 from wmsdump.errors import (
     SortKeyRequiredException, InvalidSortKeyException,
     WFSUnsupportedException, KMLUnsupportedException
@@ -113,40 +118,37 @@ class FileWriter:
             self.fh.close()
             self.fh = None
 
-EXPECTED_BOUNDS_FORMAT = '<minlon>, <minlat>, <maxlon>, <maxlat>'
+EXPECTED_BOUNDS_FORMAT = '<xmin>, <ymin>, <xmax>, <ymax>'
 
-class BoundsParamType(click.ParamType):
-    name = "bounds"
+def get_bounds_from_str(b_str, crs):
+    parts = b_str.split(',')
+    if len(parts) != 4:
+        raise Exception(f'less than four parts, expected: {EXPECTED_BOUNDS_FORMAT}')
 
-    def convert(self, value, param, ctx):
-        if not isinstance(value, dict):
-            parts = value.split(',')
-            if len(parts) != 4:
-                self.fail(f'Invalid value, expected: {EXPECTED_BOUNDS_FORMAT}', param, ctx)
-            nos = []
-            for part in parts:
-                try:
-                    n = float(part)
-                    nos.append(n)
-                except Exception:
-                    self.fail(f'Invalid number: {part}, expected floating point', param, ctx)
-            value = { 'xmin': nos[0], 'ymin': nos[1], 'xmax': nos[2], 'ymax': nos[3] }
+    nos = []
+    for part in parts:
+        try:
+            n = float(part)
+            nos.append(n)
+        except Exception:
+            raise Exception(f'not a number: {part}, expected floating point')
+    b = { 'xmin': nos[0], 'ymin': nos[1], 'xmax': nos[2], 'ymax': nos[3] }
+
+    g = get_global_bounds(crs)
             
-        if value['xmin'] < -180 or value['xmin'] > 180:
-            self.fail(f'Invalid longitude: xmin: {value["xmin"]}, expected value between -180, 180', param, ctx)
-        if value['xmax'] < -180 or value['xmax'] > 180:
-            self.fail(f'Invalid longitude: xmax: {value["xmax"]}, expected value between -180, 180', param, ctx)
-        if value['ymin'] < -90 or value['ymin'] > 90:
-            self.fail(f'Invalid latitude: ymin: {value["ymin"]}, expected value between -90, 90', param, ctx)
-        if value['ymax'] < -90 or value['ymax'] > 90:
-            self.fail(f'Invalid latitude: ymax: {value["ymax"]}, expected value between -90, 90', param, ctx)
+    if b['xmin'] < g['xmin'] or b['xmin'] > g['xmax']:
+        raise Exception(f'Invalid x: xmin: {b["xmin"]}, expected value between {g["xmin"]} and {g["xmax"]}')
 
-        if value['xmin'] > value['xmax']:
-            self.fail(f'Invalid latitudes: xmax: {value["xmax"]} less thab xmin: {value["xmin"]}', param, ctx)
-        if value['ymin'] > value['ymax']:
-            self.fail(f'Invalid latitudes: ymax: {value["ymax"]} less thab ymin: {value["ymin"]}', param, ctx)
+    if b['xmax'] < g['xmin'] or b['xmax'] > g['xmax']:
+        raise Exception(f'Invalid x: xmax: {b["xmax"]}, expected value between {g["xmin"]} and {g["xmax"]}')
+            
+    if b['ymin'] < g['ymin'] or b['ymin'] > g['ymax']:
+        raise Exception(f'Invalid y: ymin: {b["ymin"]}, expected value between {g["ymin"]} and {g["ymax"]}')
 
-        return value
+    if b['ymax'] < g['ymin'] or b['ymax'] > g['ymax']:
+        raise Exception(f'Invalid y: xmax: {b["ymax"]}, expected value between {g["ymin"]} and {g["ymax"]}')
+
+    return b
 
 
 @click.group()
@@ -294,9 +296,14 @@ def explore(geoserver_url, service_url, service, service_version, namespace, scr
               type=click.Choice(['KML', 'GEORSS'], case_sensitive=False),
               default=DEFAULTS['getmap_format'], show_default=True,
               help='which format to use while pulling using WMS GetMap')
+@click.option('--buffer-field', 
+              default=DEFAULTS['buffer_field'], show_default=True,
+              help='name of field to use for buffer to a WMS GetFeatureInfo call')
+@click.option('--out-srs', 
+              default=DEFAULTS['out_srs'], show_default=True,
+              help='CRS to ask the server to return data in.. '
+                   'will be written out in the same CRS')
 @click.option('--bounds', 
-              type=BoundsParamType(),
-              default=bbox_to_str(DEFAULTS['bounds'], None), show_default=True,
               help=f'bounds to restrict query to. format: "{EXPECTED_BOUNDS_FORMAT}"')
 @click.option('--skip-index', 
               type=int, default=0, show_default=True,
@@ -305,10 +312,10 @@ def explore(geoserver_url, service_url, service, service_version, namespace, scr
 def extract(layername, output_file, output_dir,
             geoserver_url, service_url,
             service, service_version,
-            retrieval_mode, operation,
+            retrieval_mode, operation, out_srs,
             sort_key, batch_size, geometry_precision, 
             requests_to_pause, pause_seconds, max_attempts,
-            getmap_format, retry_delay, bounds,
+            getmap_format, buffer_field, retry_delay, bounds,
             skip_index):
 
     if service_version is None:
@@ -345,6 +352,23 @@ def extract(layername, output_file, output_dir,
         else:
             logger.error(f'{layername} is of unexpected format.. has more than one ":"')
             return
+
+    try:
+        crs = CRS.from_string(out_srs)
+    except Exception:
+        logger.exception('invalid out_srs')
+        return
+
+    if bounds is None:
+        bounds = get_global_bounds(crs)
+        logger.info(f'working with bounds: {bbox_to_str(bounds, None)}')
+    else:
+        try:
+            bounds = get_bounds_from_str(bounds, crs)
+        except Exception:
+            logger.error(f'Invalid bounds string: "{bounds}"')
+            return
+
 
     logger.info(f'working with {service_url=} and {layername=}, '
                 f'{service=} and {operation=}, mode={retrieval_mode}')
@@ -390,6 +414,8 @@ def extract(layername, output_file, output_dir,
                               max_attempts=max_attempts,
                               geometry_precision=geometry_precision,
                               getmap_format=getmap_format,
+                              buffer_field=buffer_field,
+                              out_srs=out_srs,
                               bounds=bounds,
                               get_nth=writer.get,
                               req_params=req_params)

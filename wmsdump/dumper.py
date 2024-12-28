@@ -9,6 +9,8 @@ from pprint import pformat
 import requests
 import kml2geojson
 
+from pyproj import CRS, Transformer
+
 from .state import State, Extent
 from .georss_helper import extract_features, get_props
 from .errors import (
@@ -18,7 +20,11 @@ from .errors import (
 
 logger = logging.getLogger(__name__)
 
-GLOBAL_BOUNDS = { 'xmin': -180, 'ymin': -90, 'xmax': 180, 'ymax': 90 }
+def get_global_bounds(crs):
+    transformer = Transformer.from_crs(crs.geodetic_crs, crs, always_xy=True)
+    b = transformer.transform_bounds(*crs.area_of_use.bounds)
+    return { 'xmin': b[0], 'ymin': b[1], 'xmax': b[2], 'ymax': b[3] } 
+
 
 DEFAULTS = {
     'wms_version': '1.1.1',
@@ -31,7 +37,7 @@ DEFAULTS = {
     'geometry_precision': -1,
     'out_srs': 'EPSG:4326',
     'getmap_format': 'GEORSS',
-    'bounds': GLOBAL_BOUNDS
+    'buffer_field': 'buffer',
 }
 
 def truncate_nested_coordinates(coords, precision):
@@ -86,7 +92,8 @@ class OGCServiceDumper:
                  max_attempts=DEFAULTS['max_attempts'],
                  geometry_precision=DEFAULTS['geometry_precision'],
                  getmap_format=DEFAULTS['getmap_format'],
-                 bounds=DEFAULTS['bounds'],
+                 buffer_field=DEFAULTS['buffer_field'],
+                 bounds=None,
                  session=None,
                  get_nth=None,
                  req_params={}):
@@ -110,6 +117,15 @@ class OGCServiceDumper:
             logger.info('Overriding retrieval mode to EXTENT for GetFeatureInfo call')
             retrieval_mode == 'EXTENT'
 
+        self.out_srs = out_srs
+        try:
+            crs = CRS.from_string(self.out_srs)
+        except Exception:
+            logger.exception(f'{self.out_srs} is an invalid SRS')
+            raise
+        if bounds is None:
+            bounds = get_global_bounds(crs)
+        self.bounds = bounds
 
         self.retrieval_mode = retrieval_mode
 
@@ -121,11 +137,11 @@ class OGCServiceDumper:
         self.batch_size = batch_size
         self.sort_key = sort_key
         self.state = state
-        self.out_srs = out_srs
         self.requests_to_pause = requests_to_pause
         self.pause_seconds = pause_seconds
         self.max_attempts = max_attempts
         self.retry_delay = retry_delay
+        self.buffer_field = buffer_field
         self.req_params = req_params
         self.state = state
         if self.state is None:
@@ -200,8 +216,8 @@ class OGCServiceDumper:
 
         WIDTH = 256
 
-        x = WIDTH / 2
-        y = WIDTH / 2
+        x = int(WIDTH / 2)
+        y = int(WIDTH / 2)
         r = math.ceil(WIDTH / ( 2.0 ** 0.5 ))
 
         params = {
@@ -219,7 +235,9 @@ class OGCServiceDumper:
             'bbox': bbox_str,
             'x': x,
             'y': y,
-            'buffer': r,
+            'i': x,
+            'j': y,
+            self.buffer_field: r,
         }
 
         return params
