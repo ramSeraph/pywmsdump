@@ -30,19 +30,19 @@ class TestGeorssParsing(TestCase):
         self.assertEqual(feats, expected_feats)
 
     def test_point(self):
-        self.match_output('point.xml', 'point.geojsonl')
+        self.match_output('georss_point.xml', 'georss_point.geojsonl')
 
     def test_linestring(self):
-        self.match_output('linestring.xml', 'linestring.geojsonl')
+        self.match_output('georss_linestring.xml', 'georss_linestring.geojsonl')
 
     def test_polygon(self):
-        self.match_output('polygon.xml', 'polygon.geojsonl')
+        self.match_output('georss_polygon.xml', 'georss_polygon.geojsonl')
 
     def test_point_single(self):
-        self.match_output('point_single.xml', 'point_single.geojsonl')
+        self.match_output('georss_point_single.xml', 'georss_point_single.geojsonl')
 
     def test_empty_feed(self):
-        self.match_output('empty_feed.xml', 'empty_feed.geojsonl')
+        self.match_output('georss_empty_feed.xml', 'georss_empty_feed.geojsonl')
 
     def test_layer_missing(self):
         xml_txt = self.load_file('layer_missing.xml')

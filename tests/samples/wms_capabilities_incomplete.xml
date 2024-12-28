@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE WMT_MS_Capabilities SYSTEM "https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/schemas/wms/1.1.1/WMS_MS_Capabilities.dtd">
+<WMT_MS_Capabilities version="1.1.1" updateSequence="10660">
+  <Service>
+    <Name>OGC:WMS</Name>
+    <Title>GeoServer Web Map Service</Title>
+    <Abstract>A compliant implementation of WMS plus most of the SLD extension (dynamic styling). Can also generate PDF, SVG, KML, GeoRSS</Abstract>
+    <KeywordList>
+      <Keyword>WFS</Keyword>
+      <Keyword>WMS</Keyword>
+      <Keyword>GEOSERVER</Keyword>
+    </KeywordList>
+    <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://geoserver.org"/>
+    <ContactInformation>
+      <ContactPersonPrimary>
+        <ContactPerson>Claudius Ptolomaeus</ContactPerson>
+        <ContactOrganization>The Ancient Geographers</ContactOrganization>
+      </ContactPersonPrimary>
+      <ContactPosition>Chief Geographer</ContactPosition>
+      <ContactAddress>
+        <AddressType>Work</AddressType>
+        <Address/>
+        <City>Alexandria</City>
+        <StateOrProvince/>
+        <PostCode/>
+        <Country>Egypt</Country>
+      </ContactAddress>
+      <ContactVoiceTelephone/>
+      <ContactFacsimileTelephone/>
+      <ContactElectronicMailAddress>claudius.ptolomaeus@gmail.com</ContactElectronicMailAddress>
+    </ContactInformation>
+    <Fees>NONE</Fees>
+    <AccessConstraints>NONE</AccessConstraints>
+  </Service>
+  <Capability>
+    <Request>
+      <GetCapabilities>
+        <Format>application/vnd.ogc.wms_xml</Format>
+        <Format>text/xml</Format>
+        <DCPType>
+          <HTTP>
+            <Get>
+              <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?SERVICE=WMS&amp;"/>
+            </Get>
+            <Post>
+              <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?SERVICE=WMS&amp;"/>
+            </Post>
+          </HTTP>
+        </DCPType>
+      </GetCapabilities>
+      <GetMap>
+        <Format>image/png</Format>
+        <Format>application/atom xml</Format>
+        <Format>application/atom+xml</Format>
+        <Format>application/json;type=utfgrid</Format>
+        <Format>application/openlayers</Format>
+        <Format>application/pdf</Format>
+        <Format>application/rss xml</Format>
+        <Format>application/rss+xml</Format>
+        <Format>application/vnd.google-earth.kml</Format>
+        <Format>application/vnd.google-earth.kml xml</Format>
+        <Format>application/vnd.google-earth.kml+xml</Format>
+        <Format>application/vnd.google-earth.kml+xml;mode=networklink</Format>
+        <Format>application/vnd.google-earth.kmz</Format>
+        <Format>application/vnd.google-earth.kmz xml</Format>
+        <Format>application/vnd.google-earth.kmz+xml</Format>
+        <Format>application/vnd.google-earth.kmz;mode=networklink</Format>
+        <Format>atom</Format>
+        <Format>image/geotiff</Format>
+        <Format>image/geotiff8</Format>
+        <Format>image/gif</Format>
+        <Format>image/gif;subtype=animated</Format>
+        <Format>image/jpeg</Format>
+        <Format>image/png8</Format>
+        <Format>image/png; mode=8bit</Format>
+        <Format>image/svg</Format>
+        <Format>image/svg xml</Format>
+        <Format>image/svg+xml</Format>
+        <Format>image/tiff</Format>
+        <Format>image/tiff8</Format>
+        <Format>image/vnd.jpeg-png</Format>
+        <Format>kml</Format>
+        <Format>kmz</Format>
+        <Format>openlayers</Format>
+        <Format>rss</Format>
+        <Format>text/html; subtype=openlayers</Format>
+        <Format>utfgrid</Format>
+        <DCPType>
+          <HTTP>
+            <Get>
+              <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?SERVICE=WMS&amp;"/>
+            </Get>
+          </HTTP>
+        </DCPType>
+      </GetMap>
+      <GetFeatureInfo>
+        <Format>text/plain</Format>
+        <Format>application/vnd.ogc.gml</Format>
+        <Format>text/xml</Format>
+        <Format>application/vnd.ogc.gml/3.1.1</Format>
+        <Format>text/xml; subtype=gml/3.1.1</Format>
+        <Format>text/html</Format>
+        <Format>application/json</Format>
+        <DCPType>
+          <HTTP>
+            <Get>
+              <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?SERVICE=WMS&amp;"/>
+            </Get>
+            <Post>
+              <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?SERVICE=WMS&amp;"/>
+            </Post>
+          </HTTP>
+        </DCPType>
+      </GetFeatureInfo>
+      <DescribeLayer>
+        <Format>application/vnd.ogc.wms_xml</Format>
+        <DCPType>
+          <HTTP>
+            <Get>
+              <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?SERVICE=WMS&amp;"/>
+            </Get>
+          </HTTP>
+        </DCPType>
+      </DescribeLayer>
+      <GetLegendGraphic>
+        <Format>image/png</Format>
+        <Format>image/jpeg</Format>
+        <Format>image/gif</Format>
+        <DCPType>
+          <HTTP>
+            <Get>
+              <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?SERVICE=WMS&amp;"/>
+            </Get>
+          </HTTP>
+        </DCPType>
+      </GetLegendGraphic>
+      <GetStyles>
+        <Format>application/vnd.ogc.sld+xml</Format>
+        <DCPType>
+          <HTTP>
+            <Get>
+              <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?SERVICE=WMS&amp;"/>
+            </Get>
+          </HTTP>
+        </DCPType>
+      </GetStyles>
+    </Request>
+    <Exception>
+      <Format>application/vnd.ogc.se_xml</Format>
+      <Format>application/vnd.ogc.se_inimage</Format>
+      <Format>application/vnd.ogc.se_blank</Format>
+      <Format>application/json</Format>
+    </Exception>
+    <UserDefinedSymbolization SupportSLD="1" UserLayer="1" UserStyle="1" RemoteWFS="1"/>
+    <Layer>
+      <Title>GeoServer Web Map Service</Title>
+      <Abstract>A compliant implementation of WMS plus most of the SLD extension (dynamic styling). Can also generate PDF, SVG, KML, GeoRSS</Abstract>
+      <!--All supported EPSG projections:-->
+      <SRS>AUTO:42001</SRS>
+      <SRS>AUTO:42002</SRS>
+      <SRS>AUTO:42003</SRS>
+      <SRS>AUTO:42004</SRS>
+      <SRS>AUTO:97001</SRS>
+      <SRS>AUTO:97002</SRS>
+      <SRS>EPSG:2000</SRS>
+      <SRS>EPSG:2001</SRS>
+      <SRS>EPSG:2002</SRS>
+      <SRS>EPSG:2003</SRS>
+      <SRS>EPSG:2004</SRS>
+      <SRS>EPSG:2005</SRS>
+      <SRS>EPSG:2006</SRS>
+      <SRS>EPSG:2007</SRS>
+      <SRS>EPSG:2008</SRS>
+      <SRS>EPSG:2009</SRS>
+      <SRS>EPSG:2010</SRS>
+      <SRS>EPSG:2011</SRS>
+      <SRS>EPSG:2012</SRS>
+      <SRS>EPSG:2013</SRS>
+      <SRS>EPSG:2014</SRS>
+      <SRS>EPSG:2015</SRS>
+      <SRS>EPSG:2016</SRS>
+      <SRS>EPSG:2017</SRS>
+      <SRS>EPSG:2018</SRS>
+      <SRS>EPSG:2019</SRS>
+      <SRS>EPSG:2020</SRS>
+      <SRS>EPSG:2021</SRS>
+      <SRS>EPSG:2022</SRS>
+      <SRS>EPSG:2023</SRS>
+      <SRS>EPSG:2024</SRS>
+      <SRS>EPSG:2025</SRS>
+      <SRS>EPSG:2026</SRS>
+      <SRS>EPSG:2027</SRS>
+      <SRS>EPSG:2028</SRS>
+      <SRS>EPSG:2029</SRS>
+      <SRS>EPSG:2030</SRS>
+      <SRS>EPSG:2031</SRS>
+      <SRS>EPSG:2032</SRS>
+      <SRS>EPSG:2033</SRS>
+      <SRS>EPSG:2034</SRS>
+      <SRS>EPSG:2035</SRS>
+      <SRS>EPSG:2036</SRS>
+      <SRS>EPSG:2037</SRS>
+      <SRS>EPSG:2038</SRS>
+      <SRS>EPSG:2039</SRS>
+      <SRS>EPSG:2040</SRS>
+      <SRS>EPSG:2041</SRS>
+      <SRS>EPSG:2042</SRS>
+      <SRS>EPSG:2043</SRS>
+      <SRS>EPSG:2044</SRS>
+      <SRS>EPSG:2045</SRS>
+      <SRS>EPSG:2046</SRS>
+      <SRS>EPSG:2047</SRS>
+      <SRS>EPSG:2048</SRS>
+      <SRS>EPSG:2049</SRS>
+      <SRS>EPSG:2050</SRS>
+      <SRS>EPSG:2051</SRS>
+      <SRS>EPSG:2052</SRS>
+      <SRS>EPSG:2053</SRS>
+      <SRS>EPSG:2054</SRS>
+      <SRS>EPSG:2055</SRS>
+      <SRS>EPSG:2056</SRS>
+      <SRS>EPSG:2057</SRS>
+      <SRS>EPSG:2058</SRS>
+      <SRS>EPSG:2059</SRS>
+      <SRS>EPSG:2060</SRS>
+      <SRS>EPSG:2061</SRS>
+      <SRS>EPSG:2062</SRS>
+      <SRS>EPSG:2063</SRS>
+      <SRS>EPSG:2064</SRS>
+      <SRS>EPSG:2065</SRS>
+      <SRS>EPSG:2066</SRS>
+      <SRS>EPSG:2067</SRS>
+      <SRS>EPSG:2068</SRS>
+      <SRS>EPSG:2069</SRS>
+      <SRS>EPSG:2070</SRS>
+      <SRS>EPSG:2071</SRS>
+      <SRS>EPSG:2072</SRS>
+      <SRS>EPSG:2073</SRS>
+      <SRS>EPSG:2074</SRS>
+      <SRS>EPSG:2075</SRS>
+      <SRS>EPSG:2076</SRS>
+      <SRS>EPSG:2077</SRS>
+      <SRS>EPSG:2078</SRS>
+      <SRS>EPSG:2079</SRS>
+      <SRS>EPSG:2080</SRS>
+      <SRS>EPSG:2081</SRS>
+      <SRS>EPSG:2082</SRS>
+      <SRS>EPSG:2083</SRS>
+      <SRS>EPSG:2084</SRS>
+      <SRS>EPSG:2085</SRS>
+      <SRS>EPSG:2086</SRS>
+      <SRS>EPSG:2087</SRS>
+      <SRS>EPSG:2088</SRS>
+      <SRS>EPSG:2089</SRS>
+      <SRS>EPSG:2090</SRS>
+      <SRS>EPSG:2091</SRS>
+      <SRS>EPSG:2092</SRS>
+      <SRS>EPSG:2093</SRS>
+      <SRS>EPSG:2094</SRS>
+      <SRS>EPSG:2095</SRS>
+      <SRS>EPSG:32130</SRS>
+      <SRS>EPSG:32133</SRS>
+      <SRS>EPSG:32134</SRS>
+      <SRS>EPSG:32135</SRS>
+      <SRS>EPSG:32136</SRS>
+      <SRS>EPSG:32137</SRS>
+      <SRS>EPSG:32138</SRS>
+      <SRS>EPSG:32139</SRS>
+      <SRS>EPSG:32140</SRS>
+      <SRS>EPSG:32141</SRS>
+      <SRS>EPSG:32142</SRS>
+      <SRS>EPSG:32143</SRS>
+      <SRS>EPSG:32144</SRS>
+      <SRS>EPSG:32145</SRS>
+      <SRS>EPSG:32146</SRS>
+      <SRS>EPSG:32147</SRS>
+      <SRS>EPSG:32148</SRS>
+      <SRS>EPSG:32149</SRS>
+      <SRS>EPSG:32150</SRS>
+      <SRS>EPSG:32151</SRS>
+      <SRS>EPSG:32152</SRS>
+      <SRS>EPSG:32153</SRS>
+      <SRS>EPSG:32154</SRS>
+      <SRS>EPSG:32155</SRS>
+      <SRS>EPSG:32156</SRS>
+      <SRS>EPSG:32157</SRS>
+      <SRS>EPSG:32158</SRS>
+      <SRS>EPSG:32161</SRS>
+      <SRS>EPSG:32164</SRS>
+      <SRS>EPSG:32165</SRS>
+      <SRS>EPSG:32166</SRS>
+      <SRS>EPSG:32167</SRS>
+      <SRS>EPSG:32180</SRS>
+      <SRS>EPSG:32181</SRS>
+      <SRS>EPSG:32182</SRS>
+      <SRS>EPSG:32183</SRS>
+      <SRS>EPSG:32184</SRS>
+      <SRS>EPSG:32185</SRS>
+      <SRS>EPSG:32186</SRS>
+      <SRS>EPSG:32187</SRS>
+      <SRS>EPSG:32188</SRS>
+      <SRS>EPSG:32189</SRS>
+      <SRS>EPSG:42103</SRS>
+      <SRS>EPSG:42307</SRS>
+      <SRS>EPSG:42102</SRS>
+      <SRS>EPSG:42306</SRS>
+      <SRS>EPSG:42101</SRS>
+      <SRS>EPSG:42305</SRS>
+      <SRS>EPSG:42304</SRS>
+      <SRS>EPSG:42303</SRS>
+      <LatLonBoundingBox minx="-180.0" miny="-90.0" maxx="403169.8125" maxy="1459917.875"/>
+      <Layer queryable="0">
+        <Name>v3:settlement</Name>
+        <Title>settlement</Title>
+        <Abstract>Layer-Group type layer: v3:settlement</Abstract>
+        <KeywordList/>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-1.0" miny="-1.0" maxx="97.0591583251953" maxy="34.8096160888672"/>
+        <BoundingBox SRS="EPSG:4326" minx="-1.0" miny="-1.0" maxx="97.0591583251953" maxy="34.8096160888672"/>
+      </Layer>
+      <Layer queryable="0">
+        <Name>v3:lulc1</Name>
+        <Title>v3:lulc1</Title>
+        <Abstract>Layer-Group type layer: v3:lulc1</Abstract>
+        <KeywordList/>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="76.7373352050781" miny="12.592267036438" maxx="84.8045883178711" maxy="19.1959533691406"/>
+        <BoundingBox SRS="EPSG:4326" minx="76.7373352050781" miny="12.592267036438" maxx="84.8045883178711" maxy="19.1959533691406"/>
+      </Layer>
+      <Layer queryable="0">
+        <Name>v3:Electric_Assets</Name>
+        <Title>Electric_Assets</Title>
+        <Abstract>Layer-Group type layer: v3:Electric_Assets</Abstract>
+        <KeywordList/>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-1.0" miny="-1.0" maxx="96.3591618" maxy="34.0472017"/>
+        <BoundingBox SRS="EPSG:4326" minx="-1.0" miny="-1.0" maxx="96.3591618" maxy="34.0472017"/>
+      </Layer>
+      <Layer queryable="1" opaque="0">
+        <Name>gpsdp_portal:V1_203770_Geomorphology</Name>
+        <Title>V1_203770_Geomorphology</Title>
+        <Abstract/>
+        <KeywordList>
+          <Keyword>features</Keyword>
+          <Keyword>V1_203770_Geomorphology</Keyword>
+        </KeywordList>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="80.80374560981095" miny="16.459552755391545" maxx="81.01232696741073" maxy="16.695140503717184"/>
+        <BoundingBox SRS="EPSG:4326" minx="80.80374560981095" miny="16.459552755391545" maxx="81.01232696741073" maxy="16.695140503717184"/>
+        <Style>
+          <Name>gpsdp_portal:Geomorphology</Name>
+          <Title>gpsdp_portal:Geomorphology</Title>
+          <LegendURL width="305" height="700">
+            <Format>image/png</Format>
+            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=gpsdp_portal%3AV1_203770_Geomorphology"/>
+          </LegendURL>
+        </Style>
+      </Layer>
+      <Layer queryable="1" opaque="0">
+        <Name>gpsdp_portal:V1_203770_Groundwater_Pot</Name>
+        <Title>V1_203770_Groundwater_Pot</Title>
+        <Abstract/>
+        <KeywordList>
+          <Keyword>features</Keyword>
+          <Keyword>V1_203770_Groundwater_Pot</Keyword>
+        </KeywordList>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="80.80374560981095" miny="16.45955275539155" maxx="81.00717415871162" maxy="16.6951405037171"/>
+        <BoundingBox SRS="EPSG:4326" minx="80.80374560981095" miny="16.45955275539155" maxx="81.00717415871162" maxy="16.6951405037171"/>
+        <Style>
+          <Name>gpsdp_portal:Groundwater_Pot</Name>
+          <Title>gpsdp_portal:Groundwater_Pot</Title>
+          <LegendURL width="41" height="440">
+            <Format>image/png</Format>
+            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=gpsdp_portal%3AV1_203770_Groundwater_Pot"/>
+          </LegendURL>
+        </Style>
+      </Layer>
+      <Layer queryable="1" opaque="0">
+        <Name>gpsdp_portal:V1_203770_LRD</Name>
+        <Title>V1_203770_LRD</Title>
+        <Abstract/>
+        <KeywordList>
+          <Keyword>V1_203770_LRD</Keyword>
+          <Keyword>features</Keyword>
+        </KeywordList>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="80.85752141575564" miny="16.565255876713955" maxx="80.90358476682538" maxy="16.596599894901367"/>
+        <BoundingBox SRS="EPSG:4326" minx="80.85752141575564" miny="16.565255876713955" maxx="80.90358476682538" maxy="16.596599894901367"/>
+        <Style>
+          <Name>gpsdp_portal:LRD</Name>
+          <Title>gpsdp_portal:LRD</Title>
+          <LegendURL width="249" height="1120">
+            <Format>image/png</Format>
+            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=gpsdp_portal%3AV1_203770_LRD"/>
+          </LegendURL>
+        </Style>
+      </Layer>
+      <Layer queryable="1" opaque="0">
+        <Name>gpsdp_portal:V1_203770_LULC</Name>
+        <Title>V1_203770_LULC</Title>
+        <Abstract/>
+        <KeywordList>
+          <Keyword>features</Keyword>
+          <Keyword>V1_203770_LULC</Keyword>
+        </KeywordList>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="80.85410603937095" miny="16.53301207175959" maxx="80.93045913357388" maxy="16.599668317925886"/>
+        <BoundingBox SRS="EPSG:4326" minx="80.85410603937095" miny="16.53301207175959" maxx="80.93045913357388" maxy="16.599668317925886"/>
+        <Style>
+          <Name>gpsdp_portal:LULC</Name>
+          <Title>gpsdp_portal:LULC</Title>
+          <LegendURL width="221" height="440">
+            <Format>image/png</Format>
+            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=gpsdp_portal%3AV1_203770_LULC"/>
+          </LegendURL>
+        </Style>
+      </Layer>
+      <Layer queryable="1" opaque="0">
+        <Name>gpsdp_portal:V1_203770_Road</Name>
+        <Title>V1_203770_Road</Title>
+        <Abstract/>
+        <KeywordList>
+          <Keyword>features</Keyword>
+          <Keyword>V1_203770_Road</Keyword>
+        </KeywordList>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="80.80375396031583" miny="16.459600421928243" maxx="81.0123099778118" maxy="16.6950276525149"/>
+        <BoundingBox SRS="EPSG:4326" minx="80.80375396031583" miny="16.459600421928243" maxx="81.0123099778118" maxy="16.6950276525149"/>
+        <Style>
+          <Name>gpsdp_portal:Road</Name>
+          <Title>gpsdp_portal:Road</Title>
+          <LegendURL width="132" height="200">
+            <Format>image/png</Format>
+            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=gpsdp_portal%3AV1_203770_Road"/>
+          </LegendURL>
+        </Style>
+      </Layer>
+      <Layer queryable="1" opaque="0">
+        <Name>gpsdp_portal:V1_203770_Settlement</Name>
+        <Title>V1_203770_Settlement</Title>
+        <Abstract/>
+        <KeywordList>
+          <Keyword>features</Keyword>
+          <Keyword>V1_203770_Settlement</Keyword>
+        </KeywordList>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="80.85752141566974" miny="16.56525587700009" maxx="80.90358476625755" maxy="16.59437880600018"/>
+        <BoundingBox SRS="EPSG:4326" minx="80.85752141566974" miny="16.56525587700009" maxx="80.90358476625755" maxy="16.596599895699683"/>
+        <Style>
+          <Name>gpsdp_portal:Settlement</Name>
+          <Title>gpsdp_portal:Settlement</Title>
+          <LegendURL width="221" height="140">
+            <Format>image/png</Format>
+            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=gpsdp_portal%3AV1_203770_Settlement"/>
+          </LegendURL>
+        </Style>
+      </Layer>
+      <Layer queryable="1" opaque="0">
+        <Name>gpsdp_portal:V1_203770_WRD</Name>
+        <Title>V1_203770_WRD</Title>
+        <Abstract/>
+        <KeywordList>
+          <Keyword>features</Keyword>
+          <Keyword>V1_203770_WRD</Keyword>
+        </KeywordList>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="80.85410603979331" miny="16.533012071470726" maxx="80.93045913388684" maxy="16.599668317979717"/>
+        <BoundingBox SRS="EPSG:4326" minx="80.85410603979331" miny="16.533012071470726" maxx="80.93045913388684" maxy="16.599668317979717"/>
+        <Style>
+          <Name>gpsdp_portal:WRD</Name>
+          <Title>gpsdp_portal:WRD</Title>
+          <LegendURL width="272" height="800">
+            <Format>image/png</Format>
+            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=gpsdp_portal%3AV1_203770_WRD"/>
+          </LegendURL>
+        </Style>
+      </Layer>
+      <Layer queryable="1" opaque="0">
+        <Name>gpsdp_portal:V1_203770_Waterbody</Name>
+        <Title>V1_203770_Waterbody</Title>
+        <Abstract/>
+        <KeywordList>
+          <Keyword>features</Keyword>
+          <Keyword>V1_203770_Waterbody</Keyword>
+        </KeywordList>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="80.8602394630002" miny="16.534316648477265" maxx="80.91984416900009" maxy="16.596669751999965"/>
+        <BoundingBox SRS="EPSG:4326" minx="80.8602394630002" miny="16.534316648477265" maxx="80.91984416900009" maxy="16.596669751999965"/>
+        <Style>
+          <Name>gpsdp_portal:Waterbody</Name>
+          <Title>gpsdp_portal:Waterbody</Title>
+          <LegendURL width="132" height="80">
+            <Format>image/png</Format>
+            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=gpsdp_portal%3AV1_203770_Waterbody"/>
+          </LegendURL>
+        </Style>
+      </Layer>
+      <Layer queryable="1" opaque="0">
+        <Name>gpsdp_portal:V1_220493_Contour</Name>
+        <Title>V1_220493_Contour</Title>
+        <Abstract/>
+        <KeywordList>
+          <Keyword>features</Keyword>
+          <Keyword>V1_220493_Contour</Keyword>
+        </KeywordList>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="74.80562811937432" miny="13.569027856519625" maxx="74.91201611532983" maxy="13.650539552139154"/>
+        <BoundingBox SRS="EPSG:4326" minx="74.80562811937432" miny="13.569027856519625" maxx="74.91201611532983" maxy="13.650539552139154"/>
+        <Style>
+          <Name>gpsdp_portal:Contour</Name>
+          <Title>gpsdp_portal:Contour</Title>
+          <LegendURL width="99" height="2860">
+            <Format>image/png</Format>
+            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/wms?request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=gpsdp_portal%3AV1_220493_Contour"/>
+          </LegendURL>
+        </Style>
+      </Layer>
+      <Layer queryable="1" opaque="0">
+        <Name>gpsdp_portal:V1_220493_Crop</Name>
+        <Title>V1_220493_Crop</Title>
+        <Abstract/>
+        <KeywordList>
+          <Keyword>features</Keyword>
+          <Keyword>V1_220493_Crop</Keyword>
+        </KeywordList>
+        <SRS>EPSG:4326</SRS>
+        <<?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE ServiceExceptionReport SYSTEM "https://bhuvanpanchayat.nrsc.gov.in:443/geoserver/schemas/wms/1.1.1/WMS_exception_1_1_1.dtd"> <ServiceExceptionReport version="1.1.1" >   <ServiceException>
+      javax.xml.transform.TransformerException: java.lang.NullPointerException
+java.lang.NullPointerException
+</ServiceException></ServiceExceptionReport>
