@@ -78,7 +78,7 @@ def handle_error_xml(xml_text):
 
 def optionally_save_to_file(txt):
     to_file = os.environ.get('WMSDUMP_SAVE_RESPONSE_TO_FILE', None)
-    if to_file is None:
+    if to_file is None or to_file.strip() == '':
         return
     p = Path(to_file)
     try:
