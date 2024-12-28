@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom" xmlns:georss="http://www.georss.org/georss"><title>amrut_ph1:WB_Uttarapara_Road_CLine_V0</title><id>https://bhuvan-vec3.nrsc.gov.in:443/bhuvan/wms?service=wms&amp;request=GetMap&amp;version=1.1.1&amp;format=application%2Fatom%20xml&amp;layers=amrut_ph1%3AWB_Uttarapara_Road_CLine_V0&amp;styles=line&amp;height=256&amp;width=256&amp;transparent=false&amp;bbox=-180.0%2C-90.0%2C180.0%2C90.0&amp;srs=EPSG%3A4326&amp;maxfeatures=2&amp;startindex=0</id><link href="https://bhuvan-vec3.nrsc.gov.in:443/bhuvan/wms?service=wms&amp;request=GetMap&amp;version=1.1.1&amp;format=application%2Fatom%20xml&amp;layers=amrut_ph1%3AWB_Uttarapara_Road_CLine_V0&amp;styles=line&amp;height=256&amp;width=256&amp;transparent=false&amp;bbox=-180.0%2C-90.0%2C180.0%2C90.0&amp;srs=EPSG%3A4326&amp;maxfeatures=2&amp;startindex=0" rel="self"/><updated>2024-12-25T16:00:57+05:30</updated><entry><title>WB_Uttarapara_Road_CLine_V0.1</title><author><name>nrsc</name></author><id>https://bhuvan-vec3.nrsc.gov.in:443/bhuvan/wms/reflect?format=application%2Fatom%2Bxml&amp;layers=amrut_ph1%3AWB_Uttarapara_Road_CLine_V0&amp;featureid=WB_Uttarapara_Road_CLine_V0.1</id><link href="https://bhuvan-vec3.nrsc.gov.in:443/bhuvan/wms/reflect?format=application%2Fatom%2Bxml&amp;layers=amrut_ph1%3AWB_Uttarapara_Road_CLine_V0&amp;featureid=WB_Uttarapara_Road_CLine_V0.1" rel="self"/><updated>2024-12-25T16:00:59+05:30</updated><content type="html">&lt;h4&gt;WB_Uttarapara_Road_CLine_V0&lt;/h4&gt;
+
+&lt;ul class="textattributes"&gt;
+  
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;Rd_ID&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;RD_244&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;Code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;01-11&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;Sub_Class&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Other Public Road&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;Length_km&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;0.098507099212&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;Ward_No&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;6&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;Rd_Name&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;A.R Guha Sarani&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;Cons_Mat&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Concrete&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;CW_Width&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;3.0&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;ROW_Width&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;3.5&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;Maintain&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Municipal Body&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;FP&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;No&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;FP_Width&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;0.0&lt;/span&gt;&lt;/li&gt;
+  
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;SHAPE_Leng&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;98.5070992124&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</content><georss:where><georss:line>22.684585776147888 88.35216178884151 22.684572154564616 88.35215980293441 22.68437249917456 88.35213068993386 22.684030716323676 88.35210119512503 22.683925864256672 88.35207908108893 22.683783729354587 88.3520491047139 22.683706107590492 88.35202863513709</georss:line></georss:where></entry><entry><title>WB_Uttarapara_Road_CLine_V0.10</title><author><name>nrsc</name></author><id>https://bhuvan-vec3.nrsc.gov.in:443/bhuvan/wms/reflect?format=application%2Fatom%2Bxml&amp;layers=amrut_ph1%3AWB_Uttarapara_Road_CLine_V0&amp;featureid=WB_Uttarapara_Road_CLine_V0.10</id><link href="https://bhuvan-vec3.nrsc.gov.in:443/bhuvan/wms/reflect?format=application%2Fatom%2Bxml&amp;layers=amrut_ph1%3AWB_Uttarapara_Road_CLine_V0&amp;featureid=WB_Uttarapara_Road_CLine_V0.10" rel="self"/><updated>2024-12-25T16:00:59+05:30</updated><content type="html">&lt;h4&gt;WB_Uttarapara_Road_CLine_V0&lt;/h4&gt;
+
+&lt;ul class="textattributes"&gt;
+  
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;Rd_ID&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;RD_59154&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;Code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;01-11&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;Sub_Class&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Other Public Road&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;Length_km&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;0.0578810029756&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;Ward_No&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;0&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;Rd_Name&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Battala Bye Lane&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;Cons_Mat&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Asphalt&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;CW_Width&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;6.0&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;ROW_Width&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;6.0&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;Maintain&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Municipal Body&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;FP&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;No&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;FP_Width&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;0.0&lt;/span&gt;&lt;/li&gt;
+  
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;SHAPE_Leng&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;57.881002976&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</content><georss:where><georss:line>22.682736499714583 88.34239344395836 22.682739955924625 88.34197927724652 22.682731963351603 88.34195634063192 22.682716668704725 88.34193325506763 22.682694129889178 88.34189923363702 22.68267985269639 88.34188923962586 22.682646302223365 88.34188924006628</georss:line></georss:where></entry></feed>

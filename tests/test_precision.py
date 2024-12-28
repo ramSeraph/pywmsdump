@@ -1,5 +1,5 @@
 from unittest import TestCase
-from wmsdump import truncate_geometry
+from wmsdump.dumper import truncate_geometry
 
 p1 = [77.89824947, 21.91597942]
 t_p1 = [77.898, 21.916] 

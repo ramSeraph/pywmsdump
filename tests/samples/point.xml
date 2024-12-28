@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom" xmlns:georss="http://www.georss.org/georss"><title>rbi:fdc_rbi_mof</title><id>https://bhuvan-vec2.nrsc.gov.in:443/bhuvan/wms?service=wms&amp;request=GetMap&amp;version=1.1.1&amp;format=application%2Fatom%20xml&amp;layers=rbi%3Afdc_rbi_mof&amp;styles=rbi_mof_accepted&amp;sortby=gid&amp;height=256&amp;width=256&amp;transparent=false&amp;bbox=-180.0%2C-90.0%2C180.0%2C90.0&amp;srs=EPSG%3A4326&amp;maxfeatures=2&amp;startindex=10</id><link href="https://bhuvan-vec2.nrsc.gov.in:443/bhuvan/wms?service=wms&amp;request=GetMap&amp;version=1.1.1&amp;format=application%2Fatom%20xml&amp;layers=rbi%3Afdc_rbi_mof&amp;styles=rbi_mof_accepted&amp;sortby=gid&amp;height=256&amp;width=256&amp;transparent=false&amp;bbox=-180.0%2C-90.0%2C180.0%2C90.0&amp;srs=EPSG%3A4326&amp;maxfeatures=2&amp;startindex=10" rel="self"/><updated>2024-12-25T15:13:54+05:30</updated><entry><title>fdc_rbi_mof.fid-57e6dd0e_193fc878219_-320</title><author><name>bhuvan</name></author><id>https://bhuvan-vec2.nrsc.gov.in:443/bhuvan/wms/reflect?format=application%2Fatom%2Bxml&amp;layers=rbi%3Afdc_rbi_mof&amp;featureid=fdc_rbi_mof.fid-57e6dd0e_193fc878219_-320</id><link href="https://bhuvan-vec2.nrsc.gov.in:443/bhuvan/wms/reflect?format=application%2Fatom%2Bxml&amp;layers=rbi%3Afdc_rbi_mof&amp;featureid=fdc_rbi_mof.fid-57e6dd0e_193fc878219_-320" rel="self"/><updated>2024-12-25T15:13:54+05:30</updated><content type="html">&lt;h4&gt;fdc_rbi_mof&lt;/h4&gt;
+
+&lt;ul class="textattributes"&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;gid&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;1212881&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;state&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;GUJARAT&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;district&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;BHAVNAGAR&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;sub_district&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;BHAVNAGAR&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;revenue_centre&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;BHAVNAGAR  M CORP.   OG&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;pop_group&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;URBAN&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;bank_group&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;PUBLIC SECTOR BANKS&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;bank&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;STATE BANK OF INDIA&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;outlet_name&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;SYN260318026&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;address&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;IND.JEWELS,JEWELS CIRCLE&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;bsr&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;00010ATM00000GI4&lt;/span&gt;&lt;/li&gt;
+  
+  
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;lat&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;21.7587&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;lon&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;72.1459&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;banking_outlet&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;ATM&lt;/span&gt;&lt;/li&gt;
+  
+  
+  
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;status&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;1&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</content><georss:where><georss:point>21.758699417114258 72.1458969116211</georss:point></georss:where></entry><entry><title>fdc_rbi_mof.fid-57e6dd0e_193fc878219_-31f</title><author><name>bhuvan</name></author><id>https://bhuvan-vec2.nrsc.gov.in:443/bhuvan/wms/reflect?format=application%2Fatom%2Bxml&amp;layers=rbi%3Afdc_rbi_mof&amp;featureid=fdc_rbi_mof.fid-57e6dd0e_193fc878219_-31f</id><link href="https://bhuvan-vec2.nrsc.gov.in:443/bhuvan/wms/reflect?format=application%2Fatom%2Bxml&amp;layers=rbi%3Afdc_rbi_mof&amp;featureid=fdc_rbi_mof.fid-57e6dd0e_193fc878219_-31f" rel="self"/><updated>2024-12-25T15:13:54+05:30</updated><content type="html">&lt;h4&gt;fdc_rbi_mof&lt;/h4&gt;
+
+&lt;ul class="textattributes"&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;gid&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;1212882&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;state&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;GUJARAT&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;district&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;GANDHINAGAR&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;sub_district&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;GANDHINAGAR&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;revenue_centre&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;DABHODA&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;pop_group&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;SEMI URBAN&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;bank_group&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;PUBLIC SECTOR BANKS&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;bank&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;STATE BANK OF INDIA&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;outlet_name&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;ASHISH PATEL&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;address&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;DABHODA,DABHODA&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;bsr&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;00010FBC00001KYC&lt;/span&gt;&lt;/li&gt;
+  
+  
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;lat&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;23.175032&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;lon&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;72.74793&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;banking_outlet&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Fixed BC&lt;/span&gt;&lt;/li&gt;
+  
+  
+  
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;status&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;1&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</content><georss:where><georss:point>23.175031661987305 72.74793243408203</georss:point></georss:where></entry></feed>
