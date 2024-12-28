@@ -1,4 +1,3 @@
-import io
 import math
 import time
 import json
@@ -7,12 +6,12 @@ import logging
 from pprint import pformat
 
 import requests
-import kml2geojson
 
 from pyproj import CRS, Transformer
 
 from .state import State, Extent
-from .georss_helper import extract_features, get_props
+from .georss_helper import georss_extract_features
+from .kml_helper import kml_extract_features
 from .errors import (
     handle_error_xml, KnownException, ZeroAreaException,
     optionally_save_to_file
@@ -63,18 +62,6 @@ def bbox_to_str(bounds, crs):
         b_str += f', {crs}'
 
     return b_str
-
-def convert_kml_props(feat):
-    if 'properties' not in feat:
-        return 
-
-    props = feat['properties']
-    if 'description' not in props:
-        return
-
-    new_props = get_props(props['description'])
-
-    feat['properties'] = new_props
 
 class OGCServiceDumper:
 
@@ -292,14 +279,11 @@ class OGCServiceDumper:
             logger.info(f'resp: {resp_text}')
             raise
 
-        for feat in data['features']:
-            truncate_geometry(feat.get('geometry', None),
-                              self.geometry_precision)
         return data['features']
 
     def parse_response_georss(self, resp_text):
         try:
-            feats = extract_features(resp_text)
+            feats = georss_extract_features(resp_text)
         except KnownException:
             raise
         except Exception:
@@ -307,22 +291,11 @@ class OGCServiceDumper:
             logger.error(f'response: {resp_text}')
             raise
 
-        for feat in feats:
-            truncate_geometry(feat.get('geometry', None),
-                              self.geometry_precision)
-
         return feats
 
     def parse_response_kml(self, resp_text):
-        handle_error_xml(resp_text)
-        fh = io.StringIO(resp_text)
-        feature_collections = kml2geojson.main.convert(fh)
-        data = feature_collections[0]
-        for feat in data['features']:
-            truncate_geometry(feat.get('geometry', None),
-                              self.geometry_precision)
-            convert_kml_props(feat)
-        return data['features']
+        feats = kml_extract_features(resp_text)
+        return feats
 
     def parse_response_getmap(self, resp_text):
         if self.getmap_format == 'GEORSS':
@@ -342,19 +315,43 @@ class OGCServiceDumper:
 
         return self.parse_response_geojson(resp_text)
 
+    def pause_if_required(self):
+        self.req_count += 1
+
+        if self.req_count == self.requests_to_pause:
+            logger.info(f'pausing for {self.pause_seconds} secs')
+            time.sleep(self.pause_seconds)
+            self.req_count = 0
+
     def get_features(self, count, no_index=False, no_sort=False):
+        self.pause_if_required()
+
         params = self.get_params(count, no_index, no_sort)
 
+        logger.info(f'making a request for {count} records with '
+                    f'start_index: {self.state.index_done_till}, '
+                    f'already_downloaded: {self.state.downloaded_count}')
         resp_text = self.make_request(params)
 
-        return self.parse_response(resp_text)
+        feats = self.parse_response(resp_text)
+        for feat in feats:
+            truncate_geometry(feat.get('geometry', None),
+                              self.geometry_precision)
+        return feats
 
-    def get_bounded_features(self, bounds, count):
+    def get_bounded_features(self, bounds, count, key):
+        self.pause_if_required()
+
         params = self.get_bounded_params(bounds, count)
 
+        logger.info(f'making a request for {count} records with key={key}')
         resp_text = self.make_request(params)
 
-        return self.parse_bounded_response(resp_text)
+        feats = self.parse_bounded_response(resp_text)
+        for feat in feats:
+            truncate_geometry(feat.get('geometry', None),
+                              self.geometry_precision)
+        return feats
 
     def split_envelope(self, envelope):
         half_width = (envelope['xmax'] - envelope['xmin']) / 2.0
@@ -395,16 +392,8 @@ class OGCServiceDumper:
 
         max_records = self.batch_size
         if status == Extent.NOT_PRESENT:
-            self.req_count += 1
-
-            if self.req_count == self.requests_to_pause:
-                logger.info(f'pausing for {self.pause_seconds} secs')
-                time.sleep(self.pause_seconds)
-                self.req_count = 0
-
-            logger.info(f'making a request for {self.batch_size} records with key={key} ')
             try:
-                features = self.get_bounded_features(envelope, max_records)
+                features = self.get_bounded_features(envelope, max_records, key)
             except ZeroAreaException:
                 features = []
             logger.info(f'got {len(features)} records')
@@ -432,17 +421,6 @@ class OGCServiceDumper:
     def __iter__(self):
         if self.retrieval_mode == 'OFFSET':
             while True:
-                self.req_count += 1
-
-                if self.req_count == self.requests_to_pause:
-                    logger.info(f'pausing for {self.pause_seconds} secs')
-                    time.sleep(self.pause_seconds)
-                    self.req_count = 0
-
-                logger.info(f'making a request for {self.batch_size} records with '
-                            f'start_index: {self.state.index_done_till}, '
-                            f'already_downloaded: {self.state.downloaded_count}')
-
                 feats = self.get_features(self.batch_size)
                 for feat in feats:
                     yield feat

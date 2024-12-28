@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:ns2="http://www.google.com/kml/ext/2.2" xmlns:ns3="http://www.w3.org/2005/Atom" xmlns:ns4="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0">
+    <Document>
+        <LookAt>
+            <longitude>180.0</longitude>
+            <latitude>0.0</latitude>
+            <altitude>1.5768778343115222E7</altitude>
+            <heading>0.0</heading>
+            <tilt>0.0</tilt>
+            <range>1.2742E7</range>
+            <altitudeMode>clampToGround</altitudeMode>
+        </LookAt>
+        <Folder>
+            <name>tnsdma_data_sharing:tnsdma_blocks</name>
+            <LookAt>
+                <longitude>78.27083794277874</longitude>
+                <latitude>10.829704844081235</latitude>
+                <altitude>937354.6915230888</altitude>
+                <heading>0.0</heading>
+                <tilt>0.0</tilt>
+                <range>757431.7565699024</range>
+                <altitudeMode>clampToGround</altitudeMode>
+            </LookAt>
+        </Folder>
+    </Document>
+</kml>

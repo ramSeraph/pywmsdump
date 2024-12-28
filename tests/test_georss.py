@@ -3,7 +3,7 @@ import json
 from unittest import TestCase
 from pathlib import Path
 
-from wmsdump.georss_helper import extract_features
+from wmsdump.georss_helper import georss_extract_features
 from wmsdump.errors import LayerMissingException
 
 class TestGeorssParsing(TestCase):
@@ -25,7 +25,7 @@ class TestGeorssParsing(TestCase):
         expected_feats = self.load_jsonl_file(outp_fname)
 
         xml_txt = self.load_file(inp_fname)
-        feats = extract_features(xml_txt)
+        feats = georss_extract_features(xml_txt)
 
         self.assertEqual(feats, expected_feats)
 
@@ -46,4 +46,5 @@ class TestGeorssParsing(TestCase):
 
     def test_layer_missing(self):
         xml_txt = self.load_file('layer_missing.xml')
-        self.assertRaises(LayerMissingException, extract_features, xml_txt)
+        with self.assertRaises(LayerMissingException):
+            georss_extract_features(xml_txt)

@@ -19,14 +19,6 @@ class TestGeorssParsing(TestCase):
         txt = self.load_file(fname)
         return json.loads(txt)
 
-    def match_output(self, inp_fname, outp_fname):
-        expected_feats = self.load_jsonl_file(outp_fname)
-
-        xml_txt = self.load_file(inp_fname)
-        feats = extract_features(xml_txt)
-
-        self.assertEqual(feats, expected_feats)
-
     def test_wms_capabilities_bug(self):
         expected = self.load_json_file('wms_capabilities.json')
         xml_txt = self.load_file('wms_capabilities.xml')

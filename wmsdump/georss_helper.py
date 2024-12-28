@@ -2,9 +2,9 @@ import re
 
 import xmltodict
 
-from bs4 import BeautifulSoup
 
 from .errors import handle_error
+from .props_helper import get_props_from_html
 
 def get_points(vals):
     points = []
@@ -21,24 +21,12 @@ def get_points(vals):
         curr_p = []
     return points
 
-def get_props(content):
-    # TODO: check that the data is indeed in html
-    soup = BeautifulSoup(content, 'lxml')
-    lis = soup.find_all('li')
-    props = {}
-    for li in lis:
-        txt = li.text.strip()
-        parts = txt.split(':', 1)
-        if len(parts) != 2:
-            return { 'unparsed': content }
-        props[parts[0]] = parts[1].strip()
-    return props
 
 
 def extract_feature(entry):
     title = entry.get('title', None)
     content = entry.get('content', {}).get('#text', '')
-    props = get_props(content)
+    props = get_props_from_html(content)
 
     where = entry['georss:where']
     if 'georss:polygon' in where:
@@ -106,7 +94,7 @@ def combine_features(feats):
     return new_feats
 
 
-def extract_features(xml_text):
+def georss_extract_features(xml_text):
     # deal with some xml/unicode messups
     # TODO: add a test case for this?
     xml_text = re.sub(r'&#([a-zA-Z0-9]+);?', r'[#\1;]', xml_text)
