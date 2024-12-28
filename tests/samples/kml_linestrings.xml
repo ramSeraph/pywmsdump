@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:ns2="http://www.google.com/kml/ext/2.2" xmlns:ns3="http://www.w3.org/2005/Atom" xmlns:ns4="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0">
+    <Document>
+        <LookAt>
+            <longitude>180.0</longitude>
+            <latitude>0.0</latitude>
+            <altitude>1.5768778343115222E7</altitude>
+            <heading>0.0</heading>
+            <tilt>0.0</tilt>
+            <range>1.2742E7</range>
+            <altitudeMode>clampToGround</altitudeMode>
+        </LookAt>
+        <Folder>
+            <name>generic_viewer:aerial_ofc</name>
+            <LookAt>
+                <longitude>78.27759910073226</longitude>
+                <latitude>10.821054525728215</latitude>
+                <altitude>930446.0111849421</altitude>
+                <heading>0.0</heading>
+                <tilt>0.0</tilt>
+                <range>751849.1804848565</range>
+                <altitudeMode>clampToGround</altitudeMode>
+            </LookAt>
+            <Placemark id="aerial_ofc.7">
+                <name>aerial_ofc.7</name>
+                <description>&lt;h4&gt;aerial_ofc&lt;/h4&gt;
+
+&lt;ul class="textattributes"&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;district_name&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;CHENGALPATTU&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;block_name&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;CHITHAMIUR&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;stretch&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Chithamur Ring 1&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;ae_ug&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;AE&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;type_fibre&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;48 F&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;pac_name&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Package A&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;dist_code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;296974&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;block_code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;6481&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;from_code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;224214&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;to_code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;224210&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;from_node&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Zamin Budur&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;to_node&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Vettur&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;ring_spur&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Ring 1&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;status&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Completed&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;route_length&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;4651.31&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;layer_id&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;1493&lt;/span&gt;&lt;/li&gt;
+  
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;object_id&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;7&lt;/span&gt;&lt;/li&gt;
+  
+&lt;/ul&gt;
+</description>
+                <LookAt>
+                    <longitude>9.463559255033346</longitude>
+                    <latitude>43.30710971045327</latitude>
+                    <altitude>1.0979260282653945E7</altitude>
+                    <heading>0.0</heading>
+                    <tilt>0.0</tilt>
+                    <range>8871818.18892502</range>
+                    <altitudeMode>clampToGround</altitudeMode>
+                </LookAt>
+                <Style>
+                    <IconStyle>
+                        <color>00ffffff</color>
+                        <scale>0.4</scale>
+                        <heading>0.0</heading>
+                        <Icon>
+                            <href>http://icons.opengeo.org/markers/icon-line.1.png</href>
+                        </Icon>
+                    </IconStyle>
+                    <LabelStyle>
+                        <color>00ffffff</color>
+                        <scale>0.0</scale>
+                    </LabelStyle>
+                    <LineStyle>
+                        <color>ffff0000</color>
+                        <width>1.0</width>
+                    </LineStyle>
+                </Style>
+                <LineString>
+                     <coordinates>79.946085,12.372216 0.0,79.94640107459799,12.372134482390043 0.0,0.0,79.94648943577208 12.371803988647951,0.0 79.94649173086752,12.371606610440868 0.0,79.94636320552338,12.371303657843951 0.0,0.0,79.94618533562743 12.371101689446007,0.0 79.94598336722954,12.370784966276503 0.0,79.94570336558692,12.370451029891267 0.0,0.0,79.94547156094836 12.370120536149178,0.0 79.94520188723523,12.369674140087811 0.0,79.9450813947251,12.369438892806114 0.0,0.0,79.94495631202409 12.369163481354372,0.0 79.94467028575598,12.369082005466565 0.0,79.94437450533229,12.369037251105658 0.0,0.0,79.94408446264718 12.36898188192838,0.0 79.94381421516016,12.368938275115188 0.0,79.94331158926073,12.36894573417534 0.0,0.0,79.942786012407 12.368929668507315,0.0 79.94301580883705,12.368781061078149 0.0,79.94334314682291,12.368583682871066 0.0,0.0,79.9437488049404 12.368322041991915,0.0 79.94413093832969,12.367972039938659 0.0,79.94470356463977,12.367574988429062 0.0,0.0,79.94499045156867 12.367430397416898,0.0 79.94499045156866,12.366927771517467 0.0,79.94496520551891,12.366420555427176 0.0,0.0,79.94488028698797 12.365807764947048,0.0 79.94485504093822,12.36524546656641 0.0,79.94482061450677,12.364793332766467 0.0,0.0,79.9447843 12.3643257,0.0 79.94464848234942,12.363567751806217 0.0,79.94458880986821,12.36299856813928 0.0,0.0,79.94452798983927 12.362339875750536,0.0 79.94441208752002,12.361878561568867 0.0,79.9444526,12.3614355 0.0,0.0,79.9447483190007 12.361217574084687,0.0 79.94512815729456,12.360994949827862 0.0,79.94556193033107,12.360741341782717 0.0,0.0,79.9459997 12.3605055,0.0 79.94647652586042,12.360260519289884 0.0,79.94689423322887,12.360060845987372 0.0,0.0,79.94713521824913 12.359973632360985,0.0 79.9475437452359,12.359861172684859 0.0,79.94792932126833,12.359740680174722 0.0,0.0,79.94827473313072 12.359625925403162,0.0 79.94856162005959,12.359573138208244 0.0,79.9490154,12.3595332 0.0,0.0,79.9494914 12.3594719,0.0 79.9497687,12.3592814 0.0,79.94999146451322,12.35913707007632 0.0,0.0,79.95025540048782 12.35903838097278,0.0 79.9505185,12.3590587 0.0,79.95111491372678,12.358958052632687 0.0,0.0,79.95159114602879 12.358897806377621,0.0 79.9521018,12.3588021 0.0,79.95254475818045,12.358573050374106 0.0,0.0,79.95253729912027 12.358239687762728,0.0 79.95256713536087,12.357974604240427 0.0,79.95308812202376,12.357795586796788 0.0,0.0,79.9530228 12.3573797,0.0 79.95288959626896,12.356921155437513 0.0,79.95327287720596,12.356797220284228 0.0,0.0,79.95370894533792 12.356575743575121,0.0 79.95373189629223,12.356061642198537 0.0,79.9538815,12.3556621 0.0,0.0,79.95393156959472 12.355152784407789,0.0 79.95393615978558,12.354603682825877 0.0,79.95392927449929,12.35420204112542 0.0,0.0,79.95386042163635 12.35381416999755,0.0 79.95387648730437,12.353323019575278 0.0,79.9539017333541,12.352829574057573 0.0,0.0,79.95395222545359 12.352299407012971,0.0 79.95408763608403,12.351819732067854 0.0,79.95420468595103,12.351360712981615 0.0,0.0,79.95471649223217 12.35072038135632,0.0</coordinates>
+                </LineString>
+            </Placemark>
+            <Placemark id="aerial_ofc.8">
+                <name>aerial_ofc.8</name>
+                <description>&lt;h4&gt;aerial_ofc&lt;/h4&gt;
+
+&lt;ul class="textattributes"&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;district_name&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;CHENGALPATTU&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;block_name&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;CHITHAMIUR&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;stretch&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Chithamur Ring 1&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;ae_ug&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;AE&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;type_fibre&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;48 F&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;pac_name&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Package A&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;dist_code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;296974&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;block_code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;6481&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;from_code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;224167&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;to_code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;224214&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;from_node&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Irumbedu&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;to_node&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Zamin Budur&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;ring_spur&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Ring 1&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;status&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Completed&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;route_length&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;3806.49&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;layer_id&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;1493&lt;/span&gt;&lt;/li&gt;
+  
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;object_id&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;8&lt;/span&gt;&lt;/li&gt;
+  
+&lt;/ul&gt;
+</description>
+                <LookAt>
+                    <longitude>9.446298962513865</longitude>
+                    <latitude>43.31383115679534</latitude>
+                    <altitude>1.0979965231846165E7</altitude>
+                    <heading>0.0</heading>
+                    <tilt>0.0</tilt>
+                    <range>8872387.824848097</range>
+                    <altitudeMode>clampToGround</altitudeMode>
+                </LookAt>
+                <Style>
+                    <IconStyle>
+                        <color>00ffffff</color>
+                        <scale>0.4</scale>
+                        <heading>0.0</heading>
+                        <Icon>
+                            <href>http://icons.opengeo.org/markers/icon-line.1.png</href>
+                        </Icon>
+                    </IconStyle>
+                    <LabelStyle>
+                        <color>00ffffff</color>
+                        <scale>0.0</scale>
+                    </LabelStyle>
+                    <LineStyle>
+                        <color>ffff0000</color>
+                        <width>1.0</width>
+                    </LineStyle>
+                </Style>
+                <LineString>
+                    <coordinates>79.96059023,12.34731843 0.0,79.96066193694669,12.347245606873514 0.0,0.0,79.96103259485882 12.347177901558295,0.0 79.96114275943954,12.34677511231012 0.0,79.96141128560497,12.34667412811115 0.0,0.0,79.96178997635111 12.346612160534509,0.0 79.96220309352873,12.346524946908122 0.0,79.96241424230838,12.34640330685027 0.0,0.0,79.96247161969416 12.346100354253352,0.0 79.96252899707996,12.345815762419889 0.0,79.96269653904642,12.345427891292019 0.0,0.0,79.96310277093775 12.345379694287962,0.0 79.9636791,12.3454503 0.0,79.9642842,12.3453993 0.0,0.0,79.9650106 12.3452076,0.0 79.9655751,12.3450285 0.0,79.9657184,12.3445992 0.0,0.0,79.9657618 12.3441782,0.0 79.9658907,12.3437461 0.0,79.96595442701096,12.343358862760805 0.0,0.0,79.96604967347135 12.343138533599413,0.0 79.96625508451244,12.342834433454781 0.0,79.96641803628805,12.342625579770544 0.0,0.0,79.9666847 12.3423571,0.0 79.9669654165484,12.342183773900043 0.0,79.96731082841077,12.341960002095503 0.0,0.0,79.96761837119857 12.34170295140721,0.0 79.967964,12.3417365 0.0,79.9687,12.3418137 0.0,0.0,79.96899083826649 12.341830329203646,0.0 79.96949575926135,12.341873936016837 0.0,79.9699124,12.3418734 0.0,0.0,79.9704965 12.3419005,0.0 79.971151,12.3419657 0.0,79.97197216723154,12.34191065754374 0.0,0.0,79.97217069298634 12.34217115087518,0.0 79.972749057035,12.342656563558872 0.0,79.97337102789685,12.343194763437484 0.0,0.0,79.97399070366325 12.343761652008986,0.0 79.97472283910581,12.344134605016555 0.0,79.97493284033777,12.344849527243367 0.0,0.0,79.97468726512663 12.345637892523982,0.0 79.97470103569924,12.346459536688347 0.0,79.974742347417,12.347278885757277 0.0,0.0,79.9747928395165 12.348091349539915,0.0 79.97479513461194,12.348915288799706 0.0,79.97481579047081,12.349727752582345 0.0,0.0,79.97482726594797 12.35046906840662,0.0 79.9749006,12.3507898 0.0,79.97490988938347,12.351345794861325 0.0,0.0,79.97491447957434 12.351861043785629,0.0 79.9749348,12.3525233 0.0,79.97492365995606,12.353082034555017 0.0,0.0,79.97490529919261</coordinates>
+                </LineString>
+            </Placemark>
+        </Folder>
+    </Document>
+</kml>

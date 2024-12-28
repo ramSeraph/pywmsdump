@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:ns2="http://www.google.com/kml/ext/2.2" xmlns:ns3="http://www.w3.org/2005/Atom" xmlns:ns4="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0">
+    <Document>
+        <LookAt>
+            <longitude>180.0</longitude>
+            <latitude>0.0</latitude>
+            <altitude>1.5768778343115222E7</altitude>
+            <heading>0.0</heading>
+            <tilt>0.0</tilt>
+            <range>1.2742E7</range>
+            <altitudeMode>clampToGround</altitudeMode>
+        </LookAt>
+        <Folder>
+            <name>generic_viewer:anganwadi_centres</name>
+            <LookAt>
+                <longitude>78.27452269159821</longitude>
+                <latitude>10.819650775332434</latitude>
+                <altitude>932319.6421658116</altitude>
+                <heading>0.0</heading>
+                <tilt>0.0</tilt>
+                <range>753363.1725924736</range>
+                <altitudeMode>clampToGround</altitudeMode>
+            </LookAt>
+            <Placemark id="anganwadi_centres.5">
+                <name>anganwadi_centres.5</name>
+                <description>&lt;h4&gt;anganwadi_centres&lt;/h4&gt;
+
+&lt;ul class="textattributes"&gt;
+  
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;icds_code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;33629040123&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;d_code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;629&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;district&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Kanniyakumari&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;sec_code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;01&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;sector&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Edaicode&lt;/span&gt;&lt;/li&gt;
+  
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;ward_no&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;0&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;pin_code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;0&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;object_id&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;46354&lt;/span&gt;&lt;/li&gt;
+  
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;layer_id&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;1133&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+                <LookAt>
+                    <longitude>77.18541189600006</longitude>
+                    <latitude>8.396749948000036</latitude>
+                    <altitude>0.0</altitude>
+                    <heading>0.0</heading>
+                    <tilt>0.0</tilt>
+                    <range>0.0</range>
+                    <altitudeMode>clampToGround</altitudeMode>
+                </LookAt>
+                <Style>
+                    <IconStyle>
+                        <scale>0.5625</scale>
+                        <heading>0.0</heading>
+                        <Icon>
+                            <href>http://tngis.tn.gov.in:80/geoserver/kml/icon/point?0.0.0=</href>
+                        </Icon>
+                    </IconStyle>
+                    <LabelStyle>
+                        <color>00ffffff</color>
+                        <scale>0.0</scale>
+                    </LabelStyle>
+                </Style>
+                <Point>
+                    <coordinates>77.18541189600006,8.396749948000036</coordinates>
+                </Point>
+            </Placemark>
+            <Placemark id="anganwadi_centres.6">
+                <name>anganwadi_centres.6</name>
+                <description>&lt;h4&gt;anganwadi_centres&lt;/h4&gt;
+
+&lt;ul class="textattributes"&gt;
+  
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;icds_code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;33629040108&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;d_code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;629&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;district&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Kanniyakumari&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;sec_code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;01&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;sector&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;Edaicode&lt;/span&gt;&lt;/li&gt;
+  
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;ward_no&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;0&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;pin_code&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;0&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;object_id&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;46355&lt;/span&gt;&lt;/li&gt;
+  
+  &lt;li&gt;&lt;strong&gt;&lt;span class="atr-name"&gt;layer_id&lt;/span&gt;:&lt;/strong&gt; &lt;span class="atr-value"&gt;1133&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+                <LookAt>
+                    <longitude>77.18658049100003</longitude>
+                    <latitude>8.391314388000055</latitude>
+                    <altitude>0.0</altitude>
+                    <heading>0.0</heading>
+                    <tilt>0.0</tilt>
+                    <range>0.0</range>
+                    <altitudeMode>clampToGround</altitudeMode>
+                </LookAt>
+                <Style>
+                    <IconStyle>
+                        <scale>0.5625</scale>
+                        <heading>0.0</heading>
+                        <Icon>
+                            <href>http://tngis.tn.gov.in:80/geoserver/kml/icon/point?0.0.0=</href>
+                        </Icon>
+                    </IconStyle>
+                    <LabelStyle>
+                        <color>00ffffff</color>
+                        <scale>0.0</scale>
+                    </LabelStyle>
+                </Style>
+                <Point>
+                    <coordinates>77.18658049100003,8.391314388000069</coordinates>
+                </Point>
+            </Placemark>
+        </Folder>
+    </Document>
+</kml>

@@ -27,10 +27,6 @@ class TestKMLParsing(TestCase):
 
         xml_txt = self.load_file(inp_fname)
         feats = kml_extract_features(xml_txt)
-        #with open('out.jsonl', 'w') as f:
-        #    for feat in feats:
-        #        f.write(json.dumps(feat))
-        #        f.write('\n')
 
         self.assertEqual(feats, expected_feats)
 
@@ -39,6 +35,12 @@ class TestKMLParsing(TestCase):
 
     def test_kml_one_multigeometry(self):
         self.match_output('kml_one_multigeometry.xml', 'kml_one_multigeometry.geojsonl')
+
+    def test_kml_points(self):
+        self.match_output('kml_points.xml', 'kml_points.geojsonl')
+
+    def test_kml_linestrings(self):
+        self.match_output('kml_linestrings.xml', 'kml_linestrings.geojsonl')
 
     def test_layer_missing(self):
         xml_txt = self.load_file('layer_missing.xml')

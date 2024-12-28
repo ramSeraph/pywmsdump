@@ -21,7 +21,7 @@ from wmsdump.dumper import (
 from wmsdump.errors import (
     SortKeyRequiredException, InvalidSortKeyException,
     WFSUnsupportedException, KMLUnsupportedException,
-    LayerMissingException
+    LayerMissingException, GeoRSSUnsupportedException
 )
 
 logger = logging.getLogger(__name__)
@@ -440,6 +440,9 @@ def extract(layername, output_file, output_dir,
     except KMLUnsupportedException:
         logger.error('kml is not supported on this endpoint.. '
                      'try using --getmap-format/-f GEORSS')
+    except GeoRSSUnsupportedException:
+        logger.error('GeoRSS is not supported on this endpoint.. '
+                     'try using --getmap-format/-f KML')
     except LayerMissingException:
         logger.error('the layer specified is not supported on this endpoint.. '
                      'check available layers using the "explore" command')

@@ -13,6 +13,7 @@ ZERO_AREA_ERR_MSG = 'The request bounding box has zero area'
 KML_NOT_SUPPORTED_MSGS = ['There is no support for creating maps in kml format',
                           'There is no support for creating maps in '
                           'application/vnd.google-earth.kml%2Bxml format']
+GEORSS_NOT_SUPPORTED_MSG = 'Creating maps using application/atom xml is not allowed'
 LAYER_MISSING_MSG = 'Could not find layer'
 
 
@@ -32,6 +33,9 @@ class ZeroAreaException(KnownException):
     pass
 
 class KMLUnsupportedException(KnownException):
+    pass
+
+class GeoRSSUnsupportedException(KnownException):
     pass
 
 class LayerMissingException(KnownException):
@@ -70,6 +74,8 @@ def check_error_msg(err_msg):
             raise KMLUnsupportedException()
     if err_msg.find(LAYER_MISSING_MSG) != -1:
         raise LayerMissingException()
+    if err_msg.find(GEORSS_NOT_SUPPORTED_MSG) != -1:
+        raise GeoRSSUnsupportedException()
 
     raise Exception(err_msg)
 

@@ -4,7 +4,7 @@ from unittest import TestCase
 from pathlib import Path
 
 from wmsdump.georss_helper import georss_extract_features
-from wmsdump.errors import LayerMissingException
+from wmsdump.errors import LayerMissingException, GeoRSSUnsupportedException
 
 class TestGeorssParsing(TestCase):
     def setUp(self):
@@ -47,4 +47,9 @@ class TestGeorssParsing(TestCase):
     def test_layer_missing(self):
         xml_txt = self.load_file('layer_missing.xml')
         with self.assertRaises(LayerMissingException):
+            georss_extract_features(xml_txt)
+
+    def test_georss_no_support(self):
+        xml_txt = self.load_file('georss_no_support.xml')
+        with self.assertRaises(GeoRSSUnsupportedException):
             georss_extract_features(xml_txt)
