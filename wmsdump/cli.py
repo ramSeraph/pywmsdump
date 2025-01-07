@@ -14,6 +14,7 @@ from pyproj import CRS
 from wmsdump.state import get_state_from_files
 from wmsdump.geoserver import get_layer_list_from_page
 from wmsdump.capabilities import fill_layer_list
+from wmsdump.hole_puncher import punch_holes
 from wmsdump.dumper import (
     OGCServiceDumper, DEFAULTS,
     bbox_to_str, get_global_bounds
@@ -454,4 +455,38 @@ def extract(layername, output_file, output_dir,
         feats = dumper.get_features(2, no_index=True, no_sort=True)
         for feat in feats:
             pprint(feat['properties'])
-        
+
+
+@click.command()
+@click.option('--log-level', '-l',
+              type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                                case_sensitive=False),
+              default='INFO', show_default=True,
+              help='set logging level')
+@click.argument('input-file',
+                type=click.Path(), required=True)
+@click.argument('output-file',
+                type=click.Path(), required=False)
+@click.option('--index-in-mem',
+              is_flag=True, default=False, show_default=True,
+              help='whether the spatial index keeps the geometry data in memory '
+                   'or just keeps the offset of the features on disk. For large '
+                   'data keeping evrything in memory might lead to running out of'
+                   ' RAM')
+@click.option('--keep-map-file',
+              is_flag=True, default=False, show_default=True,
+              help='Whether to delete the hole map temporary file, might help with'
+                   ' debugging')
+def punch_holes_main(log_level, input_file, output_file, index_in_mem, keep_map_file):
+    setup_logging(log_level)
+    if output_file is None:
+        shortname = Path(input_file).name
+        output_file = str(Path(input_file).parent / f'fixed_{shortname}')
+
+    logger.info(f'reading data from {input_file}, will be writing to {output_file}, keeping index in memory: {index_in_mem}')
+    punch_holes(input_file, output_file,
+                use_offset=not index_in_mem,
+                keep_map_file=keep_map_file)
+
+
+       
