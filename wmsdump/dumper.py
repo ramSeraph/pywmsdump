@@ -35,7 +35,7 @@ DEFAULTS = {
     'retry_delay': 5,
     'geometry_precision': -1,
     'out_srs': 'EPSG:4326',
-    'getmap_format': 'GEORSS',
+    'getmap_format': 'KML',
     'kml_strip_point': True,
     'kml_keep_original_props': False,
     'buffer_field': 'buffer',
