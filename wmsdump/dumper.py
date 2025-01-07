@@ -36,6 +36,8 @@ DEFAULTS = {
     'geometry_precision': -1,
     'out_srs': 'EPSG:4326',
     'getmap_format': 'GEORSS',
+    'kml_strip_point': True,
+    'kml_keep_original_props': False,
     'buffer_field': 'buffer',
 }
 
@@ -79,8 +81,11 @@ class OGCServiceDumper:
                  max_attempts=DEFAULTS['max_attempts'],
                  geometry_precision=DEFAULTS['geometry_precision'],
                  getmap_format=DEFAULTS['getmap_format'],
+                 kml_strip_point=DEFAULTS['kml_strip_point'],
+                 kml_keep_original_props=DEFAULTS['kml_keep_original_props'],
                  buffer_field=DEFAULTS['buffer_field'],
                  bounds=None,
+                 max_box_dims=None,
                  session=None,
                  get_nth=None,
                  req_params={}):
@@ -114,12 +119,16 @@ class OGCServiceDumper:
             bounds = get_global_bounds(crs)
         self.bounds = bounds
 
+        self.max_box_dims = max_box_dims
+
         self.retrieval_mode = retrieval_mode
 
         self.url = url
         self.layername = layername
         self.geometry_precision = geometry_precision
         self.getmap_format = getmap_format
+        self.kml_strip_point = kml_strip_point
+        self.kml_keep_original_props = kml_keep_original_props
         self.initial_bounds = bounds
         self.batch_size = batch_size
         self.sort_key = sort_key
@@ -294,7 +303,9 @@ class OGCServiceDumper:
         return feats
 
     def parse_response_kml(self, resp_text):
-        feats = kml_extract_features(resp_text)
+        feats = kml_extract_features(resp_text,
+                                     self.kml_strip_point,
+                                     self.kml_keep_original_props)
         return feats
 
     def parse_response_getmap(self, resp_text):
@@ -383,6 +394,19 @@ class OGCServiceDumper:
             ),
         ]
 
+    def is_envelope_size_allowed(self, b):
+        if self.max_box_dims is None:
+            return True
+
+        dx = self.max_box_dims['deltax']
+        dy = self.max_box_dims['deltay']
+
+        if b['xmax'] - b['xmin'] > dx:
+            return False
+        if b['ymax'] - b['ymin'] > dy:
+            return False
+
+        return True
 
     def scrape_an_envelope(self, envelope, key):
         status = self.state.explored_tree.get(key, Extent.NOT_PRESENT.value)
@@ -392,18 +416,19 @@ class OGCServiceDumper:
 
         max_records = self.batch_size
         if status == Extent.NOT_PRESENT:
-            try:
-                features = self.get_bounded_features(envelope, max_records, key)
-            except ZeroAreaException:
-                features = []
-            logger.info(f'got {len(features)} records')
+            if self.is_envelope_size_allowed(envelope):
+                try:
+                    features = self.get_bounded_features(envelope, max_records, key)
+                except ZeroAreaException:
+                    features = []
+                logger.info(f'got {len(features)} records')
 
-            for feature in features:
-                yield feature
-            num_features = len(features)
-            if num_features < max_records:
-                self.state.update_coverage(key, Extent.EXPLORED)
-                return
+                for feature in features:
+                    yield feature
+                num_features = len(features)
+                if num_features < max_records:
+                    self.state.update_coverage(key, Extent.EXPLORED)
+                    return
             self.state.update_coverage(key, Extent.OPEN)
             status = Extent.OPEN
 

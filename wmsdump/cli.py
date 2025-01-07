@@ -120,12 +120,32 @@ class FileWriter:
             self.fh.close()
             self.fh = None
 
-EXPECTED_BOUNDS_FORMAT = '<xmin>, <ymin>, <xmax>, <ymax>'
+EXPECTED_BOUNDS_FORMAT = '<xmin>,<ymin>,<xmax>,<ymax>'
+EXPECTED_MAX_BOX_FORMAT = '<deltax>,<deltay>'
+
+def get_box_dims(b_str):
+    parts = b_str.split(',')
+    if len(parts) != 2:
+        raise Exception(f'does not have parts, expected: {EXPECTED_MAX_BOX_FORMAT}')
+
+    nos = []
+    for part in parts:
+        try:
+            n = float(part)
+            if n <= 0:
+                raise Exception('')
+            nos.append(n)
+        except Exception:
+            raise Exception(f'not a number: {part}, expected postive non-zero floating point')
+    b = { 'deltax': nos[0], 'deltay': nos[1] }
+
+    return b
+
 
 def get_bounds_from_str(b_str, crs):
     parts = b_str.split(',')
     if len(parts) != 4:
-        raise Exception(f'less than four parts, expected: {EXPECTED_BOUNDS_FORMAT}')
+        raise Exception(f'does not have four parts, expected: {EXPECTED_BOUNDS_FORMAT}')
 
     nos = []
     for part in parts:
@@ -298,6 +318,12 @@ def explore(geoserver_url, service_url, service, service_version, namespace, scr
               type=click.Choice(['KML', 'GEORSS'], case_sensitive=False),
               default=DEFAULTS['getmap_format'], show_default=True,
               help='which format to use while pulling using WMS GetMap')
+@click.option('--kml-strip-point/--no-kml-strip-point',
+              default=DEFAULTS['kml_strip_point'], show_default=True,
+              help='Whether to strip the points in polygons and linestring geomcollections')
+@click.option('--kml-keep-original-props/--no-kml-keep-original-props',
+              default=DEFAULTS['kml_keep_original_props'], show_default=True,
+              help='Whether to keep the original style related props in kml conversion')
 @click.option('--buffer-field', 
               default=DEFAULTS['buffer_field'], show_default=True,
               help='name of field to use for buffer to a WMS GetFeatureInfo call')
@@ -306,7 +332,11 @@ def explore(geoserver_url, service_url, service, service_version, namespace, scr
               help='CRS to ask the server to return data in.. '
                    'will be written out in the same CRS')
 @click.option('--bounds', 
-              help=f'bounds to restrict query to. format: "{EXPECTED_BOUNDS_FORMAT}"')
+              help='bounds to restrict query to. defaults to CRS bounds. '
+                   f'format: "{EXPECTED_BOUNDS_FORMAT}"')
+@click.option('--max-box-dims',
+              help='when querying using EXTENT mode, maximum size of the bounding box to use.'
+                   f' format: {EXPECTED_MAX_BOX_FORMAT}')
 @click.option('--skip-index', 
               type=int, default=0, show_default=True,
               help='skip n elements in index.. useful to skip records causing failure. '
@@ -317,8 +347,10 @@ def extract(layername, output_file, output_dir,
             retrieval_mode, operation, out_srs,
             sort_key, batch_size, geometry_precision, 
             requests_to_pause, pause_seconds, max_attempts,
-            getmap_format, buffer_field, retry_delay, bounds,
-            skip_index):
+            getmap_format, kml_strip_point,
+            kml_keep_original_props,
+            buffer_field, retry_delay, bounds,
+            max_box_dims, skip_index):
 
     if service_version is None:
         service_version = DEFAULTS['wms_version'] if service == 'WMS' else DEFAULTS['wfs_version']
@@ -371,6 +403,13 @@ def extract(layername, output_file, output_dir,
             logger.error(f'Invalid bounds string: "{bounds}"')
             return
 
+    if retrieval_mode == 'EXTENT' and max_box_dims is not None:
+        try:
+            max_box_dims = get_box_dims(max_box_dims)
+        except Exception:
+            logger.error(f'Invalid max box dimensions string: "{max_box_dims}"')
+            return
+
 
     logger.info(f'working with {service_url=} and {layername=}, '
                 f'{service=} and {operation=}, mode={retrieval_mode}')
@@ -416,9 +455,12 @@ def extract(layername, output_file, output_dir,
                               max_attempts=max_attempts,
                               geometry_precision=geometry_precision,
                               getmap_format=getmap_format,
+                              kml_strip_point=kml_strip_point,
+                              kml_keep_original_props=kml_keep_original_props,
                               buffer_field=buffer_field,
                               out_srs=out_srs,
                               bounds=bounds,
+                              max_box_dims=max_box_dims,
                               get_nth=writer.get,
                               req_params=req_params)
 
