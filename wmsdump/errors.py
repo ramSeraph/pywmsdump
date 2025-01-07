@@ -12,10 +12,11 @@ WFS_DISABLED_ERR_MSGS = ['Service WFS is disabled',
 ZERO_AREA_ERR_MSG = 'The request bounding box has zero area'
 KML_NOT_SUPPORTED_MSGS = ['There is no support for creating maps in kml format',
                           'There is no support for creating maps in '
-                          'application/vnd.google-earth.kml%2Bxml format']
+                          'application/vnd.google-earth.kml%2Bxml format',
+                          'There is no support for creating maps in '
+                          'application/vnd.google-earth.kml+xml format']
 GEORSS_NOT_SUPPORTED_MSG = 'Creating maps using application/atom xml is not allowed'
 LAYER_MISSING_MSG = 'Could not find layer'
-
 
 class KnownException(Exception):
     pass

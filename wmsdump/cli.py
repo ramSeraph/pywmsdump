@@ -148,7 +148,7 @@ def get_bounds_from_str(b_str, crs):
         raise Exception(f'Invalid y: ymin: {b["ymin"]}, expected value between {g["ymin"]} and {g["ymax"]}')
 
     if b['ymax'] < g['ymin'] or b['ymax'] > g['ymax']:
-        raise Exception(f'Invalid y: xmax: {b["ymax"]}, expected value between {g["ymin"]} and {g["ymax"]}')
+        raise Exception(f'Invalid y: ymax: {b["ymax"]}, expected value between {g["ymin"]} and {g["ymax"]}')
 
     return b
 
