@@ -45,10 +45,12 @@ def parse_capabilities(service, xml_txt, layer_list, service_info):
         return True
 
     def process_wms_5(path, item):
-        if matches(path, ['WMT_MS_Capabilities', 'Capability', 'Layer', 'Layer', 'Name']):
+        if matches(path, ['WMT_MS_Capabilities', 'Capability', 'Layer', 'Layer', 'Name']) or \
+           matches(path, ['WMS_Capabilities', 'Capability', 'Layer', 'Layer', 'Name']):
             layer_list.append(item)
         for request_type in ['GetMap', 'GetFeatureInfo']:
-            if matches(path, ['WMT_MS_Capabilities', 'Capability', 'Request', request_type, 'Format']):
+            if matches(path, ['WMT_MS_Capabilities', 'Capability', 'Request', request_type, 'Format']) or \
+               matches(path, ['WMS_Capabilities', 'Capability', 'Request', request_type, 'Format']):
                 if request_type not in service_info:
                     service_info[request_type] = []
                 service_info[request_type].append(item)
