@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 
 def get_props_from_html(content):
     # TODO: check that the data is indeed in html
-    soup = BeautifulSoup(content, 'lxml')
+    soup = BeautifulSoup(content, 'html.parser')
     lis = soup.find_all('li')
     props = {}
     for li in lis:
