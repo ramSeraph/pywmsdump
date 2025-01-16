@@ -1,22 +1,24 @@
 import os
+import re
 
 from pathlib import Path
 
 import xmltodict
 
-SORT_KEY_ERR_MSG = 'Cannot do natural order without a primary key, ' + \
-                   'please add it or specify a manual sort over existing attributes'
-INVALID_PROP_NAME_ERR_MSG = 'Illegal property name'
-WFS_DISABLED_ERR_MSGS = ['Service WFS is disabled',
-                         'WFS request not enabled']
-ZERO_AREA_ERR_MSG = 'The request bounding box has zero area'
-KML_NOT_SUPPORTED_MSGS = ['There is no support for creating maps in kml format',
-                          'There is no support for creating maps in '
-                          'application/vnd.google-earth.kml%2Bxml format',
-                          'There is no support for creating maps in '
-                          'application/vnd.google-earth.kml+xml format']
-GEORSS_NOT_SUPPORTED_MSG = 'Creating maps using application/atom xml is not allowed'
-LAYER_MISSING_MSG = 'Could not find layer'
+SORT_KEY_ERR_MSGS = [ 'Cannot do natural order without a primary key, ' + \
+                      'please add it or specify a manual sort over existing attributes' ]
+INVALID_PROP_NAME_ERR_MSGS = [ 'Illegal property name',
+                               'Sort property \'[\\w:]+\' not available in [\\w:]+' ]
+WFS_DISABLED_ERR_MSGS = [ 'Service WFS is disabled',
+                          'WFS request not enabled']
+ZERO_AREA_ERR_MSGS = [ 'The request bounding box has zero area' ]
+KML_NOT_SUPPORTED_MSGS = [ 'There is no support for creating maps in kml format',
+                           'There is no support for creating maps in '
+                           'application/vnd.google-earth.kml%2Bxml format',
+                           'There is no support for creating maps in '
+                           'application/vnd.google-earth.kml+xml format' ]
+GEORSS_NOT_SUPPORTED_MSGS = [ 'Creating maps using application/atom xml is not allowed' ]
+LAYER_MISSING_MSGS = [ 'Could not find layer' ]
 
 class KnownException(Exception):
     pass
@@ -42,6 +44,16 @@ class GeoRSSUnsupportedException(KnownException):
 class LayerMissingException(KnownException):
     pass
 
+ERROR_MAPPINGS = [
+    (SORT_KEY_ERR_MSGS, SortKeyRequiredException),
+    (INVALID_PROP_NAME_ERR_MSGS, InvalidSortKeyException),
+    (WFS_DISABLED_ERR_MSGS, WFSUnsupportedException),
+    (ZERO_AREA_ERR_MSGS, ZeroAreaException),
+    (KML_NOT_SUPPORTED_MSGS, KMLUnsupportedException),
+    (GEORSS_NOT_SUPPORTED_MSGS, GeoRSSUnsupportedException),
+    (LAYER_MISSING_MSGS, LayerMissingException),
+]
+
 
 def get_error_msg(data):
     if 'ServiceExceptionReport' in data and 'ServiceException' in data['ServiceExceptionReport']:
@@ -61,22 +73,11 @@ def get_error_msg(data):
 
 
 def check_error_msg(err_msg):
-    if err_msg.find(SORT_KEY_ERR_MSG) != -1:
-        raise SortKeyRequiredException()
-    if err_msg.find(INVALID_PROP_NAME_ERR_MSG) != -1:
-        raise InvalidSortKeyException()
-    for e in WFS_DISABLED_ERR_MSGS:
-        if err_msg.find(e) != -1:
-            raise WFSUnsupportedException()
-    if err_msg.find(ZERO_AREA_ERR_MSG) != -1:
-        raise ZeroAreaException()
-    for e in KML_NOT_SUPPORTED_MSGS:
-        if err_msg.find(e) != -1:
-            raise KMLUnsupportedException()
-    if err_msg.find(LAYER_MISSING_MSG) != -1:
-        raise LayerMissingException()
-    if err_msg.find(GEORSS_NOT_SUPPORTED_MSG) != -1:
-        raise GeoRSSUnsupportedException()
+    for msg_patterns, ExceptopnClass in ERROR_MAPPINGS:
+        for msg_pattern in msg_patterns:
+            matches = re.search(rf'{msg_pattern}', err_msg)
+            if matches is not None:
+                raise ExceptopnClass()
 
     raise Exception(err_msg)
 

@@ -26,7 +26,7 @@ class TestKMLParsing(TestCase):
         expected_feats = self.load_jsonl_file(outp_fname)
 
         xml_txt = self.load_file(inp_fname)
-        feats = kml_extract_features(xml_txt)
+        feats = kml_extract_features(xml_txt, True, False)
 
         self.assertEqual(feats, expected_feats)
 
@@ -45,14 +45,14 @@ class TestKMLParsing(TestCase):
     def test_layer_missing(self):
         xml_txt = self.load_file('layer_missing.xml')
         with self.assertRaises(LayerMissingException):
-            kml_extract_features(xml_txt)
+            kml_extract_features(xml_txt, True, False)
 
     def test_kml_not_supported_1(self):
         xml_txt = self.load_file('kml_no_support_1.xml')
         with self.assertRaises(KMLUnsupportedException):
-            kml_extract_features(xml_txt)
+            kml_extract_features(xml_txt, True, False)
 
     def test_kml_not_supported_2(self):
         xml_txt = self.load_file('kml_no_support_2.xml')
         with self.assertRaises(KMLUnsupportedException):
-            kml_extract_features(xml_txt)
+            kml_extract_features(xml_txt, True, False)
