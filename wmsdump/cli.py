@@ -22,7 +22,8 @@ from wmsdump.dumper import (
 from wmsdump.errors import (
     SortKeyRequiredException, InvalidSortKeyException,
     WFSUnsupportedException, KMLUnsupportedException,
-    LayerMissingException, GeoRSSUnsupportedException
+    LayerMissingException, GeoRSSUnsupportedException,
+    ServiceUnsupportedException
 )
 
 logger = logging.getLogger(__name__)
@@ -480,6 +481,10 @@ def extract(layername, output_file, output_dir,
     except WFSUnsupportedException:
         logger.error('WFS is not supported on this endpoint.. '
                      'try using --service/-s WMS')
+    except ServiceUnsupportedException:
+        alt_service = 'WMS' if service == 'WFS' else 'WFS'
+        logger.error(f'{service} is not supported on this endpoint.. '
+                     f'try using --service/-s {alt_service}')
     except KMLUnsupportedException:
         logger.error('kml is not supported on this endpoint.. '
                      'try using --getmap-format/-f GEORSS')

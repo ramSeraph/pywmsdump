@@ -4,9 +4,9 @@ from unittest import TestCase
 from pathlib import Path
 
 from wmsdump.capabilities import parse_capabilities
-from wmsdump.errors import WFSUnsupportedException
+from wmsdump.errors import WFSUnsupportedException, ServiceUnsupportedException
 
-class TestGeorssParsing(TestCase):
+class TestCapabilitiesParsing(TestCase):
     def setUp(self):
         pass
 
@@ -70,6 +70,17 @@ class TestGeorssParsing(TestCase):
         layer_list = []
         service_info = {}
         with self.assertRaises(WFSUnsupportedException):
+            parse_capabilities('WFS', xml_txt, layer_list, service_info)
+
+        self.assertEqual(layer_list, [])
+        self.assertEqual(service_info, {})
+
+    def test_wfs_disabled_esri(self):
+        xml_txt = self.load_file('wfs_disabled_esri.xml')
+
+        layer_list = []
+        service_info = {}
+        with self.assertRaises(ServiceUnsupportedException):
             parse_capabilities('WFS', xml_txt, layer_list, service_info)
 
         self.assertEqual(layer_list, [])

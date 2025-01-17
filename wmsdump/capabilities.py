@@ -30,27 +30,41 @@ def matches(path, expected):
     got = [ p[0] for p in path ]
     got = got[:len(expected)]
     return got == expected
- 
+
+def convert_item(item):
+    if not isinstance(item, dict):
+        return item
+    return item.get('#text', None)
+
 def parse_capabilities(service, xml_txt, layer_list, service_info):
     exceptions = []
 
     def process_error_2(path, item):
         if matches(path, ['ServiceExceptionReport', 'ServiceException']):
-            exceptions.append(item)
+            item = convert_item(item)
+            if item is not None:
+                exceptions.append(item)
         return True
 
     def process_error_3(path, item):
         if matches(path, ['ows:ExceptionReport', 'ows:Exception', 'ows:ExceptionText']):
-            exceptions.append(item)
+            item = convert_item(item)
+            if item is not None:
+                exceptions.append(item)
         return True
 
     def process_wms_5(path, item):
         if matches(path, ['WMT_MS_Capabilities', 'Capability', 'Layer', 'Layer', 'Name']) or \
            matches(path, ['WMS_Capabilities', 'Capability', 'Layer', 'Layer', 'Name']):
-            layer_list.append(item)
+            item = convert_item(item)
+            if item is not None:
+                layer_list.append(item)
         for request_type in ['GetMap', 'GetFeatureInfo']:
             if matches(path, ['WMT_MS_Capabilities', 'Capability', 'Request', request_type, 'Format']) or \
                matches(path, ['WMS_Capabilities', 'Capability', 'Request', request_type, 'Format']):
+                item = convert_item(item)
+                if item is None:
+                    continue
                 if request_type not in service_info:
                     service_info[request_type] = []
                 service_info[request_type].append(item)
@@ -65,7 +79,9 @@ def parse_capabilities(service, xml_txt, layer_list, service_info):
 
     def process_wfs_4(path, item):
         if matches(path, ['WFS_Capabilities', 'FeatureTypeList', 'FeatureType', 'Name']):
-            layer_list.append(item)
+            item = convert_item(item)
+            if item is not None:
+                layer_list.append(item)
         return True
 
     if service == 'WMS':

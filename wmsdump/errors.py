@@ -10,7 +10,8 @@ SORT_KEY_ERR_MSGS = [ 'Cannot do natural order without a primary key, ' + \
 INVALID_PROP_NAME_ERR_MSGS = [ 'Illegal property name',
                                'Sort property \'[\\w:]+\' not available in [\\w:]+' ]
 WFS_DISABLED_ERR_MSGS = [ 'Service WFS is disabled',
-                          'WFS request not enabled']
+                          'WFS request not enabled' ]
+SERVICE_DISABLED_ERR_MSGS = [ 'Can\'t recognize service requested.' ]
 ZERO_AREA_ERR_MSGS = [ 'The request bounding box has zero area' ]
 KML_NOT_SUPPORTED_MSGS = [ 'There is no support for creating maps in kml format',
                            'There is no support for creating maps in '
@@ -38,6 +39,9 @@ class ZeroAreaException(KnownException):
 class KMLUnsupportedException(KnownException):
     pass
 
+class ServiceUnsupportedException(KnownException):
+    pass
+
 class GeoRSSUnsupportedException(KnownException):
     pass
 
@@ -48,6 +52,7 @@ ERROR_MAPPINGS = [
     (SORT_KEY_ERR_MSGS, SortKeyRequiredException),
     (INVALID_PROP_NAME_ERR_MSGS, InvalidSortKeyException),
     (WFS_DISABLED_ERR_MSGS, WFSUnsupportedException),
+    (SERVICE_DISABLED_ERR_MSGS, ServiceUnsupportedException),
     (ZERO_AREA_ERR_MSGS, ZeroAreaException),
     (KML_NOT_SUPPORTED_MSGS, KMLUnsupportedException),
     (GEORSS_NOT_SUPPORTED_MSGS, GeoRSSUnsupportedException),
