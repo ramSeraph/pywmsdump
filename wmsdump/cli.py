@@ -32,7 +32,7 @@ req_params = {}
 
 def setup_logging(log_level):
     from colorlog import ColoredFormatter
-    formatter = ColoredFormatter("%(log_color)s%(asctime)s [%(levelname)-5s][%(process)d][%(threadName)s] %(message)s",
+    formatter = ColoredFormatter("%(log_color)s%(asctime)s [%(levelname)-5s] %(message)s",
                                  datefmt='%Y-%m-%d %H:%M:%S',
                                  reset=True,
                                  log_colors={
