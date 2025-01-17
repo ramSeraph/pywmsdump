@@ -96,7 +96,6 @@ def combine_features(feats):
 
 def georss_extract_features(xml_text):
     # deal with some xml/unicode messups
-    # TODO: add a test case for this?
     xml_text = re.sub(r'&#([a-zA-Z0-9]+);?', r'[#\1;]', xml_text)
 
     data = xmltodict.parse(xml_text)
@@ -123,7 +122,6 @@ def georss_extract_features(xml_text):
     # combine them into one feature where possible
     # the assumption here is that.. they show up in the same batch and that
     # the properties dict for the split pieces is empty
-    # TODO: how are polygons with inner rings represented?
     feats = combine_features(feats)
 
     return feats
