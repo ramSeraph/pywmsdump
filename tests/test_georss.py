@@ -4,7 +4,10 @@ from unittest import TestCase
 from pathlib import Path
 
 from wmsdump.georss_helper import georss_extract_features
-from wmsdump.errors import LayerMissingException, GeoRSSUnsupportedException
+from wmsdump.errors import (
+    LayerMissingException, GeoRSSUnsupportedException,
+    SortKeyRequiredException
+)
 
 class TestGeorssParsing(TestCase):
     def setUp(self):
@@ -49,7 +52,15 @@ class TestGeorssParsing(TestCase):
         with self.assertRaises(LayerMissingException):
             georss_extract_features(xml_txt)
 
+    def test_need_sort_key(self):
+        xml_txt = self.load_file('missing_sort_key.xml')
+        with self.assertRaises(SortKeyRequiredException):
+            georss_extract_features(xml_txt)
+
     def test_georss_no_support(self):
         xml_txt = self.load_file('georss_no_support.xml')
         with self.assertRaises(GeoRSSUnsupportedException):
             georss_extract_features(xml_txt)
+
+    def test_merge_polygons(self):
+        self.match_output('georss_merge_polygons.xml', 'georss_merge_polygons.geojsonl')

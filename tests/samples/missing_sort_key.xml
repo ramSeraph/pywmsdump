@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE ServiceExceptionReport SYSTEM "http://tngis.tn.gov.in:80/geoserver/schemas/wms/1.1.1/WMS_exception_1_1_1.dtd"> <ServiceExceptionReport version="1.1.1" >   <ServiceException>
+      java.lang.RuntimeException: java.io.IOException
+java.io.IOExceptionCannot do natural order without a primary key, please add it or specify a manual sort over existing attributes
+</ServiceException></ServiceExceptionReport>
