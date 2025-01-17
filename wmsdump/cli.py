@@ -514,12 +514,12 @@ def extract(layername, output_file, output_dir,
                 type=click.Path(), required=True)
 @click.argument('output-file',
                 type=click.Path(), required=False)
-@click.option('--index-in-mem',
-              is_flag=True, default=False, show_default=True,
+@click.option('--index-in-mem/--no-index-in-mem',
+              is_flag=True, default=True, show_default=True,
               help='whether the spatial index keeps the geometry data in memory '
                    'or just keeps the offset of the features on disk. For large '
                    'data keeping evrything in memory might lead to running out of'
-                   ' RAM')
+                   ' available memory')
 @click.option('--keep-map-file',
               is_flag=True, default=False, show_default=True,
               help='Whether to delete the hole map temporary file, might help with'
