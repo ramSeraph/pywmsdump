@@ -5,10 +5,12 @@ from pathlib import Path
 
 from graphlib import TopologicalSorter
 
+import numpy as np
 import shapely
 from shapely.geometry import shape, mapping
-from shapely import prepare, unary_union
-from rtree import index
+from shapely import unary_union
+
+from geoindex_rs import rtree as rt
 
 logger = logging.getLogger(__name__)
 
@@ -21,124 +23,155 @@ def fix_if_required(p):
     return p
 
 
+def get_polygons(feat):
+    s = shape(feat['geometry'])
+    if s.geom_type not in ['Polygon', 'MultiPolygon']:
+        return None
+    s = fix_if_required(s)
+    if s.geom_type == 'Polygon':
+        return [s]
+    ps = list(s.geoms)
+    return [ fix_if_required(p) for p in ps ]
+
 class FileReader:
     def __init__(self, fname,
-                 use_offset=True):
+                 maintain_map=True,
+                 use_offset=False):
         self.file = fname
         self.count = 0
+        self.maintain_map = maintain_map
         self.use_offset = use_offset
         self.idx_map = {}
+        self.offset_map = {}
+        self.idx_arr = []
+        self.tree = None
+
+    def iter_features(self, f):
+        while True:
+            line = f.readline()
+            if line == '':
+                break
+            feat = json.loads(line)
+            self.count += 1
+            yield feat, f.tell()
 
     def __iter__(self):
         with open(self.file, 'r') as f:
-            if self.use_offset:
-                self.idx_map[self.count] = 0
-            while True:
-                line = f.readline()
-                self.count += 1
-                if self.use_offset:
-                    self.idx_map[self.count] = f.tell()
-                if line == '':
-                    break
-                feat = json.loads(line)
+            for feat, _ in self.iter_features(f):
                 yield feat
+
+    def populate_spatial_index(self):
+        logger.info('creating index')
+        xmin = []
+        ymin = []
+        xmax = []
+        ymax = []
+        with open(self.file, 'r') as f:
+            if self.maintain_map and self.use_offset:
+                self.offset_map[self.count] = 0
+            for feat, pos in self.iter_features(f):
+                if self.count % BSIZE == 0:
+                    logger.info(f'{self.count} records collected to add to index')
+                ps = get_polygons(feat)
+                if ps is None:
+                    continue
+                for pi,p in enumerate(ps):
+                    if self.maintain_map:
+                        idx = (self.count - 1, pi)
+                        self.idx_arr.append(idx)
+                        if not self.use_offset:
+                            self.idx_map[idx] = p
+                        else:
+                            self.offset_map[self.count] = pos
+                    b = p.bounds
+                    xmin.append(b[0])
+                    ymin.append(b[1])
+                    xmax.append(b[2])
+                    ymax.append(b[3])
+        
+        xmin = np.array(xmin, dtype=np.float32)
+        ymin = np.array(ymin, dtype=np.float32)
+        xmax = np.array(xmax, dtype=np.float32)
+        ymax = np.array(ymax, dtype=np.float32)
+        
+        builder = rt.RTreeBuilder(num_items=len(xmin))
+        builder.add(xmin, ymin, xmax, ymax)
+        tree = builder.finish()
+        self.tree = tree
+
+    def get_contained_polygons(self, s):
+        if self.tree is None:
+            raise Exception('index not built')
+
+        b = s.bounds
+        results = rt.search(self.tree, *b)
+        results = results.to_pylist()
+        out = []
+        for i in results:
+            mi, mpi = self.idx_arr[i]
+            mp = self.get(mi, mpi)
+            if shapely.contains_properly(s, mp):
+                out.append((mi, mpi, mp))
+        return out
 
     def get(self, n, pi):
         if n >= self.count:
             return None
-        if not self.use_offset:
+
+        if not self.maintain_map:
             return None
 
+        if not self.use_offset:
+            return self.idx_map[(n,pi)]
+
         with open(self.file, 'r') as f:
-            f.seek(self.idx_map[n])
+            f.seek(self.offset_map[n])
             line = f.readline()
             feat = json.loads(line)
-            s = shape(feat['geometry'])
-            if s.geom_type not in ['Polygon', 'MultiPolygon']:
-                return None
 
-            ps = []
-            if s.geom_type == 'Polygon':
-                ps.append(s)
-            else:
-                ps.extend(list(s.geoms))
+            ps = get_polygons(feat)
+            if ps is None:
+                return None
 
             if pi >= len(ps):
                 return None
 
-            mp = ps[pi]
-            mp = fix_if_required(mp)
-            if not mp.is_valid:
-                props = feat['properties']
-                logger.info(f'invalid geometry even after buffer for {n=}, {pi=}, {props=}')
- 
-            return mp
+            return ps[pi]
 
 BSIZE = 10000
 
-def idx_gen(reader, full_poly_map):
-    logger.info('adding features to index')
-    for feat in reader:
-        s = shape(feat['geometry'])
-        if s.geom_type not in ['Polygon', 'MultiPolygon']:
-            continue
-        ps = []
-        if s.geom_type == 'Polygon':
-            ps.append(s)
-        else:
-            ps.extend(list(s.geoms))
-
-        i = reader.count - 1
-        tot_count = 0
-        if (i + 1) % BSIZE == 0:
-            logger.info(f'added {i + 1} features')
-        for pi, p in enumerate(ps):
-            p = fix_if_required(p)
-            if not p.is_valid:
-                props = feat['properties']
-                logger.error(f'invalid geometry even after buffer for {props}')
-            if not reader.use_offset:
-                full_poly_map[(i,pi)] = p
-            yield (tot_count, p.bounds, (i,pi))
-            tot_count += 1
-
-def deserialize_hole_map(json_str):
+def deserialize_enclosing_map(json_str):
     data = json.loads(json_str)
-    hole_map = {}
+
+    enclosing_map = {}
     for k, v in data.items():
         parts = k.split('_')
-        hole_map[(int(parts[0]), int(parts[1]))] = [ tuple(m) for m in v ]
+        enclosing_map[(int(parts[0]), int(parts[1]))] = [ tuple(m) for m in v ]
 
-    return hole_map
+    return enclosing_map
 
-def serialize_hole_map(hole_map):
+def serialize_enclosing_map(enclosing_map):
     out = {}
-    for k, v in hole_map.items():
+    for k, v in enclosing_map.items():
         out[f'{k[0]}_{k[1]}'] = v
     return json.dumps(out)
 
-def get_poly_map_from_file(inp_fname, all_polys):
+def get_poly_map_from_file(inp_fname, involved_poly_idxs):
     pmap = {}
-    r = FileReader(inp_fname, use_offset=False)
+    r = FileReader(inp_fname, maintain_map=False)
     logger.info('Collecting polygons involved in corrections')
     for feat in r:
-        s = shape(feat['geometry'])
-        if s.geom_type not in ['Polygon', 'MultiPolygon']:
+        ps = get_polygons(feat)
+        if ps is None:
             continue
-        ps = []
-        if s.geom_type == 'Polygon':
-            ps.append(s)
-        else:
-            ps.extend(list(s.geoms))
 
         i = r.count - 1
         if (i + 1) % BSIZE == 0:
             logger.info(f'read {i + 1} features')
 
         for pi, p in enumerate(ps):
-            if (i, pi) not in all_polys:
+            if (i, pi) not in involved_poly_idxs:
                 continue
-            p = fix_if_required(p)
             if not p.is_valid:
                 props = feat['properties']
                 logger.error(f'invalid geometry even after buffer for {props}')
@@ -147,94 +180,86 @@ def get_poly_map_from_file(inp_fname, all_polys):
     return pmap
 
 
-def get_hole_map_file(inp_fname):
-    return Path(f'{inp_fname}.hole_map.json')
+def get_enclosing_map_file(inp_fname):
+    return Path(f'{inp_fname}.enclosing_map.json')
 
-def get_hole_map(inp_fname, use_offset):
-    hole_map_file = get_hole_map_file(inp_fname)
-    if hole_map_file.exists():
-        hole_map = deserialize_hole_map(hole_map_file.read_text())
-        all_polys = set()
-        for k, v in hole_map.items():
-            all_polys.add(k)
+def get_enclosing_map(inp_fname, use_offset):
+    enclosing_map_file = get_enclosing_map_file(inp_fname)
+    if enclosing_map_file.exists():
+        enclosing_map = deserialize_enclosing_map(enclosing_map_file.read_text())
+        involved_poly_idxs = set()
+
+        for k, v in enclosing_map.items():
+            involved_poly_idxs.add(k)
             for m in v:
-                all_polys.add(m)
-        pmap = get_poly_map_from_file(inp_fname, all_polys)
-        return hole_map, pmap
+                involved_poly_idxs.add(m)
+        pmap = get_poly_map_from_file(inp_fname, involved_poly_idxs)
+        return enclosing_map, pmap
 
-    full_poly_map = {}
     r1 = FileReader(inp_fname, use_offset=use_offset)
-    idx = index.Index(idx_gen(r1, full_poly_map))
+    r1.populate_spatial_index()
 
     pmap = {}
-    hole_map = {}
-    r2 = FileReader(inp_fname, use_offset=False)
-    logger.info('Looking for holes')
+    enclosing_map = {}
+    r2 = FileReader(inp_fname, maintain_map=False)
+    logger.info('Looking for polygons enclosing other polygons')
     for feat in r2:
         i = r2.count - 1
         if (i + 1) % BSIZE == 0:
-            logger.info(f'done handling {i + 1} features checking for holes')
+            logger.info(f'done handling {i + 1} features checking for enclosings')
 
-        s = shape(feat['geometry'])
-        if s.geom_type not in ['Polygon', 'MultiPolygon']:
+        ps = get_polygons(feat)
+        if ps is None:
             continue
-        ps = []
-        if s.geom_type == 'Polygon':
-            ps.append(s)
-        else:
-            ps.extend(list(s.geoms))
 
         for pi, p in enumerate(ps):
-            items = list(idx.intersection(s.bounds, objects='raw'))
-            for item in items:
-                mi, mpi = item
-                if use_offset:
-                    mp = r1.get(mi, mpi)
-                else:
-                    mp = full_poly_map[(mi,mpi)]
+            p = fix_if_required(p)
+            contained_items = r1.get_contained_polygons(p)
+            for item in contained_items:
+                mi, mpi, mp = item
+                h = (i,pi)
+                if h not in pmap:
+                    pmap[h] = p
+                if h not in enclosing_map:
+                    enclosing_map[h] = []
+                enclosing_map[h].append((mi,mpi))
+                pmap[(mi,mpi)] = mp
 
-                if shapely.contains_properly(p, mp):
-                    h = (i,pi)
-                    if h not in pmap:
-                        if not p.is_valid:
-                            p = p.buffer(0)
-                        pmap[h] = p
-                    if h not in hole_map:
-                        hole_map[h] = []
-                    hole_map[h].append((mi,mpi))
-                    pmap[(mi,mpi)] = mp
-    hole_map_file.write_text(serialize_hole_map(hole_map))
-    return hole_map, pmap
+    enclosing_map_file.write_text(serialize_enclosing_map(enclosing_map))
+    return enclosing_map, pmap
 
-def prune_hole_map(hole_map):
-    reverse_hole_map = {}
-    for k, v in hole_map.items():
+def prune_enclosing_map(enclosing_map):
+    reverse_enclosing_map = {}
+    for k, v in enclosing_map.items():
         for c in v:
-            if c not in reverse_hole_map:
-                reverse_hole_map[c] = []
-            reverse_hole_map[c].append(k)
+            if c not in reverse_enclosing_map:
+                reverse_enclosing_map[c] = set()
+            reverse_enclosing_map[c].add(k)
+    for k in enclosing_map.keys():
+        enclosing_map[k] = set(enclosing_map[k])
 
-    new_hole_map = {}
-    for k, v in hole_map.items():
-        new_hole_map[k] = []
+    new_enclosing_map = {}
+    for k, v in enclosing_map.items():
+        new_enclosing_map[k] = []
         for c in v:
-            parents = reverse_hole_map.get(c, [])
+            parents = reverse_enclosing_map.get(c, set())
             parent_already_there = False
             for p in parents:
                 if p in v:
                     parent_already_there = True
                     break
             if not parent_already_there:
-                new_hole_map[k].append(c)
+                new_enclosing_map[k].append(c)
 
-    return new_hole_map
+    return new_enclosing_map
 
-def get_replacements(hole_map, pmap):
-    logger.info('processing hole map')
-    hole_map = prune_hole_map(hole_map)
+def get_replacements(enclosing_map, pmap):
+    logger.info('pruning enclosing map to only keep closest enclosing polygons in hierarchy')
+    enclosing_map = prune_enclosing_map(enclosing_map)
 
+    logger.info('topologically sorting enclosing map to determine order of hole punching')
     topo_sorter = TopologicalSorter()
-    for k,v in hole_map.items():
+    for k,v in enclosing_map.items():
         for c in v:
             topo_sorter.add(c,k)
 
@@ -244,16 +269,16 @@ def get_replacements(hole_map, pmap):
         ordering[n] = count
         count += 1
 
-    sorted_keys = sorted(hole_map.keys(), key=lambda x: ordering[x])
+    sorted_keys = sorted(enclosing_map.keys(), key=lambda x: ordering[x])
 
     replacements = {}
     count = 0
-    logger.info('creating replacement polygons')
+    logger.info('creating replacement polygons with holes')
     for k in sorted_keys:
         count += 1
         if count % BSIZE == 0:
             logger.info(f'created {count} replacement polygons')
-        holes = hole_map[k]
+        holes = enclosing_map[k]
         p = pmap[k]
         hps = [ pmap[h] for h in holes ]
         hp_union = unary_union(hps)
@@ -269,17 +294,11 @@ def get_replacements(hole_map, pmap):
 def write_fixed_file(outp_fname, inp_fname, replacements):
     logger.info(f'writing features to {outp_fname}')
     with open(outp_fname, 'w') as f:
-        r3 = FileReader(inp_fname, use_offset=True)
+        r3 = FileReader(inp_fname, maintain_map=False)
         count = 0
         for feat in r3:
-            s = shape(feat['geometry'])
-            if s.geom_type in [ 'Polygon', 'MultiPolygon' ]:
-                ps = []
-                if s.geom_type == 'Polygon':
-                    ps.append(s)
-                else:
-                    ps.extend(list(s.geoms))
-
+            ps = get_polygons(feat)
+            if ps is not None:
                 has_changes = False
                 out = []
                 for pi in range(len(ps)):
@@ -303,16 +322,16 @@ def write_fixed_file(outp_fname, inp_fname, replacements):
 
 def punch_holes(inp_fname, outp_fname, use_offset=True, keep_map_file=False):
 
-    hole_map, pmap = get_hole_map(inp_fname, use_offset)
-    logger.info(f'{len(hole_map)} polygons affected')
+    enclosing_map, pmap = get_enclosing_map(inp_fname, use_offset)
+    logger.info(f'{len(enclosing_map)} polygons affected')
 
-    replacements = get_replacements(hole_map, pmap)
+    replacements = get_replacements(enclosing_map, pmap)
 
     write_fixed_file(outp_fname, inp_fname, replacements)
 
-    hole_map_file = get_hole_map_file(inp_fname)
-
     if keep_map_file:
         return
-    if hole_map_file.exists():
-        hole_map_file.unlink()
+
+    enclosing_map_file = get_enclosing_map_file(inp_fname)
+    if enclosing_map_file.exists():
+        enclosing_map_file.unlink()

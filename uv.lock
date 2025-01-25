@@ -2,6 +2,39 @@ version = 1
 requires-python = ">=3.12"
 
 [[package]]
+name = "arro3-core"
+version = "0.4.5"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6d/de/4d70416eefb82cf1ee30e8e76814877664229293c9621e454e7adbc2af78/arro3_core-0.4.5-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:50495e2b643d390ac967a533ad181a497be7e3bfa91414cee12d4bb345c7e19f", size = 2369336 },
+    { url = "https://files.pythonhosted.org/packages/60/66/2b8b5f74859fd5acb0e6df466ceb3fd7b01fdf361f6603fcceebcfcfc54b/arro3_core-0.4.5-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:550dd93c44f2462519c85e30bf88ab71dcada4c4ddf0cbef72cc016200479ea0", size = 2132754 },
+    { url = "https://files.pythonhosted.org/packages/dc/59/b4845d5984ff126b146caf3b9fbe603e39e96703d48a19f21424041c35c8/arro3_core-0.4.5-cp312-cp312-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:0d1f13ad10440066cd7d951c6796d2e30bca558dcedd9f70622a5f4540b70d7f", size = 2654942 },
+    { url = "https://files.pythonhosted.org/packages/65/41/c890766a4a25928c12a1e45996aa70a5c79eecd2ab71c5e6ad8f317702a7/arro3_core-0.4.5-cp312-cp312-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:3645ac0bea6d6e146998153b1bbc17cb7b94708ef51097d318d9fa23bb895098", size = 2508820 },
+    { url = "https://files.pythonhosted.org/packages/15/af/5753cfa8f1b2bd9bec9e6f4cc597f39f9ab4aa59bd78067187849a5c41bb/arro3_core-0.4.5-cp312-cp312-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:113f658be221f5b1875905988fe73f265cf5ac2d0d551edaf8a377233b691c4f", size = 3546579 },
+    { url = "https://files.pythonhosted.org/packages/dd/68/0f1b5a05f29d5aeef7c20d646d8598eaba08d19da9b195e0effe85ec5183/arro3_core-0.4.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f7cbc6b7577e4c2bcca980db23e0be986d6889e3ef322c85f35c4cd8af210d2c", size = 2485782 },
+    { url = "https://files.pythonhosted.org/packages/3c/a6/fa62a6af2e18232498e72f594d774855c3679c49f12954958f8531bcf30d/arro3_core-0.4.5-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:d8e61a591f2f63c610fda80a9e10e1541674a3e582daaa3cedac351d10033af1", size = 2338831 },
+    { url = "https://files.pythonhosted.org/packages/44/c9/99ce2eb3840ac02d9070206f37c4e5fd4ffb161dc5808ff4dd35b62e9e97/arro3_core-0.4.5-cp312-cp312-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:c3b47354ff584e9b129ad9c9f73552e2d15144081d6c05cd8244be59da1afda9", size = 2679555 },
+    { url = "https://files.pythonhosted.org/packages/0c/fa/5cf21ac70a445c01869d64b8204fc84d61bcfebcf51851f2aa7d8bf5253c/arro3_core-0.4.5-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:b69447fd9725c8c9b40d29a3149b44736e5e5993a048ee5980509713ede0cdb7", size = 2478985 },
+    { url = "https://files.pythonhosted.org/packages/89/78/58e6cbc9acade1e5d7d019a10b8ce438125a45ada4cc55df7fab7f18e79b/arro3_core-0.4.5-cp312-cp312-musllinux_1_2_armv7l.whl", hash = "sha256:ef90c5cdf31a68eb98da024700096fe77a47fe4a1de24312cd8cf3472868e529", size = 2916793 },
+    { url = "https://files.pythonhosted.org/packages/57/0f/1af0878d6ed28cc7251b655badeab8a3bb12d3e1ada7b0c044b3addad873/arro3_core-0.4.5-cp312-cp312-musllinux_1_2_i686.whl", hash = "sha256:e04504728f880c775e58abda44914e04e94d1bc8536da5ff3d2ca2ba77bef7bc", size = 2764614 },
+    { url = "https://files.pythonhosted.org/packages/82/11/518aba36c488e32b94b231118530a4e8e328555944664c85a5977b55f16d/arro3_core-0.4.5-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:71278f35bee941324581a19b3de6d444e45f17358692a7920932ff7a9aeb390b", size = 2659801 },
+    { url = "https://files.pythonhosted.org/packages/c1/dd/ae9ad933a10928431f728112ec9e4267fce7db61f87106a1bf938f24b666/arro3_core-0.4.5-cp312-cp312-win_amd64.whl", hash = "sha256:6cd0552dacaba312c87f6062e6e6f5d707ca29eeab82f3d4d957b341d536ab87", size = 2356558 },
+    { url = "https://files.pythonhosted.org/packages/d8/e2/6497744aeb2f0360592bf753eef3b3c9ae10b48b598279d3ef496924373c/arro3_core-0.4.5-cp313-cp313-macosx_10_12_x86_64.whl", hash = "sha256:db802a712a68a4bfc6ab167962ccf8fc2170569f6232993545958562bd48937f", size = 2368914 },
+    { url = "https://files.pythonhosted.org/packages/d0/2d/546030085123e80e849575a222b307e5a45608453a54368bfafe644d6492/arro3_core-0.4.5-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:5465c828b3e0093e68cc96fe845a75263dd4b89e9864086614147bf778112c87", size = 2132271 },
+    { url = "https://files.pythonhosted.org/packages/9a/58/3760815ee9b1a769f22bba4705b5a84a0cb020415201e97c97d4142ac375/arro3_core-0.4.5-cp313-cp313-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:89a64014998c7bced9ee84e5b33c47096670f2a5d4250c9beb3aebbe70f64071", size = 2654427 },
+    { url = "https://files.pythonhosted.org/packages/77/1b/20a25dbb5debf2a358130cacab0f66815384db6ed0fe2e761a59ee48d2bf/arro3_core-0.4.5-cp313-cp313-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:8acb6cce103dfb56cdf69ba6a6471ba4beea062b2df7a0c061a6e04414ab42f6", size = 2508290 },
+    { url = "https://files.pythonhosted.org/packages/2a/e7/877c88d1d797ab07a7293082214c52883927625594dce23094634aa72e87/arro3_core-0.4.5-cp313-cp313-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:dd82248bbd7971e73c5acdd42e3efbfee141413086c0ec6d9f527818fd17300c", size = 3554592 },
+    { url = "https://files.pythonhosted.org/packages/6c/9d/698dd7c5a56197b9458f390840d8596dea65cb62bcbffdac8e8a40512398/arro3_core-0.4.5-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bb1d703238cd10ee52314b71620897a6830769128f8f665179778e773e2a7e18", size = 2485344 },
+    { url = "https://files.pythonhosted.org/packages/11/96/60758cc7b7dbc9f52a55d81f973c6d3d6666038f993c37e06c8ae1ebb078/arro3_core-0.4.5-cp313-cp313-manylinux_2_28_aarch64.whl", hash = "sha256:790bccb515dcd015d0f04128423f312ab6adaf226573f07bcd768c8af46f5814", size = 2338545 },
+    { url = "https://files.pythonhosted.org/packages/c8/57/62b8443d8d7fe4dd8c4f5a90f2fad1b844ef7822966e9d6e5e0a5369a0f5/arro3_core-0.4.5-cp313-cp313-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:8639e08e6f289976420c728572b97c60d339e4577568d4b148d962bd16f14e19", size = 2679301 },
+    { url = "https://files.pythonhosted.org/packages/ef/85/def91d17cc77d8f5e37bd1b90be54aa74403f9f1eb0b9a840f367a792a7e/arro3_core-0.4.5-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:e79129ed90b32159b627c25040222f6ab987aee347b1b942d4743d1bb6d27f1a", size = 2478468 },
+    { url = "https://files.pythonhosted.org/packages/ea/36/e58dce0cd997758af9188f7085614ea8852ee5f0c13960579a658a5a39bc/arro3_core-0.4.5-cp313-cp313-musllinux_1_2_armv7l.whl", hash = "sha256:53c7568699d185f3f75c39c4e476b5c871c461e4956769e627acdacdb1199951", size = 2916412 },
+    { url = "https://files.pythonhosted.org/packages/c4/a6/9719dee21ec18a5556d5faa7bd15fac4249fe5b270bfc974afbe8e3782cc/arro3_core-0.4.5-cp313-cp313-musllinux_1_2_i686.whl", hash = "sha256:aa057de5d3f5e3624f1c4d4be924f42def0f96fb67673ff4cfb1bddc57ce5824", size = 2764217 },
+    { url = "https://files.pythonhosted.org/packages/b0/e6/be087204b946059e8ae1276f8a557112cb8d47a5f4255f8fdf87b4ecca32/arro3_core-0.4.5-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:f8260cd4bffded2245718e011c595b1236e682863e7f8adcc0b3029272da34fe", size = 2659439 },
+    { url = "https://files.pythonhosted.org/packages/8b/ec/eedb545901b067a0de06dc4fe2d1d21ce439fed1e7f0aca2d3ca87f5459c/arro3_core-0.4.5-cp313-cp313-win_amd64.whl", hash = "sha256:fa90beff5023f02836a9943702cf4e258b112ae05edac6c7f6fffad1fa1ea3ed", size = 2356197 },
+]
+
+[[package]]
 name = "attrs"
 version = "24.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -87,7 +120,7 @@ name = "click"
 version = "8.1.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "platform_system == 'Windows'" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de", size = 336121 }
 wheels = [
@@ -113,6 +146,44 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/d3/7a/359f4d5df2353f26172b3cc39ea32daa39af8de522205f512f458923e677/colorlog-6.9.0.tar.gz", hash = "sha256:bfba54a1b93b94f54e1f4fe48395725a3d92fd2a4af702f6bd70946bdc0c6ac2", size = 16624 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e3/51/9b208e85196941db2f0654ad0357ca6388ab3ed67efdbfc799f35d1f83aa/colorlog-6.9.0-py3-none-any.whl", hash = "sha256:5906e71acd67cb07a71e779c47c4bcb45fb8c2993eebe9e5adcd6a6f1b283eff", size = 11424 },
+]
+
+[[package]]
+name = "geoindex-rs"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "arro3-core" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d4/98/011f7347c3957672dfc332653ee508dac628c6c124937c9b53900bbe7713/geoindex_rs-0.2.0-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:2d3ba8b75f6bdb2d6bdac6a0c16fd0d7465001657ee258f5bf122aaacaf791cf", size = 2024523 },
+    { url = "https://files.pythonhosted.org/packages/72/f4/c6172b3aa8420c920ad9327e2ac49f130290ce79432491a9cd0e0c7f2e00/geoindex_rs-0.2.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:58c8c9172cd7e70a0f6f344a5d56d9252192ed0096e9629023dbb629ee302851", size = 1811045 },
+    { url = "https://files.pythonhosted.org/packages/f5/7e/dd574bed667e38bc5ee88b9f785fd45cbd5c4f149c58836b13a5a395d32f/geoindex_rs-0.2.0-cp312-cp312-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:9ffa092c11bdab82d0da8f76c6cb050936306feeafdfe6a32be3323810954f3d", size = 2325905 },
+    { url = "https://files.pythonhosted.org/packages/92/1e/7eb26ee612a29129aba2680749f3b3bf478acb846347cf1efbf7f2e5a87b/geoindex_rs-0.2.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:79f9fdf4f69ae932e50d6f5485dbee759eb2033c18593030e2ece7988fdf0e01", size = 2005356 },
+    { url = "https://files.pythonhosted.org/packages/f8/5b/4f833f7b7b54acda5f215500b214391fa24333627c9641650aceac602ccf/geoindex_rs-0.2.0-cp312-cp312-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:44790001977672ad45d683fdb38525f43bc54b1c19b9c740f2b680f881f5e646", size = 2313495 },
+    { url = "https://files.pythonhosted.org/packages/48/02/a71a63d5dcf4d55957530b30cfea8d01442422f1460a9ac062eb23b3967a/geoindex_rs-0.2.0-cp312-cp312-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:2dbe9c08e8d69c59ce0bb7f92a0fdf6d5fc1b1324fcc4678e1113d7585d6c1ab", size = 2167804 },
+    { url = "https://files.pythonhosted.org/packages/88/97/2cefe60a5f2946a22203fb86fdd1e0721ed6aa853a1b0a4c317b3e73d744/geoindex_rs-0.2.0-cp312-cp312-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:4abb54c1765a28e4d7d47ac991199c434f16e5773855edc456336aeaaf7d8b9b", size = 2998754 },
+    { url = "https://files.pythonhosted.org/packages/bc/a2/7decdc58e58ee07d5407b7a41cf93e0e799e44a74487888660964807c057/geoindex_rs-0.2.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:524ab7425d43b8614c6a3d34a3a5cc55a6b325d27f258fa71f974cc3ae275fa7", size = 2160384 },
+    { url = "https://files.pythonhosted.org/packages/17/b7/d93fc8f6bfab8de67fd9e0a4a47737f0e016d253c6137ef1bad95319a30d/geoindex_rs-0.2.0-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:ea8e7ca8f728dfbf3c44e5a5a529758d3597d102c23952dc027d750bded42f32", size = 2152984 },
+    { url = "https://files.pythonhosted.org/packages/fd/c6/a7ec0a3022b4b7031833cc227c1423ae5727743acf259ad6c78d5f801b4f/geoindex_rs-0.2.0-cp312-cp312-musllinux_1_2_armv7l.whl", hash = "sha256:06e6e9b125376460ee3f1fde902d7fdd2748dfbffac086970d60d0777fa666fa", size = 2577168 },
+    { url = "https://files.pythonhosted.org/packages/26/6d/501d3a2e9c928cb267b7751a14abafc26c0a0fcdc740673b3e63c66a99d5/geoindex_rs-0.2.0-cp312-cp312-musllinux_1_2_i686.whl", hash = "sha256:2d2f1619529cf7c91c52608b214005378ae0e0bef2e93a6712933c08ec0c6e0f", size = 2416740 },
+    { url = "https://files.pythonhosted.org/packages/42/da/9853afda4d467ec78a1eaa171cb78fc898718e24b71d50ec787b3542cc04/geoindex_rs-0.2.0-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:a72c36fba12d367c728214713c56e7db97f088e44c01cd4c6d0812c34ddcb6f3", size = 2326997 },
+    { url = "https://files.pythonhosted.org/packages/f9/9e/27b6305d034864153f325b26d3b16f638d8f7fc57595f5c2b064b469ddb4/geoindex_rs-0.2.0-cp312-cp312-win32.whl", hash = "sha256:3321fbb0cc0848b8135a30a5b88ac7b7ca4deeb7a551b3d387d7b2c24b31037d", size = 1895925 },
+    { url = "https://files.pythonhosted.org/packages/fc/15/3f945c9d61c6eb01784f7efe5e28d58d27cbba1d328f9505ebf3fd2fa73f/geoindex_rs-0.2.0-cp312-cp312-win_amd64.whl", hash = "sha256:3774346520ea2431628b02c5da6d8124270ced343655bdd2bbb6f16aaff77b86", size = 2030598 },
+    { url = "https://files.pythonhosted.org/packages/53/0a/29984ef83f7a272721ee19bf6ad097745b1844fe90ba4531bb1d44bd7ee8/geoindex_rs-0.2.0-cp313-cp313-macosx_10_12_x86_64.whl", hash = "sha256:f2d7bc9742fb94a6aae3864df2751fa607e9873d8c02028926d5530951e04968", size = 2024075 },
+    { url = "https://files.pythonhosted.org/packages/ef/5c/d62200276e5493e3debcdbbe674db5be783b00aef83dbbc8f720a1dd58ae/geoindex_rs-0.2.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:57ffdf80793380bd2ff45df0b8ff8bd79ac9c0e4986c6dfc6909b41e94677421", size = 1810935 },
+    { url = "https://files.pythonhosted.org/packages/92/de/fd4179dd1eca376009657ff4e8568e291520a31c451f4cfaf6650f9d78bb/geoindex_rs-0.2.0-cp313-cp313-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:cba6f292fa760e6787787e07c3c2c53e31a73c22adf3738d58f196089e6dff48", size = 2325405 },
+    { url = "https://files.pythonhosted.org/packages/d9/9b/2915d14f8510abde9c26ae132680e603cd9a06c9481b92f9d81bbdc14e60/geoindex_rs-0.2.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:3db129ca21edb9f763417b4a52b0f13ff5ce006219e7a00b9c6fb146fe0cb8e9", size = 2004992 },
+    { url = "https://files.pythonhosted.org/packages/90/ea/b96487fdd5568751ef4dc64d7182e6daa15d45b1a713722508605356839d/geoindex_rs-0.2.0-cp313-cp313-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:ae34e622d2695680bdd5a95b5d456bc69fa516a69fcabe308b269ef334685874", size = 2313338 },
+    { url = "https://files.pythonhosted.org/packages/ea/6a/1663293ccd12fe807557bc743537a2d032aa61439f0e21d0dbf5651932af/geoindex_rs-0.2.0-cp313-cp313-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:52a908852f448abd89f85926c51b273abcd5d2ada7918746890d1862ab460f24", size = 2167583 },
+    { url = "https://files.pythonhosted.org/packages/3b/32/31eb1ae2775dd0fc1146c926f9ebabdc0e73c239e9856d7bd19166271952/geoindex_rs-0.2.0-cp313-cp313-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:756eee660909e2fb016264c048b4fc429d590cabb1455263e31161bc8f9cf730", size = 3009824 },
+    { url = "https://files.pythonhosted.org/packages/77/d2/33676baf6706ecda30ef4a3102533e539c93f46d6939850bbbb1a12cf92c/geoindex_rs-0.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4e6a47a9032958c3e99e6cfa87fa0cfb5d14be5cb7546576788090b03292c416", size = 2159646 },
+    { url = "https://files.pythonhosted.org/packages/83/78/c30188cd168b061258c8855558d534d8ce8329444fd93794398026dbce71/geoindex_rs-0.2.0-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:2b2b8a343575b2db410df13245e65e85820ed5d67d2d640b0c8a21827298f1e2", size = 2152362 },
+    { url = "https://files.pythonhosted.org/packages/13/d7/9f27eaeca5e6e2e0ded916bd0268b0a92fe97c23fa721cc57990bcc952f1/geoindex_rs-0.2.0-cp313-cp313-musllinux_1_2_armv7l.whl", hash = "sha256:00a35e6a44f79dc478f5a9b825ab2e25a342db1efd128388a381efa542c17ba5", size = 2576682 },
+    { url = "https://files.pythonhosted.org/packages/45/1e/e3b5562f28d82f55e44ce0f0c6820998e5d5f492689c8facc16e36df2e97/geoindex_rs-0.2.0-cp313-cp313-musllinux_1_2_i686.whl", hash = "sha256:48d998b66ed415e1bcba83f2c6bbe0427cfc818fb105419873713a16b9ec1bb4", size = 2416357 },
+    { url = "https://files.pythonhosted.org/packages/29/34/af3e561b64fcef6390b40f89b7cc8d8e64ad67d6812b19f0c65d8a10e76d/geoindex_rs-0.2.0-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:04f3c4abc8fbde158217b7085525abe69b21b833817c864436590d7aa7a57a11", size = 2326734 },
+    { url = "https://files.pythonhosted.org/packages/68/0f/8a23308de3adfbeafac41ccac1751f9633ba7b41e554591122c7b19573d1/geoindex_rs-0.2.0-cp313-cp313-win32.whl", hash = "sha256:a8eb6c473c6e6847331c99432f3618ac7c7bd6c29ce3e06b808970fc7070391f", size = 1895751 },
+    { url = "https://files.pythonhosted.org/packages/2e/d5/553fe12733d2da68c9e485a33887e93ba34036172391c0def83e609f6e00/geoindex_rs-0.2.0-cp313-cp313-win_amd64.whl", hash = "sha256:8d0f8123ac94d0f18f6f2c2b65815c356435dab659f7a1575efaf5674059dad8", size = 2029888 },
 ]
 
 [[package]]
@@ -342,23 +413,6 @@ wheels = [
 ]
 
 [[package]]
-name = "rtree"
-version = "1.3.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/6e/79/44fdc619e87bd7b5388f76418719bd8b99de5565475f74a2e0d82b401062/rtree-1.3.0.tar.gz", hash = "sha256:b36e9dd2dc60ffe3d02e367242d2c26f7281b00e1aaf0c39590442edaaadd916", size = 48190 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/06/cc/1b494bde9c99a5cf27e980bf36ef99e76abac6316736231007c04e3a7b28/Rtree-1.3.0-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:80879d9db282a2273ca3a0d896c84583940e9777477727a277624ebfd424c517", size = 475526 },
-    { url = "https://files.pythonhosted.org/packages/dd/5b/085d6fad9d45c0cc2acbea5b78c3a2d7f1e7ccc7c05929633461a6a741d8/Rtree-1.3.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:4328e9e421797c347e6eb08efbbade962fe3664ebd60c1dffe82c40911b1e125", size = 432890 },
-    { url = "https://files.pythonhosted.org/packages/12/70/f0553ffb163c47a62c09e4bdc5e0c7fb3392a03cd5a3dbde965aa6a85052/Rtree-1.3.0-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:037130d3ce1fc029de81941ec416ba5546f66228380ba19bb41f2ea1294e8423", size = 500384 },
-    { url = "https://files.pythonhosted.org/packages/4e/92/3c972e534ce0508214b9ed0cfeba03d1e26d193e8fa624131b5324b91b25/Rtree-1.3.0-py3-none-manylinux2014_i686.manylinux_2_17_i686.whl", hash = "sha256:864a05d0c3b7ce6c5e34378b7ab630057603b79179368bc50624258bdf2ff631", size = 569246 },
-    { url = "https://files.pythonhosted.org/packages/70/db/6c8bc20061572c33766ade296071d0127e7365d4d3ff54a6c2c075de637b/Rtree-1.3.0-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:ec2ed6d1635753dab966e68f592a9c4896f3f4ec6ad2b09b776d592eacd883a9", size = 543195 },
-    { url = "https://files.pythonhosted.org/packages/71/2c/5d04fa6010f2d4d4b38078efdc6f371430f499ef2cf7eeced3d18f57daaa/Rtree-1.3.0-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:b4485fb3e5c5e85b94a95f0a930a3848e040d2699cfb012940ba5b0130f1e09a", size = 1416562 },
-    { url = "https://files.pythonhosted.org/packages/b6/63/0a2bee2940a8ba116d845ac8b360e49c315a57aeb4aa92ea12a4cb84eb4f/Rtree-1.3.0-py3-none-musllinux_1_2_i686.whl", hash = "sha256:7e2e9211f4fb404c06a08fd2cbebb03234214f73c51913bb371c3d9954e99cc9", size = 1630693 },
-    { url = "https://files.pythonhosted.org/packages/10/8a/8a50fc8d58807ba5780485ecc502136aa814f6a08e1cce4f9c4f109ba2b4/Rtree-1.3.0-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:c021f4772b25cc24915da8073e553ded6fa8d0b317caa4202255ed26b2344c1c", size = 1506863 },
-    { url = "https://files.pythonhosted.org/packages/85/d2/5bb7617faa3b23b51e2259f9d23e0b33f6ff0ed9811b0d05511e9b7ed84e/Rtree-1.3.0-py3-none-win_amd64.whl", hash = "sha256:97f835801d24c10bbf02381abe5e327345c8296ec711dde7658792376abafc66", size = 377458 },
-]
-
-[[package]]
 name = "shapely"
 version = "2.0.6"
 source = { registry = "https://pypi.org/simple" }
@@ -407,11 +461,12 @@ dependencies = [
     { name = "bs4" },
     { name = "click" },
     { name = "colorlog" },
+    { name = "geoindex-rs" },
     { name = "jsonschema" },
     { name = "kml2geojson" },
+    { name = "numpy" },
     { name = "pyproj" },
     { name = "requests" },
-    { name = "rtree" },
     { name = "shapely" },
     { name = "xmltodict" },
 ]
@@ -426,11 +481,12 @@ requires-dist = [
     { name = "bs4", specifier = ">=0.0.2" },
     { name = "click", specifier = ">=8.1.7" },
     { name = "colorlog", specifier = ">=6.9.0" },
+    { name = "geoindex-rs", specifier = ">=0.2.0" },
     { name = "jsonschema", specifier = ">=4.23.0" },
     { name = "kml2geojson", specifier = ">=5.1.0" },
+    { name = "numpy", specifier = ">=2.2.1" },
     { name = "pyproj", specifier = ">=3.7.0" },
     { name = "requests", specifier = ">=2.32.3" },
-    { name = "rtree", specifier = ">=1.3.0" },
     { name = "shapely", specifier = ">=2.0.6" },
     { name = "xmltodict", specifier = ">=0.14.2" },
 ]
