@@ -7,7 +7,11 @@ from pprint import pformat
 
 import requests
 
-from pyproj import CRS, Transformer
+pyproj_available = True
+try:
+    from pyproj import CRS, Transformer
+except ImportError:
+    pyproj_available = False
 
 from .state import State, Extent
 from .georss_helper import georss_extract_features
@@ -19,7 +23,26 @@ from .errors import (
 
 logger = logging.getLogger(__name__)
 
-def get_global_bounds(crs):
+known_bounds = {
+    'EPSG:4326': { 'xmin': -180.0, 'ymin': -90.0,
+                   'xmax':  180.0, 'ymax':  90.0 },
+    'EPSG:3857': { 'xmin': -20037508.342789244, 'ymin': -20048966.104014598,
+                   'xmax':  20037508.342789244, 'ymax':  20048966.104014598 },
+}
+
+def get_global_bounds(crs_str):
+    if crs_str in list(known_bounds.keys()):
+        return known_bounds[crs_str]
+
+    if not pyproj_available:
+        raise Exception(f'{crs_str} handling requires installing pyproj')
+
+    try:
+        crs = CRS.from_string(crs_str)
+    except Exception:
+        logger.exception(f'{crs_str} is an invalid SRS')
+        raise
+
     transformer = Transformer.from_crs(crs.geodetic_crs, crs, always_xy=True)
     b = transformer.transform_bounds(*crs.area_of_use.bounds)
     return { 'xmin': b[0], 'ymin': b[1], 'xmax': b[2], 'ymax': b[3] } 
@@ -110,13 +133,8 @@ class OGCServiceDumper:
             retrieval_mode == 'EXTENT'
 
         self.out_srs = out_srs
-        try:
-            crs = CRS.from_string(self.out_srs)
-        except Exception:
-            logger.exception(f'{self.out_srs} is an invalid SRS')
-            raise
         if bounds is None:
-            bounds = get_global_bounds(crs)
+            bounds = get_global_bounds(out_srs)
         self.bounds = bounds
 
         self.max_box_dims = max_box_dims

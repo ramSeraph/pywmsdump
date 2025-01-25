@@ -9,7 +9,6 @@ import click
 import requests
 
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from pyproj import CRS
 
 from wmsdump.state import get_state_from_files
 from wmsdump.geoserver import get_layer_list_from_page
@@ -143,7 +142,7 @@ def get_box_dims(b_str):
     return b
 
 
-def get_bounds_from_str(b_str, crs):
+def get_bounds_from_str(b_str, crs_str):
     parts = b_str.split(',')
     if len(parts) != 4:
         raise Exception(f'does not have four parts, expected: {EXPECTED_BOUNDS_FORMAT}')
@@ -157,7 +156,7 @@ def get_bounds_from_str(b_str, crs):
             raise Exception(f'not a number: {part}, expected floating point')
     b = { 'xmin': nos[0], 'ymin': nos[1], 'xmax': nos[2], 'ymax': nos[3] }
 
-    g = get_global_bounds(crs)
+    g = get_global_bounds(crs_str)
             
     if b['xmin'] < g['xmin'] or b['xmin'] > g['xmax']:
         raise Exception(f'Invalid x: xmin: {b["xmin"]}, expected value between {g["xmin"]} and {g["xmax"]}')
@@ -388,18 +387,12 @@ def extract(layername, output_file, output_dir,
             logger.error(f'{layername} is of unexpected format.. has more than one ":"')
             return
 
-    try:
-        crs = CRS.from_string(out_srs)
-    except Exception:
-        logger.exception('invalid out_srs')
-        return
-
     if bounds is None:
-        bounds = get_global_bounds(crs)
+        bounds = get_global_bounds(out_srs)
         logger.info(f'working with bounds: {bbox_to_str(bounds, None)}')
     else:
         try:
-            bounds = get_bounds_from_str(bounds, crs)
+            bounds = get_bounds_from_str(bounds, out_srs)
         except Exception:
             logger.error(f'Invalid bounds string: "{bounds}"')
             return
