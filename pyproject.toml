@@ -8,20 +8,32 @@ dependencies = [
     "bs4>=0.0.2",
     "click>=8.1.7",
     "colorlog>=6.9.0",
-    "geoindex-rs>=0.2.0",
     "jsonschema>=4.23.0",
     "kml2geojson>=5.1.0",
-    "numpy>=2.2.1",
     "requests>=2.32.3",
-    "shapely>=2.0.6",
     "xmltodict>=0.14.2",
 ]
 
 [project.scripts]
 wms-extracter = "wmsdump.cli:main"
-punch-holes = "wmsdump.cli:punch_holes_main"
+punch-holes = "wmsdump.hole_puncher:main [punch-holes]"
+
+[project.optional-dependencies]
+punch-holes = [
+    "geoindex-rs>=0.2.0",
+    "numpy>=2.2.1",
+    "shapely>=2.0.6",
+]
+proj = [
+    "pyproj>=3.7.0",
+]
 
 [dependency-groups]
 dev = [
     "pytest>=8.3.4",
+]
+
+[tool.ruff.lint]
+ignore = [
+    "E402" # Module level import not at top of file
 ]

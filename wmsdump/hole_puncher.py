@@ -7,10 +7,12 @@ from graphlib import TopologicalSorter
 
 import numpy as np
 import shapely
+import click
 from shapely.geometry import shape, mapping
 from shapely import unary_union
-
 from geoindex_rs import rtree as rt
+
+from wmsdump.logging import setup_logging
 
 logger = logging.getLogger(__name__)
 
@@ -335,3 +337,37 @@ def punch_holes(inp_fname, outp_fname, use_offset=True, keep_map_file=False):
     enclosing_map_file = get_enclosing_map_file(inp_fname)
     if enclosing_map_file.exists():
         enclosing_map_file.unlink()
+
+
+@click.command()
+@click.option('--log-level', '-l',
+              type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                                case_sensitive=False),
+              default='INFO', show_default=True,
+              help='set logging level')
+@click.argument('input-file',
+                type=click.Path(), required=True)
+@click.argument('output-file',
+                type=click.Path(), required=False)
+@click.option('--index-in-mem/--no-index-in-mem',
+              is_flag=True, default=True, show_default=True,
+              help='whether the spatial index keeps the geometry data in memory '
+                   'or just keeps the offset of the features on disk. For large '
+                   'data keeping evrything in memory might lead to running out of'
+                   ' available memory')
+@click.option('--keep-map-file',
+              is_flag=True, default=False, show_default=True,
+              help='Whether to delete the hole map temporary file, might help with'
+                   ' debugging')
+def main(log_level, input_file, output_file, index_in_mem, keep_map_file):
+    setup_logging(log_level)
+    if output_file is None:
+        shortname = Path(input_file).name
+        output_file = str(Path(input_file).parent / f'fixed_{shortname}')
+
+    logger.info(f'reading data from {input_file}, will be writing to {output_file}, keeping index in memory: {index_in_mem}')
+    punch_holes(input_file, output_file,
+                use_offset=not index_in_mem,
+                keep_map_file=keep_map_file)
+
+
