@@ -196,8 +196,8 @@ class ExtentState(State):
             self.current_count += 1
             return True
 
-        self.current_count += 1
         self.done[hashed] = [ self.current_count ]
+        self.current_count += 1
         return True
 
     def get_dict(self):

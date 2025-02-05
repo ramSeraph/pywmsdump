@@ -243,6 +243,7 @@ class OGCServiceDumper:
             'feature_count': count,
             'srs': self.out_srs,
             'info_format': 'application/json',
+            'with_geometry': 'true',
             'width': WIDTH,
             'height': WIDTH,
             'styles': '',
@@ -339,6 +340,7 @@ class OGCServiceDumper:
         return self.parse_response_getmap(resp_text)
 
     def parse_bounded_response(self, resp_text):
+        optionally_save_to_file(resp_text)
         if self.operation == 'GetMap':
             return self.parse_response_getmap(resp_text)
 

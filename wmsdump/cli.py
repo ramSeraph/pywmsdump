@@ -84,7 +84,8 @@ class FileWriter:
         with open(self.file, 'r') as f:
             f.seek(self.idx_map[n])
             line = f.readline()
-            return json.loads(line)
+            line = line.strip('\n')
+            return line
 
     def write(self, feat):
         if self.fh is None:
