@@ -49,6 +49,9 @@ def get_global_bounds(crs_str):
 
 
 DEFAULTS = {
+    'retrieval_mode': 'OFFSET',
+    'operation': 'GetMap',
+    'flavor': 'Geoserver',
     'wms_version': '1.1.1',
     'wfs_version': '1.0.0',
     'batch_size': 1000,
@@ -61,7 +64,6 @@ DEFAULTS = {
     'getmap_format': 'KML',
     'kml_strip_point': True,
     'kml_keep_original_props': False,
-    'buffer_field': 'buffer',
 }
 
 def truncate_nested_coordinates(coords, precision):
@@ -92,8 +94,9 @@ class OGCServiceDumper:
 
     def __init__(self, url, layername, service,
                  service_version=None,
-                 retrieval_mode='OFFSET',
-                 operation='GetMap',
+                 retrieval_mode=DEFAULTS['retrieval_mode'],
+                 operation=DEFAULTS['operation'],
+                 flavor=DEFAULTS['flavor'],
                  batch_size=DEFAULTS['batch_size'],
                  out_srs=DEFAULTS['out_srs'],
                  sort_key=None,
@@ -106,7 +109,6 @@ class OGCServiceDumper:
                  getmap_format=DEFAULTS['getmap_format'],
                  kml_strip_point=DEFAULTS['kml_strip_point'],
                  kml_keep_original_props=DEFAULTS['kml_keep_original_props'],
-                 buffer_field=DEFAULTS['buffer_field'],
                  bounds=None,
                  max_box_dims=None,
                  session=None,
@@ -124,6 +126,10 @@ class OGCServiceDumper:
         if self.service == 'WFS':
             operation = 'GetFeature'
         self.operation = operation
+
+        self.flavor = flavor
+        if flavor not in ['Geoserver', 'QGISserver']:
+            raise Exception('flavor should be one of Geoserver or QGISserver')
 
         if retrieval_mode not in ['OFFSET', 'EXTENT']:
             raise Exception('retrieval mode should be one of OFFSET or EXTENSION')
@@ -155,7 +161,6 @@ class OGCServiceDumper:
         self.pause_seconds = pause_seconds
         self.max_attempts = max_attempts
         self.retry_delay = retry_delay
-        self.buffer_field = buffer_field
         self.req_params = req_params
         self.state = state
         if self.state is None:
@@ -252,8 +257,14 @@ class OGCServiceDumper:
             'y': y,
             'i': x,
             'j': y,
-            self.buffer_field: r,
         }
+
+        if self.flavor != 'QGISserver':
+            params['buffer'] = r
+        else:
+            params['FI_LINE_TOLERANCE'] = r
+            params['FI_POINT_TOLERANCE'] = r
+            params['FI_POLYGON_TOLERANCE'] = r
 
         return params
 

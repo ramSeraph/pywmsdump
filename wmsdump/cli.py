@@ -266,14 +266,18 @@ def explore(geoserver_url, service_url, service, service_version, namespace, scr
                    f' \'{DEFAULTS["wms_version"]}\' for WMS and \'{DEFAULTS["wfs_version"]}\' for WFS')
 @click.option('--retrieval-mode', '-m',
               type=click.Choice(['OFFSET', 'EXTENT'], case_sensitive=False),
-              default='OFFSET', show_default=True,
+              default=DEFAULTS['retrieval_mode'], show_default=True,
               help='which method to use to batch record retrieval, OFFSET uses record offset paging, '
                    'EXTENT uses bbox splitting and drilling down by spatial extent, '
                    'when using GetFeatureInfo this will be overriden to EXTENT')
 @click.option('--operation', '-o',
               type=click.Choice(['GetMap', 'GetFeatureInfo'], case_sensitive=False),
-              default='GetMap', show_default=True,
+              default=DEFAULTS['operation'], show_default=True,
               help='which operation to use for querying a WMS endpoint')
+@click.option('--flavor', 
+              type=click.Choice(['Geoserver', 'QGISserver'], case_sensitive=False),
+              default=DEFAULTS['flavor'], show_default=True,
+              help='vendor of the WMS services, useful to specify for GetFeatureInfo based retrieval')
 @click.option('--sort-key', '-k',
               help='key to use to do paged retrieval')
 @click.option('--batch-size', '-b',
@@ -306,9 +310,6 @@ def explore(geoserver_url, service_url, service, service_version, namespace, scr
 @click.option('--kml-keep-original-props/--no-kml-keep-original-props',
               default=DEFAULTS['kml_keep_original_props'], show_default=True,
               help='Whether to keep the original style related props in kml conversion')
-@click.option('--buffer-field', 
-              default=DEFAULTS['buffer_field'], show_default=True,
-              help='name of field to use for buffer to a WMS GetFeatureInfo call')
 @click.option('--out-srs', 
               default=DEFAULTS['out_srs'], show_default=True,
               help='CRS to ask the server to return data in.. '
@@ -325,13 +326,13 @@ def explore(geoserver_url, service_url, service, service_version, namespace, scr
                    'only applicable when using OFFSET based retrieval') 
 def extract(layername, output_file, output_dir,
             geoserver_url, service_url,
-            service, service_version,
+            service, service_version, flavor,
             retrieval_mode, operation, out_srs,
             sort_key, batch_size, geometry_precision, 
             requests_to_pause, pause_seconds, max_attempts,
             getmap_format, kml_strip_point,
             kml_keep_original_props,
-            buffer_field, retry_delay, bounds,
+            retry_delay, bounds,
             max_box_dims, skip_index):
 
     if service_version is None:
@@ -422,6 +423,7 @@ def extract(layername, output_file, output_dir,
                               service_version=service_version,
                               operation=operation,
                               retrieval_mode=retrieval_mode,
+                              flavor=flavor,
                               batch_size=batch_size,
                               sort_key=sort_key,
                               state=state,
@@ -433,7 +435,6 @@ def extract(layername, output_file, output_dir,
                               getmap_format=getmap_format,
                               kml_strip_point=kml_strip_point,
                               kml_keep_original_props=kml_keep_original_props,
-                              buffer_field=buffer_field,
                               out_srs=out_srs,
                               bounds=bounds,
                               max_box_dims=max_box_dims,
