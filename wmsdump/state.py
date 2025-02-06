@@ -308,8 +308,14 @@ def get_state_from_files(state_file, output_file, **params):
             return None
     else:
         state = State.from_dict(**params)
-
-    state.updatecb = lambda s: Path(state_file).write_text(json.dumps(s))
+    
+    def update_file(s):
+        Path(state_file).write_text(json.dumps(s))
+        # to avoid state being written without a output file being present
+        # as the above condition doesn't allow resumption
+        if not Path(output_file).exists():
+            Path(output_file).write_text('')
+    state.updatecb = update_file
 
     return state
 
