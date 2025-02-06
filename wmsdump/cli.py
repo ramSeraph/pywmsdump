@@ -154,6 +154,23 @@ def get_bounds_from_str(b_str, crs_str):
 
     return b
 
+def parse_header(ctx, param, values):
+    """Convert header strings into a dictionary."""
+    headers = {}
+
+    if not values:
+        return headers
+
+    for value in values:
+        try:
+            key, val = value.split(':', 1)
+            headers[key.strip()] = val.strip()
+        except ValueError:
+            raise click.BadParameter(
+                f'Invalid header format: {value}. Use Key:Value format'
+            )
+
+    return headers
 
 @click.group()
 @click.option('--log-level', '-l',
@@ -165,13 +182,20 @@ def get_bounds_from_str(b_str, crs_str):
               is_flag=True, default=False, show_default=True,
               help='switch off ssl verification') 
 @click.option('--request-timeout', '-t', type=int,
-              help='timeout for the http requests') 
-def main(log_level, no_ssl_verify, request_timeout):
+              help='timeout for the http requests')
+@click.option('--header', '-H',
+              multiple=True, callback=parse_header,
+              help='Header in the format "Key:Value". Can be used multiple times.')
+def main(log_level, no_ssl_verify, request_timeout, header):
     setup_logging(log_level)
     req_params['verify'] = not no_ssl_verify
     req_params['timeout'] = request_timeout
     if no_ssl_verify:
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+    if header is not None:
+        req_params['headers'] = header
+
 
 
 @main.command()
@@ -414,7 +438,6 @@ def extract(layername, output_file, output_dir,
 
     if skip_index > 0:
         state.update(skip_index, 0)
-
 
     writer = FileWriter(output_file,
                         keep_idx=(retrieval_mode == 'EXTENT'))
