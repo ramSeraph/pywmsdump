@@ -18,8 +18,9 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
+
+      - name: change to ref
+        run: git checkout ${{ github.ref_name }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
