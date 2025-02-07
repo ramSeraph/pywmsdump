@@ -1,4 +1,4 @@
-# wmsdump
+# wmsdump [![PyPI - Latest Version](https://img.shields.io/pypi/v/wmsdump)](https://pypi.org/project/wmsdump/) [![GitHub Tag](https://img.shields.io/github/v/tag/ramSeraph/pywmsdump?filter=v*)](https://github.com/ramSeraph/pywmsdump/releases/latest)
 
 A library and command-line tool for extracting data from OGC services (WMS, WFS).
 
@@ -34,6 +34,14 @@ A library and command-line tool for extracting data from OGC services (WMS, WFS)
     # Install dependencies using uv
     uv pip install wmsdump
     ```
+
+    You can also use the tools directly by running
+    ```bash
+    uvx --from wmsdump wms-extractor <args>
+    ```
+
+    uv creates a temporary virtualenv and manages your dependencies in this invocation.
+
 
     For the optional `punch-holes` feature( needed for using the punch-holes utility ), use:
 
@@ -71,7 +79,7 @@ wms-extractor --help
 
 *    `--log-level`: Log level. One of DEBUG,INFO,WARNING,ERROR,CRITICAL. Defaults to INFO.
 *    `--no-ssl-verify`: switch off ssl verification for all network calls.
-*    `--request-timeout`: timeout for the http requests in seconds. Deafault is no timeout.
+*    `--request-timeout`: timeout for the http requests in seconds. Default is no timeout.
 *    `--header`: Header to be added to all network requests, in the format "Key:Value". Can be used multiple times.
 
 ### 1. Explore
