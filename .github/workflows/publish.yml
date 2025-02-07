@@ -33,7 +33,7 @@ jobs:
         run: uv build
 
       - name: Publish distribution 
-        uses: uv publish
+        run: uv publish
 
       - name: Sign the dists with Sigstore
         uses: sigstore/gh-action-sigstore-python@v3.0.0
