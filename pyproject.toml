@@ -4,6 +4,9 @@ description = "Library for extraction of data from WMS/WFS endpoints"
 license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.12"
+authors = [
+    { name = "Sreeram Kandimalla", email = "kandimalla.sreeram@gmail.com" },
+]
 dependencies = [
     "bs4>=0.0.2",
     "click>=8.1.7",
@@ -13,7 +16,13 @@ dependencies = [
     "requests>=2.32.3",
     "xmltodict>=0.14.2",
 ]
-dynamic = ["version", "urls"]
+dynamic = [
+    "version"
+]
+
+[project.urls]
+homepage = "https://github.com/ramSeraph/pywmsdump"
+repository = "https://github.com/ramSeraph/pywmsdump.git"
 
 [project.scripts]
 wms-extractor = "wmsdump.cli:main"
@@ -40,7 +49,10 @@ ignore = [
 ]
 
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = [
+    "hatchling",
+    "hatch-vcs"
+]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]
@@ -49,6 +61,6 @@ source = "vcs"
 [tool.hatch.build.hooks.vcs]
 version-file = "wmsdump/_version.py"
 
-[tool.hatch.metadata.hooks.vcs.urls]
-Homepage = "https://github.com/ramSeraph/pywmsdump"
-source_archive = "https://github.com/ramSeraph/pywmsdump/archive/{commit_hash}.zip"
+tool.hatch.build.targets.sdist.include = [
+    "wmsdump"
+]

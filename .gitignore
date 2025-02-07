@@ -1,3 +1,5 @@
 __pycache__
 build
 wmsdump.egg-info
+wmsdump/_version.py
+dist

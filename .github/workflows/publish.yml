@@ -27,6 +27,7 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: uv.lock
+          version: ">=0.5.29"
 
       - name: Set up Python
         run: uv python install
