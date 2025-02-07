@@ -1,7 +1,7 @@
 [project]
 name = "wmsdump"
-version = "0.1.0"
 description = "Library for extraction of data from WMS/WFS endpoints"
+license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -13,9 +13,10 @@ dependencies = [
     "requests>=2.32.3",
     "xmltodict>=0.14.2",
 ]
+dynamic = ["version", "urls"]
 
 [project.scripts]
-wms-extracter = "wmsdump.cli:main"
+wms-extractor = "wmsdump.cli:main"
 punch-holes = "wmsdump.hole_puncher:main [punch-holes]"
 
 [project.optional-dependencies]
@@ -37,3 +38,17 @@ dev = [
 ignore = [
     "E402" # Module level import not at top of file
 ]
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "wmsdump/_version.py"
+
+[tool.hatch.metadata.hooks.vcs.urls]
+Homepage = "https://github.com/ramSeraph/pywmsdump"
+source_archive = "https://github.com/ramSeraph/pywmsdump/archive/{commit_hash}.zip"

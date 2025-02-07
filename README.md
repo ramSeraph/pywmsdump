@@ -63,6 +63,17 @@ A library and command-line tool for extracting data from OGC services (WMS, WFS)
 
 `wmsdump` provides a command-line tool `wms-extractor` with two main commands: `explore` and `extract`.
 
+### Common Options
+
+```bash
+wms-extractor --help
+```
+
+*    `--log-level`: Log level. One of DEBUG,INFO,WARNING,ERROR,CRITICAL. Defaults to INFO.
+*    `--no-ssl-verify`: switch off ssl verification for all network calls.
+*    `--request-timeout`: timeout for the http requests in seconds. Deafault is no timeout.
+*    `--header`: Header to be added to all network requests, in the format "Key:Value". Can be used multiple times.
+
 ### 1. Explore
 
 The `explore` command helps discover available layers and service information.
