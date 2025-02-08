@@ -227,3 +227,9 @@ Contributions are welcome! Please submit bug reports, feature requests, and pull
 
 This project is released under UnLicense - see the `LICENSE` file for details.
 
+## Credits
+
+This was heavily inspired by a similar tool for ESRI endpoints - [openaddresses/pyesridump](https://github.com/openaddresses/pyesridump)
+
+Also, that this is possible was pointed out to me by [datta07](https://github.com/datta07), some of the georss parsing code was also based on prior work by [datt07](https://github.com/datta07), [answerquest](https://github.com/answerquest) and [devdattaT](https://github.com/devdattaT).
+
