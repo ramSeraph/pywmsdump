@@ -193,7 +193,7 @@ def main(log_level, no_ssl_verify, request_timeout, header):
     if no_ssl_verify:
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-    if header is not None:
+    if header:
         req_params['headers'] = header
 
 
