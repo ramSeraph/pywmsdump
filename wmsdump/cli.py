@@ -320,7 +320,7 @@ def explore(geoserver_url, service_url, service, service_version, namespace, scr
               type=int, default=DEFAULTS['retry_delay'], show_default=True,
               help='number of secs to wait before retrying on failure.. '
                    'for each failure the delay is incremented by the same number')
-@click.option('--geometry-precision', '-g',
+@click.option('--geometry-precision', 
               type=int, default=DEFAULTS['geometry_precision'], show_default=True,
               help='decimal point precision of geometry to be returned, '
                    'truncation is done on client side. -1 means no truncation')
