@@ -64,16 +64,15 @@ class FileWriter:
             self.init_idx()
 
     def init_idx(self):
-        self.idx_map[self.count] = 0
         if not self.file.exists():
             return
         with open(self.file, 'r') as f:
             while True:
                 line = f.readline()
-                self.count += 1
-                self.idx_map[self.count] = f.tell()
                 if line == '':
                     break
+                self.idx_map[self.count] = f.tell() - len(line)
+                self.count += 1
 
     def get(self, n):
         if not self.keep_idx or \
@@ -91,11 +90,11 @@ class FileWriter:
         if self.fh is None:
             self.fh = open(self.file, 'a')
 
-        self.fh.write(json.dumps(feat))
-        self.fh.write('\n')
+        line = json.dumps(feat) + '\n'
+        self.fh.write(line)
         if self.keep_idx:
+            self.idx_map[self.count] = self.fh.tell() - len(line)
             self.count += 1
-            self.idx_map[self.count] = self.fh.tell()
 
     def close(self):
         if self.fh is not None:
