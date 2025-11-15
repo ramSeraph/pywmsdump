@@ -27,6 +27,7 @@ repository = "https://github.com/ramSeraph/pywmsdump.git"
 [project.scripts]
 wms-extractor = "wmsdump.cli:main"
 punch-holes = "wmsdump.hole_puncher:main [punch-holes]"
+geojsonl-dedupe = "wmsdump.deduplicate:main"
 
 [project.optional-dependencies]
 punch-holes = [

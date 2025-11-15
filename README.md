@@ -170,7 +170,40 @@ wms-extractor extract my_layer output.geojsonl --geoserver-url http://example.co
 wms-extractor extract my_layer output.geojsonl --geoserver-url http://example.com/geoserver --bounds -180,-90,180,90
 ```
 
-### 3. Punch Holes (Optional)
+### 3. Deduplicate GeoJSONL
+
+This command removes duplicate features from a GeoJSONL file. Features are considered duplicates if they have identical geometry and properties. Deduplication is performed by hashing features and detecting collisions.
+
+```bash
+geojsonl-dedupe --help
+```
+
+**Arguments:**
+
+*   `INPUT-FILE`: The input GeoJSONl file to deduplicate (required)
+*   `OUTPUT-FILE`: The output GeoJSONl file. If not provided, writes to `deduped_<INPUT-FILE>`
+
+**Options:**
+
+*   `--log-level`, `-l`: Set logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL). Defaults to INFO.
+*   `--use-offset/--use-ram`: Use file offset for collision checks (default) or keep features in RAM. Using file offset is more memory-efficient for large files.
+
+**Example:**
+
+```bash
+# Deduplicate using file offset method (memory-efficient)
+geojsonl-dedupe input.geojsonl output.geojsonl
+
+# Deduplicate keeping features in RAM (faster but uses more memory)
+geojsonl-dedupe input.geojsonl output.geojsonl --use-ram
+
+# Auto-generate output filename
+geojsonl-dedupe input.geojsonl
+```
+
+**Note:** The `EXTENT` retrieval mode includes built-in deduplication to handle features that may appear in overlapping spatial extents during extraction. This tool is useful for post-processing or cleaning up data from other sources.
+
+### 4. Punch Holes (Optional)
 
 This command is available if installed with the `punch-holes` extra.  It removes overlaps in a GeoJSONl file by punching holes where polygons overlap.  This is useful for cleaning up data problems which happen when extracting data using GeoRSS format which cannot represent polygons with holes.
 
