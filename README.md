@@ -1,6 +1,8 @@
 # wmsdump [![PyPI - Latest Version](https://img.shields.io/pypi/v/wmsdump)](https://pypi.org/project/wmsdump/) [![GitHub Tag](https://img.shields.io/github/v/tag/ramSeraph/pywmsdump?filter=v*)](https://github.com/ramSeraph/pywmsdump/releases/latest)
 
-A library and command-line tool for extracting data from OGC services (WMS, WFS).
+A library and command-line tool for extracting **vector layer** data from OGC services (WMS, WFS).
+
+> **Note:** This tool only supports vector layers. Raster layers are not supported.
 
 ## Features
 
