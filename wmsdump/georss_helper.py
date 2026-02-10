@@ -2,9 +2,9 @@ import re
 
 import xmltodict
 
-
 from .errors import handle_error
 from .props_helper import get_props_from_html
+
 
 def get_points(vals):
     points = []

@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 
+
 def get_props_from_html(content):
     # TODO: check that the data is indeed in html
     soup = BeautifulSoup(content, 'html.parser')

@@ -6,9 +6,10 @@ import kml2geojson
 from .errors import handle_error_xml
 from .props_helper import get_props_from_html
 
+
 def convert_kml_props(feat, keep_original):
     if 'properties' not in feat:
-        return 
+        return
 
     props = feat['properties']
     if 'description' not in props:

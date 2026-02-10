@@ -1,8 +1,7 @@
-import math
-import time
 import json
 import logging
-
+import math
+import time
 from pprint import pformat
 
 import requests
@@ -13,14 +12,11 @@ try:
 except ImportError:
     pyproj_available = False
 
-from .state import State
+from .enums import Extent, Flavor, Format, Operation, RetrievalMode, Service, WFSVersion, WMSVersion
+from .errors import KnownException, ZeroAreaException, handle_error_xml, optionally_save_to_file
 from .georss_helper import georss_extract_features
 from .kml_helper import kml_extract_features
-from .enums import Service, Operation, RetrievalMode, Format, Flavor, Extent, WMSVersion, WFSVersion
-from .errors import (
-    handle_error_xml, KnownException, ZeroAreaException,
-    optionally_save_to_file
-)
+from .state import State
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +42,7 @@ def get_global_bounds(crs_str):
 
     transformer = Transformer.from_crs(crs.geodetic_crs, crs, always_xy=True)
     b = transformer.transform_bounds(*crs.area_of_use.bounds)
-    return { 'xmin': b[0], 'ymin': b[1], 'xmax': b[2], 'ymax': b[3] } 
+    return { 'xmin': b[0], 'ymin': b[1], 'xmax': b[2], 'ymax': b[3] }
 
 # Virtual map size for GetFeatureInfo calls
 WMS_MAP_SIZE = 256
@@ -78,7 +74,7 @@ def truncate_nested_coordinates(coords, precision):
 
 def truncate_geometry(geom, precision):
     if geom is None or precision == -1:
-        return 
+        return
     if geom['type'] == 'GeometryCollection':
         for subgeom in geom['geometries']:
             truncate_geometry(subgeom, precision)
@@ -145,13 +141,18 @@ class OGCServiceDumper:
             if fixed_buffer is None:
                 raise Exception(f'fixed_buffer is required for {RetrievalMode.EXTENT_FIXED_BUFFER.value} mode')
             if self.operation != Operation.GetFeatureInfo:
-                raise Exception(f'{RetrievalMode.EXTENT_FIXED_BUFFER.value} mode is only supported for {Operation.GetFeatureInfo.value} operation')
+                raise Exception(
+                    f'{RetrievalMode.EXTENT_FIXED_BUFFER.value} mode is only supported for '
+                    f'{Operation.GetFeatureInfo.value} operation'
+                )
 
         # Validate GetFeatureInfo requires extent-based retrieval
         extent_modes = [RetrievalMode.EXTENT, RetrievalMode.EXTENT_FIXED_BUFFER]
         if self.operation == Operation.GetFeatureInfo and retrieval_mode not in extent_modes:
             extent_mode_values = [m.value for m in extent_modes]
-            raise Exception(f'{Operation.GetFeatureInfo.value} requires retrieval mode to be one of {", ".join(extent_mode_values)}')
+            raise Exception(
+                f'{Operation.GetFeatureInfo.value} requires retrieval mode to be one of {", ".join(extent_mode_values)}'
+            )
 
         self.out_srs = out_srs
         if bounds is None:
@@ -184,7 +185,7 @@ class OGCServiceDumper:
                                          layername=self.layername,
                                          service=self.service,
                                          version=self.service_version,
-                                         operation=self.operation, 
+                                         operation=self.operation,
                                          mode=self.retrieval_mode,
                                          sort_key=self.sort_key)
 
@@ -316,7 +317,7 @@ class OGCServiceDumper:
                     raise Exception(f'Request failed - status: {resp.status_code}, text: {resp.text}')
             except Exception:
                 logger.info(f'request failed - attempt:{attempt}/{self.max_attempts}.. '
-                            f'retrying in {self.retry_delay*attempt} secs') 
+                            f'retrying in {self.retry_delay*attempt} secs')
                 if attempt >= self.max_attempts:
                     raise
                 time.sleep(self.retry_delay * attempt)
@@ -430,7 +431,7 @@ class OGCServiceDumper:
 
     def get_params_WMS_GetFeatureInfo_FixedBuffer(self, count, bounds, cell_index, cols, rows):
         """Get params for GetFeatureInfo call for a specific grid cell.
-        
+
         This mode exists because some servers ignore the BUFFER parameter
         and only return features within a fixed pixel radius around the query point.
         Therefore, we don't set BUFFER and instead query multiple grid points
@@ -468,10 +469,10 @@ class OGCServiceDumper:
     def get_cell_features(self, envelope, cell_index, cols, rows, count, key):
         """Get features for a specific grid cell."""
         params = self.get_params_WMS_GetFeatureInfo_FixedBuffer(count, envelope, cell_index, cols, rows)
-        
+
         logger.info(f'making a request for {count} records with key={key} cell={cell_index}')
         resp_text = self.make_request(params)
-        
+
         feats = self.parse_bounded_response(resp_text)
         for feat in feats:
             truncate_geometry(feat.get('geometry', None),
@@ -557,7 +558,7 @@ class OGCServiceDumper:
 
     def scrape_envelope_fixed_buffer(self, envelope, parent_key):
         """Scrape an envelope using fixed buffer grid-based iteration.
-        
+
         For each extent, makes k calls (one per grid cell) instead of 1 call.
         Each cell is tracked independently - only cells exceeding max_features
         are drilled down.
@@ -602,8 +603,7 @@ class OGCServiceDumper:
         if self.retrieval_mode == RetrievalMode.OFFSET:
             while True:
                 feats = self.get_features(self.batch_size)
-                for feat in feats:
-                    yield feat
+                yield from feats
 
                 self.state.update(self.batch_size, len(feats))
 

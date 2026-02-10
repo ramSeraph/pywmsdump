@@ -1,12 +1,10 @@
 import json
 import logging
-
-from enum import Enum
 from pathlib import Path
 
 import jsonschema
 
-from .enums import Service, Operation, RetrievalMode, Extent, parse_version
+from .enums import Extent, Operation, RetrievalMode, Service, parse_version
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +120,7 @@ def validate_state_dict(state_data):
 
 
 class State:
-    def __init__(self, 
+    def __init__(self,
                  url=None,
                  layername=None,
                  service=None,
@@ -164,7 +162,7 @@ class State:
 
         if self.service != service:
             return False, f'state service:{self.service} not the same as invocation service:{service}'
-        
+
         if self.version != version:
             return False, f'state version:{self.version} not the same as invocation version:{version}'
 
@@ -282,7 +280,7 @@ class OffsetState(State):
         d = super().get_dict()
 
         d.update({
-            'sort_key': self.sort_key, 
+            'sort_key': self.sort_key,
             'index_done_till': self.index_done_till,
             'downloaded_count': self.downloaded_count,
         })
@@ -344,14 +342,14 @@ def get_state_from_files(state_file, output_file, **params):
         if state.mode == RetrievalMode.OFFSET:
             logger.info(f'Counting existing records in {output_file}')
             seen_count = 0
-            with open(output_file, 'r') as f:
+            with open(output_file) as f:
                 for line in f:
                     seen_count += 1
             params['downloaded_count'] = seen_count
         else:
             del params['sort_key']
             logger.info(f'Reading existing records in {output_file}')
-            with open(output_file, 'r') as f:
+            with open(output_file) as f:
                 for line in f:
                     state.add_raw_feature_no_dedup(line.strip('\n'))
 
@@ -361,7 +359,7 @@ def get_state_from_files(state_file, output_file, **params):
             return None
     else:
         state = State.from_dict(**params)
-    
+
     def update_file(s):
         Path(state_file).write_text(json.dumps(s))
         # to avoid state being written without a output file being present

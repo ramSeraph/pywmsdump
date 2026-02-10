@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Service(Enum):
     WMS = "WMS"
     WFS = "WFS"

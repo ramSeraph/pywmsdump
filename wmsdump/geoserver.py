@@ -1,11 +1,10 @@
-import logging
 import json
+import logging
+from urllib.parse import urljoin
 
 import requests
 import xmltodict
-
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +14,7 @@ def _get_layer_names(soup):
     lnames = []
     table = soup.find('table')
     tbody = table.find('tbody')
-    
+
     for tr in tbody.find_all('tr'):
         tds = tr.find_all('td')
         layer_name = tds[2].text.strip()
@@ -99,7 +98,7 @@ def _parse_page_ajax(resp_text):
 
 def _get_preview_url(resp_text):
     soup = BeautifulSoup(resp_text, 'html.parser')
-    links = soup.find_all('a')     
+    links = soup.find_all('a')
     preview_link = None
     for link in links:
         if link.text.strip() == 'Layer Preview':
@@ -156,7 +155,8 @@ def get_layer_list_from_page(url, **req_args):
         'Wicket-Ajax': 'true',
         'Wicket-Ajax-Baseurl': wicket_base_url,
         'X-Requested-With': 'XMLHttpRequest',
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/131.0.0.0 Safari/537.36',
     }
     base_headers = req_args.pop('headers', {})
     headers.update(base_headers)

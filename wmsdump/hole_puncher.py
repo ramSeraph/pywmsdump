@@ -1,16 +1,14 @@
 import json
 import logging
-
+from graphlib import TopologicalSorter
 from pathlib import Path
 
-from graphlib import TopologicalSorter
-
+import click
 import numpy as np
 import shapely
-import click
-from shapely.geometry import shape, mapping
-from shapely import unary_union
 from geoindex_rs import rtree as rt
+from shapely import unary_union
+from shapely.geometry import mapping, shape
 
 from wmsdump.logging import setup_logging
 
@@ -58,7 +56,7 @@ class FileReader:
             yield feat, f.tell()
 
     def __iter__(self):
-        with open(self.file, 'r') as f:
+        with open(self.file) as f:
             for feat, _ in self.iter_features(f):
                 yield feat
 
@@ -68,7 +66,7 @@ class FileReader:
         ymin = []
         xmax = []
         ymax = []
-        with open(self.file, 'r') as f:
+        with open(self.file) as f:
             if self.maintain_map and self.use_offset:
                 self.offset_map[self.count] = 0
             for feat, pos in self.iter_features(f):
@@ -90,12 +88,12 @@ class FileReader:
                     ymin.append(b[1])
                     xmax.append(b[2])
                     ymax.append(b[3])
-        
+
         xmin = np.array(xmin, dtype=np.float32)
         ymin = np.array(ymin, dtype=np.float32)
         xmax = np.array(xmax, dtype=np.float32)
         ymax = np.array(ymax, dtype=np.float32)
-        
+
         builder = rt.RTreeBuilder(num_items=len(xmin))
         builder.add(xmin, ymin, xmax, ymax)
         tree = builder.finish()
@@ -126,7 +124,7 @@ class FileReader:
         if not self.use_offset:
             return self.idx_map[(n,pi)]
 
-        with open(self.file, 'r') as f:
+        with open(self.file) as f:
             f.seek(self.offset_map[n])
             line = f.readline()
             feat = json.loads(line)
@@ -365,7 +363,9 @@ def main(log_level, input_file, output_file, index_in_mem, keep_map_file):
         shortname = Path(input_file).name
         output_file = str(Path(input_file).parent / f'fixed_{shortname}')
 
-    logger.info(f'reading data from {input_file}, will be writing to {output_file}, keeping index in memory: {index_in_mem}')
+    logger.info(
+        f'reading data from {input_file}, will be writing to {output_file}, keeping index in memory: {index_in_mem}'
+    )
     punch_holes(input_file, output_file,
                 use_offset=not index_in_mem,
                 keep_map_file=keep_map_file)

@@ -1,12 +1,11 @@
 import logging
-
 from pprint import pformat
 
 import requests
 import xmltodict
 
-from .errors import check_error_msg, optionally_save_to_file
 from .enums import Service
+from .errors import check_error_msg, optionally_save_to_file
 
 logger = logging.getLogger(__name__)
 

@@ -1,30 +1,28 @@
-import re
 import json
 import logging
-
-from pprint import pprint
+import re
 from pathlib import Path
+from pprint import pprint
 
 import click
 import requests
-
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
-from wmsdump.state import get_state_from_files
-from wmsdump.geoserver import get_layer_list_from_page
 from wmsdump.capabilities import fill_layer_list
-from wmsdump.dumper import (
-    OGCServiceDumper, DEFAULTS,
-    bbox_to_str, get_global_bounds
-)
-from wmsdump.enums import Service, Operation, RetrievalMode, Format, Flavor, parse_version
-from wmsdump.logging import setup_logging
+from wmsdump.dumper import DEFAULTS, OGCServiceDumper, bbox_to_str, get_global_bounds
+from wmsdump.enums import Flavor, Format, Operation, RetrievalMode, Service, parse_version
 from wmsdump.errors import (
-    SortKeyRequiredException, InvalidSortKeyException,
-    WFSUnsupportedException, KMLUnsupportedException,
-    LayerMissingException, GeoRSSUnsupportedException,
-    ServiceUnsupportedException
+    GeoRSSUnsupportedException,
+    InvalidSortKeyException,
+    KMLUnsupportedException,
+    LayerMissingException,
+    ServiceUnsupportedException,
+    SortKeyRequiredException,
+    WFSUnsupportedException,
 )
+from wmsdump.geoserver import get_layer_list_from_page
+from wmsdump.logging import setup_logging
+from wmsdump.state import get_state_from_files
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +69,7 @@ class FileWriter:
     def init_idx(self):
         if not self.file.exists():
             return
-        with open(self.file, 'r') as f:
+        with open(self.file) as f:
             while True:
                 line = f.readline()
                 if line == '':
@@ -85,7 +83,7 @@ class FileWriter:
            not self.file.exists():
             return None
 
-        with open(self.file, 'r') as f:
+        with open(self.file) as f:
             f.seek(self.idx_map[n])
             line = f.readline()
             line = line.strip('\n')
@@ -143,13 +141,13 @@ def get_bounds_from_str(b_str, crs_str):
     b = { 'xmin': nos[0], 'ymin': nos[1], 'xmax': nos[2], 'ymax': nos[3] }
 
     g = get_global_bounds(crs_str)
-            
+
     if b['xmin'] < g['xmin'] or b['xmin'] > g['xmax']:
         raise Exception(f'Invalid x: xmin: {b["xmin"]}, expected value between {g["xmin"]} and {g["xmax"]}')
 
     if b['xmax'] < g['xmin'] or b['xmax'] > g['xmax']:
         raise Exception(f'Invalid x: xmax: {b["xmax"]}, expected value between {g["xmin"]} and {g["xmax"]}')
-            
+
     if b['ymin'] < g['ymin'] or b['ymin'] > g['ymax']:
         raise Exception(f'Invalid y: ymin: {b["ymin"]}, expected value between {g["ymin"]} and {g["ymax"]}')
 
@@ -240,12 +238,21 @@ def main(log_level, no_ssl_verify, request_timeout, header):
               help='scrape the geoserver web page instead of reading capabilities.'
                    ' Useful when capabilities is broken because of large number of layers')
 @common_options()
-def explore(log_level, no_ssl_verify, request_timeout, header,
-            geoserver_url, service_url, service, service_version, namespace, scrape_webpage, output_file):
+def explore(log_level,
+            no_ssl_verify,
+            request_timeout,
+            header,
+            geoserver_url,
+            service_url,
+            service,
+            service_version,
+            namespace,
+            scrape_webpage,
+            output_file):
     apply_common_options(log_level, no_ssl_verify, request_timeout, header)
     # Convert CLI string to enum
     service = Service(service)
-    
+
     if geoserver_url is None and service_url is None:
         logger.error('Invalid invocation: '
                      'One of "--service-url" or "--geoserver-url" must be provided')
@@ -323,7 +330,7 @@ def explore(log_level, no_ssl_verify, request_timeout, header,
               type=click.Choice(enum_values(Operation), case_sensitive=False),
               default=DEFAULTS['operation'].value, show_default=True,
               help='which operation to use for querying a WMS endpoint')
-@click.option('--flavor', 
+@click.option('--flavor',
               type=click.Choice(enum_values(Flavor), case_sensitive=False),
               default=DEFAULTS['flavor'].value, show_default=True,
               help='vendor of the WMS services, useful to specify for GetFeatureInfo based retrieval')
@@ -335,17 +342,17 @@ def explore(log_level, no_ssl_verify, request_timeout, header,
 @click.option('--pause-seconds', '-p',
               type=int, default=DEFAULTS['pause_seconds'], show_default=True,
               help='amount of time to pause between a batch of requests')
-@click.option('--requests-to-pause', 
+@click.option('--requests-to-pause',
               type=int, default=DEFAULTS['requests_to_pause'], show_default=True,
               help='number of requests to make before pausing for --pause-seconds')
-@click.option('--max-attempts', 
+@click.option('--max-attempts',
               type=int, default=DEFAULTS['max_attempts'], show_default=True,
               help='number of times to attempt a request before giving up')
 @click.option('--retry-delay', '-r',
               type=int, default=DEFAULTS['retry_delay'], show_default=True,
               help='number of secs to wait before retrying on failure.. '
                    'for each failure the delay is incremented by the same number')
-@click.option('--geometry-precision', 
+@click.option('--geometry-precision',
               type=int, default=DEFAULTS['geometry_precision'], show_default=True,
               help='decimal point precision of geometry to be returned, '
                    'truncation is done on client side. -1 means no truncation')
@@ -359,11 +366,11 @@ def explore(log_level, no_ssl_verify, request_timeout, header,
 @click.option('--kml-keep-original-props/--no-kml-keep-original-props',
               default=DEFAULTS['kml_keep_original_props'], show_default=True,
               help='Whether to keep the original style related props in kml conversion')
-@click.option('--out-srs', 
+@click.option('--out-srs',
               default=DEFAULTS['out_srs'], show_default=True,
               help='CRS to ask the server to return data in.. '
                    'will be written out in the same CRS')
-@click.option('--bounds', 
+@click.option('--bounds',
               help='bounds to restrict query to. defaults to CRS bounds. '
                    f'format: "{EXPECTED_BOUNDS_FORMAT}"')
 @click.option('--max-box-dims',
@@ -373,22 +380,40 @@ def explore(log_level, no_ssl_verify, request_timeout, header,
               type=int,
               help='pixel buffer size for EXTENT_FIXED_BUFFER mode. Required when using '
                    'EXTENT_FIXED_BUFFER retrieval mode with GetFeatureInfo.')
-@click.option('--skip-index', 
+@click.option('--skip-index',
               type=int, default=0, show_default=True,
               help='skip n elements in index.. useful to skip records causing failure. '
-                   'only applicable when using OFFSET based retrieval') 
+                   'only applicable when using OFFSET based retrieval')
 @common_options()
-def extract(log_level, no_ssl_verify, request_timeout, header,
-            layername, output_file, output_dir,
-            geoserver_url, service_url,
-            service, service_version, flavor,
-            retrieval_mode, operation, out_srs,
-            sort_key, batch_size, geometry_precision, 
-            requests_to_pause, pause_seconds, max_attempts,
-            getmap_format, kml_strip_point,
+def extract(log_level,
+            no_ssl_verify,
+            request_timeout,
+            header,
+            layername,
+            output_file,
+            output_dir,
+            geoserver_url,
+            service_url,
+            service,
+            service_version,
+            flavor,
+            retrieval_mode,
+            operation,
+            out_srs,
+            sort_key,
+            batch_size,
+            geometry_precision,
+            requests_to_pause,
+            pause_seconds,
+            max_attempts,
+            getmap_format,
+            kml_strip_point,
             kml_keep_original_props,
-            retry_delay, bounds,
-            max_box_dims, fixed_buffer, skip_index):
+            retry_delay,
+            bounds,
+            max_box_dims,
+            fixed_buffer,
+            skip_index):
     apply_common_options(log_level, no_ssl_verify, request_timeout, header)
 
     # Convert CLI strings to enums
@@ -544,4 +569,4 @@ def extract(log_level, no_ssl_verify, request_timeout, header,
             pprint(feat['properties'])
 
 
-       
+
