@@ -176,29 +176,42 @@ def parse_header(ctx, param, values):
 
     return headers
 
-@click.group()
-@click.option('--log-level', '-l',
-              type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-                                case_sensitive=False),
-              default='INFO', show_default=True,
-              help='set logging level')
-@click.option('--no-ssl-verify',
-              is_flag=True, default=False, show_default=True,
-              help='switch off ssl verification') 
-@click.option('--request-timeout', '-t', type=int,
-              help='timeout for the http requests')
-@click.option('--header', '-H',
-              multiple=True, callback=parse_header,
-              help='Header in the format "Key:Value". Can be used multiple times.')
-def main(log_level, no_ssl_verify, request_timeout, header):
+DEPRECATED_SUFFIX = ' (DEPRECATED: use on subcommand instead)'
+
+def common_options(deprecated=False):
+    """Decorator for common options shared between commands."""
+    def decorator(f):
+        suffix = DEPRECATED_SUFFIX if deprecated else ''
+        f = click.option('--header', '-H',
+                         multiple=True, callback=parse_header,
+                         help='Header in the format "Key:Value". Can be used multiple times.' + suffix)(f)
+        f = click.option('--request-timeout', '-t', type=int,
+                         help='timeout for the http requests' + suffix)(f)
+        f = click.option('--no-ssl-verify',
+                         is_flag=True, default=False, show_default=True,
+                         help='switch off ssl verification' + suffix)(f)
+        f = click.option('--log-level', '-l',
+                         type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                                           case_sensitive=False),
+                         default='INFO', show_default=True,
+                         help='set logging level' + suffix)(f)
+        return f
+    return decorator
+
+def apply_common_options(log_level, no_ssl_verify, request_timeout, header):
+    """Apply common options to the request params."""
     setup_logging(log_level)
     req_params['verify'] = not no_ssl_verify
     req_params['timeout'] = request_timeout
     if no_ssl_verify:
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
     if header:
         req_params['headers'] = header
+
+@click.group()
+@common_options(deprecated=True)
+def main(log_level, no_ssl_verify, request_timeout, header):
+    apply_common_options(log_level, no_ssl_verify, request_timeout, header)
 
 
 
@@ -226,7 +239,10 @@ def main(log_level, no_ssl_verify, request_timeout, header):
               is_flag=True, default=False, show_default=True,
               help='scrape the geoserver web page instead of reading capabilities.'
                    ' Useful when capabilities is broken because of large number of layers')
-def explore(geoserver_url, service_url, service, service_version, namespace, scrape_webpage, output_file):
+@common_options()
+def explore(log_level, no_ssl_verify, request_timeout, header,
+            geoserver_url, service_url, service, service_version, namespace, scrape_webpage, output_file):
+    apply_common_options(log_level, no_ssl_verify, request_timeout, header)
     # Convert CLI string to enum
     service = Service(service)
     
@@ -357,7 +373,9 @@ def explore(geoserver_url, service_url, service, service_version, namespace, scr
               type=int, default=0, show_default=True,
               help='skip n elements in index.. useful to skip records causing failure. '
                    'only applicable when using OFFSET based retrieval') 
-def extract(layername, output_file, output_dir,
+@common_options()
+def extract(log_level, no_ssl_verify, request_timeout, header,
+            layername, output_file, output_dir,
             geoserver_url, service_url,
             service, service_version, flavor,
             retrieval_mode, operation, out_srs,
@@ -367,6 +385,7 @@ def extract(layername, output_file, output_dir,
             kml_keep_original_props,
             retry_delay, bounds,
             max_box_dims, skip_index):
+    apply_common_options(log_level, no_ssl_verify, request_timeout, header)
 
     # Convert CLI strings to enums
     service = Service(service)
