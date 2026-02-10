@@ -82,12 +82,32 @@ EXTENT_SCHEMA = {
     }
 }
 
+EXTENT_FIXED_BUFFER_SCHEMA = {
+    "type" : "object",
+    "required": COMMON_REQUIRED + [ "explored_tree" ],
+    "properties": COMMON_PROPS | {
+        "explored_tree": {
+            "type": "object",
+            "description": "bounds tree and their exploration status (pipe-separated keys)",
+            "patternProperties": {
+                "^[0-9]+(\\|[0-9]+)*$": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3
+                }
+            }
+        }
+    }
+}
+
 
 def validate_state_dict(state_data):
     mode = state_data.get('mode', None)
     schema = None
     if mode == RetrievalMode.EXTENT.value:
         schema = EXTENT_SCHEMA
+    elif mode == RetrievalMode.EXTENT_FIXED_BUFFER.value:
+        schema = EXTENT_FIXED_BUFFER_SCHEMA
     elif mode == RetrievalMode.OFFSET.value:
         schema = OFFSET_SCHEMA
     else:
@@ -121,6 +141,8 @@ class State:
         mode = params.pop('mode', None)
         if mode == RetrievalMode.EXTENT:
             return ExtentState(**params)
+        if mode == RetrievalMode.EXTENT_FIXED_BUFFER:
+            return ExtentFixedBufferState(**params)
         if mode == RetrievalMode.OFFSET:
             return OffsetState(**params)
 
@@ -210,6 +232,13 @@ class ExtentState(State):
             'explored_tree': {k: v.value for k, v in self.explored_tree.items()}
         })
         return d
+
+
+class ExtentFixedBufferState(ExtentState):
+    """State for EXTENT_FIXED_BUFFER mode - uses pipe-separated keys."""
+    def __init__(self, **params):
+        super().__init__(**params)
+        self.mode = RetrievalMode.EXTENT_FIXED_BUFFER
 
 
 class OffsetState(State):

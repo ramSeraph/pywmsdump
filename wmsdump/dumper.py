@@ -48,6 +48,8 @@ def get_global_bounds(crs_str):
     b = transformer.transform_bounds(*crs.area_of_use.bounds)
     return { 'xmin': b[0], 'ymin': b[1], 'xmax': b[2], 'ymax': b[3] } 
 
+# Virtual map size for GetFeatureInfo calls
+WMS_MAP_SIZE = 256
 
 DEFAULTS = {
     'retrieval_mode': RetrievalMode.OFFSET,
@@ -65,6 +67,7 @@ DEFAULTS = {
     'getmap_format': Format.KML,
     'kml_strip_point': True,
     'kml_keep_original_props': False,
+    'fixed_buffer': None,
 }
 
 def truncate_nested_coordinates(coords, precision):
@@ -112,6 +115,7 @@ class OGCServiceDumper:
                  kml_keep_original_props=DEFAULTS['kml_keep_original_props'],
                  bounds=None,
                  max_box_dims=None,
+                 fixed_buffer=DEFAULTS['fixed_buffer'],
                  session=None,
                  get_nth=None,
                  req_params={}):
@@ -132,12 +136,22 @@ class OGCServiceDumper:
             raise Exception('flavor should be one of Geoserver or QGISserver')
         self.flavor = flavor
 
-        if retrieval_mode not in [RetrievalMode.OFFSET, RetrievalMode.EXTENT]:
-            raise Exception('retrieval mode should be one of OFFSET or EXTENT')
+        valid_modes = [m.value for m in RetrievalMode]
+        if retrieval_mode not in list(RetrievalMode):
+            raise Exception(f'retrieval mode should be one of {", ".join(valid_modes)}')
 
-        if self.operation == Operation.GetFeatureInfo and retrieval_mode != RetrievalMode.EXTENT:
-            logger.info('Overriding retrieval mode to EXTENT for GetFeatureInfo call')
-            retrieval_mode = RetrievalMode.EXTENT
+        # Validate EXTENT_FIXED_BUFFER requirements
+        if retrieval_mode == RetrievalMode.EXTENT_FIXED_BUFFER:
+            if fixed_buffer is None:
+                raise Exception(f'fixed_buffer is required for {RetrievalMode.EXTENT_FIXED_BUFFER.value} mode')
+            if self.operation != Operation.GetFeatureInfo:
+                raise Exception(f'{RetrievalMode.EXTENT_FIXED_BUFFER.value} mode is only supported for {Operation.GetFeatureInfo.value} operation')
+
+        # Validate GetFeatureInfo requires extent-based retrieval
+        extent_modes = [RetrievalMode.EXTENT, RetrievalMode.EXTENT_FIXED_BUFFER]
+        if self.operation == Operation.GetFeatureInfo and retrieval_mode not in extent_modes:
+            extent_mode_values = [m.value for m in extent_modes]
+            raise Exception(f'{Operation.GetFeatureInfo.value} requires retrieval mode to be one of {", ".join(extent_mode_values)}')
 
         self.out_srs = out_srs
         if bounds is None:
@@ -145,6 +159,7 @@ class OGCServiceDumper:
         self.bounds = bounds
 
         self.max_box_dims = max_box_dims
+        self.fixed_buffer = fixed_buffer
 
         self.retrieval_mode = retrieval_mode
 
@@ -219,8 +234,8 @@ class OGCServiceDumper:
             'maxFeatures': count,
             'srs': self.out_srs,
             'format': fmt,
-            'width': 256,
-            'height': 256,
+            'width': WMS_MAP_SIZE,
+            'height': WMS_MAP_SIZE,
             'styles': '',
             'bbox': bbox_str
         }
@@ -234,11 +249,9 @@ class OGCServiceDumper:
     def get_params_WMS_GetFeatureInfo(self, count, bounds):
         bbox_str = bbox_to_str(bounds, None)
 
-        WIDTH = 256
-
-        x = int(WIDTH / 2)
-        y = int(WIDTH / 2)
-        r = math.ceil(WIDTH / ( 2.0 ** 0.5 ))
+        x = int(WMS_MAP_SIZE / 2)
+        y = int(WMS_MAP_SIZE / 2)
+        r = math.ceil(WMS_MAP_SIZE / ( 2.0 ** 0.5 ))
 
         params = {
             'service': Service.WMS.value,
@@ -250,8 +263,8 @@ class OGCServiceDumper:
             'srs': self.out_srs,
             'info_format': 'application/json',
             'with_geometry': 'true',
-            'width': WIDTH,
-            'height': WIDTH,
+            'width': WMS_MAP_SIZE,
+            'height': WMS_MAP_SIZE,
             'styles': '',
             'bbox': bbox_str,
             'x': x,
@@ -396,6 +409,75 @@ class OGCServiceDumper:
                               self.geometry_precision)
         return feats
 
+    def get_grid_dimensions(self):
+        """Calculate grid dimensions based on fixed_buffer size."""
+        cols = math.ceil(WMS_MAP_SIZE / self.fixed_buffer)
+        rows = math.ceil(WMS_MAP_SIZE / self.fixed_buffer)
+        return cols, rows
+
+    def get_cell_envelope(self, envelope, cell_index, cols, rows):
+        """Get the coordinate extent for a specific grid cell."""
+        col = cell_index % cols
+        row = cell_index // cols
+        cell_width = (envelope['xmax'] - envelope['xmin']) / cols
+        cell_height = (envelope['ymax'] - envelope['ymin']) / rows
+        return dict(
+            xmin=envelope['xmin'] + col * cell_width,
+            ymin=envelope['ymin'] + row * cell_height,
+            xmax=envelope['xmin'] + (col + 1) * cell_width,
+            ymax=envelope['ymin'] + (row + 1) * cell_height,
+        )
+
+    def get_params_WMS_GetFeatureInfo_FixedBuffer(self, count, bounds, cell_index, cols, rows):
+        """Get params for GetFeatureInfo call for a specific grid cell.
+        
+        This mode exists because some servers ignore the BUFFER parameter
+        and only return features within a fixed pixel radius around the query point.
+        Therefore, we don't set BUFFER and instead query multiple grid points
+        to ensure full coverage of the extent.
+        """
+        bbox_str = bbox_to_str(bounds, None)
+
+        # Calculate pixel position for the center of this grid cell
+        col = cell_index % cols
+        row = cell_index // cols
+        x = int((col + 0.5) * (WMS_MAP_SIZE / cols))
+        y = int((row + 0.5) * (WMS_MAP_SIZE / rows))
+
+        params = {
+            'service': Service.WMS.value,
+            'version': self.service_version.value,
+            'request': 'GetFeatureInfo',
+            'layers': self.layername,
+            'query_layers': self.layername,
+            'feature_count': count,
+            'srs': self.out_srs,
+            'info_format': 'application/json',
+            'with_geometry': 'true',
+            'width': WMS_MAP_SIZE,
+            'height': WMS_MAP_SIZE,
+            'styles': '',
+            'bbox': bbox_str,
+            'x': x,
+            'y': y,
+            'i': x,
+            'j': y,
+        }
+        return params
+
+    def get_cell_features(self, envelope, cell_index, cols, rows, count, key):
+        """Get features for a specific grid cell."""
+        params = self.get_params_WMS_GetFeatureInfo_FixedBuffer(count, envelope, cell_index, cols, rows)
+        
+        logger.info(f'making a request for {count} records with key={key} cell={cell_index}')
+        resp_text = self.make_request(params)
+        
+        feats = self.parse_bounded_response(resp_text)
+        for feat in feats:
+            truncate_geometry(feat.get('geometry', None),
+                              self.geometry_precision)
+        return feats
+
     def split_envelope(self, envelope):
         half_width = (envelope['xmax'] - envelope['xmin']) / 2.0
         half_height = (envelope['ymax'] - envelope['ymin']) / 2.0
@@ -473,6 +555,48 @@ class OGCServiceDumper:
 
             self.state.update_coverage(key, Extent.EXPLORED)
 
+    def scrape_envelope_fixed_buffer(self, envelope, parent_key):
+        """Scrape an envelope using fixed buffer grid-based iteration.
+        
+        For each extent, makes k calls (one per grid cell) instead of 1 call.
+        Each cell is tracked independently - only cells exceeding max_features
+        are drilled down.
+        """
+        cols, rows = self.get_grid_dimensions()
+        k = cols * rows
+        max_records = self.batch_size
+
+        for i in range(k):
+            cell_key = f"{parent_key}|{i}"
+            status = self.state.explored_tree.get(cell_key, Extent.NOT_PRESENT)
+
+            if status == Extent.EXPLORED:
+                continue
+
+            if status == Extent.NOT_PRESENT:
+                try:
+                    features = self.get_cell_features(envelope, i, cols, rows, max_records, cell_key)
+                except ZeroAreaException:
+                    features = []
+                logger.info(f'got {len(features)} records for cell {i}')
+
+                for feature in features:
+                    yield feature
+
+                if len(features) < max_records:
+                    self.state.update_coverage(cell_key, Extent.EXPLORED)
+                    continue
+                else:
+                    self.state.update_coverage(cell_key, Extent.OPEN)
+                    status = Extent.OPEN
+
+            if status == Extent.OPEN:
+                # Drill down into this cell's coordinate extent
+                cell_envelope = self.get_cell_envelope(envelope, i, cols, rows)
+                for feature in self.scrape_envelope_fixed_buffer(cell_envelope, cell_key):
+                    yield feature
+                self.state.update_coverage(cell_key, Extent.EXPLORED)
+
 
     def __iter__(self):
         if self.retrieval_mode == RetrievalMode.OFFSET:
@@ -485,6 +609,10 @@ class OGCServiceDumper:
 
                 if len(feats) < self.batch_size:
                     break
+        elif self.retrieval_mode == RetrievalMode.EXTENT_FIXED_BUFFER:
+            for feature in self.scrape_envelope_fixed_buffer(self.initial_bounds, "0"):
+                if self.state.add_feature(feature):
+                    yield feature
         else:
             for feature in self.scrape_an_envelope(self.initial_bounds, "0"):
                 if self.state.add_feature(feature):

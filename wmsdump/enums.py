@@ -21,6 +21,7 @@ class Operation(Enum):
 class RetrievalMode(Enum):
     OFFSET = "OFFSET"
     EXTENT = "EXTENT"
+    EXTENT_FIXED_BUFFER = "EXTENT_FIXED_BUFFER"
 
 class Format(Enum):
     GEORSS = "GEORSS"

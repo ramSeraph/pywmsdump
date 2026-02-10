@@ -369,6 +369,10 @@ def explore(log_level, no_ssl_verify, request_timeout, header,
 @click.option('--max-box-dims',
               help='when querying using EXTENT mode, maximum size of the bounding box to use.'
                    f' format: {EXPECTED_MAX_BOX_FORMAT}')
+@click.option('--fixed-buffer',
+              type=int,
+              help='pixel buffer size for EXTENT_FIXED_BUFFER mode. Required when using '
+                   'EXTENT_FIXED_BUFFER retrieval mode with GetFeatureInfo.')
 @click.option('--skip-index', 
               type=int, default=0, show_default=True,
               help='skip n elements in index.. useful to skip records causing failure. '
@@ -384,7 +388,7 @@ def extract(log_level, no_ssl_verify, request_timeout, header,
             getmap_format, kml_strip_point,
             kml_keep_original_props,
             retry_delay, bounds,
-            max_box_dims, skip_index):
+            max_box_dims, fixed_buffer, skip_index):
     apply_common_options(log_level, no_ssl_verify, request_timeout, header)
 
     # Convert CLI strings to enums
@@ -398,11 +402,6 @@ def extract(log_level, no_ssl_verify, request_timeout, header,
         service_version = DEFAULTS['wms_version'] if service == Service.WMS else DEFAULTS['wfs_version']
     else:
         service_version = parse_version(service, service_version)
-
-    if service == Service.WMS and operation == Operation.GetFeatureInfo:
-        if retrieval_mode != RetrievalMode.EXTENT:
-            logger.info('Using GetFeatureInfo for retrieval.. overriding mode to EXTENT')
-            retrieval_mode = RetrievalMode.EXTENT
 
     if service == Service.WFS:
         operation = Operation.GetFeature
@@ -477,29 +476,34 @@ def extract(log_level, no_ssl_verify, request_timeout, header,
         state.update(skip_index, 0)
 
     writer = FileWriter(output_file,
-                        keep_idx=(retrieval_mode == RetrievalMode.EXTENT))
+                        keep_idx=(retrieval_mode in (RetrievalMode.EXTENT, RetrievalMode.EXTENT_FIXED_BUFFER)))
 
-    dumper = OGCServiceDumper(service_url, layername, service,
-                              service_version=service_version,
-                              operation=operation,
-                              retrieval_mode=retrieval_mode,
-                              flavor=flavor,
-                              batch_size=batch_size,
-                              sort_key=sort_key,
-                              state=state,
-                              requests_to_pause=requests_to_pause,
-                              pause_seconds=pause_seconds,
-                              retry_delay=retry_delay,
-                              max_attempts=max_attempts,
-                              geometry_precision=geometry_precision,
-                              getmap_format=getmap_format,
-                              kml_strip_point=kml_strip_point,
-                              kml_keep_original_props=kml_keep_original_props,
-                              out_srs=out_srs,
-                              bounds=bounds,
-                              max_box_dims=max_box_dims,
-                              get_nth=writer.get,
-                              req_params=req_params)
+    try:
+        dumper = OGCServiceDumper(service_url, layername, service,
+                                  service_version=service_version,
+                                  operation=operation,
+                                  retrieval_mode=retrieval_mode,
+                                  flavor=flavor,
+                                  batch_size=batch_size,
+                                  sort_key=sort_key,
+                                  state=state,
+                                  requests_to_pause=requests_to_pause,
+                                  pause_seconds=pause_seconds,
+                                  retry_delay=retry_delay,
+                                  max_attempts=max_attempts,
+                                  geometry_precision=geometry_precision,
+                                  getmap_format=getmap_format,
+                                  kml_strip_point=kml_strip_point,
+                                  kml_keep_original_props=kml_keep_original_props,
+                                  out_srs=out_srs,
+                                  bounds=bounds,
+                                  max_box_dims=max_box_dims,
+                                  fixed_buffer=fixed_buffer,
+                                  get_nth=writer.get,
+                                  req_params=req_params)
+    except Exception as e:
+        logger.error(str(e))
+        return
 
     dump_samples = False
     try:
