@@ -75,9 +75,7 @@ A library and command-line tool for extracting **vector layer** data from OGC se
 
 ### Common Options
 
-```bash
-wms-extractor --help
-```
+The following options are available on both `explore` and `extract` subcommands:
 
 *    `--log-level`: Log level. One of DEBUG,INFO,WARNING,ERROR,CRITICAL. Defaults to INFO.
 *    `--no-ssl-verify`: switch off ssl verification for all network calls.
@@ -138,8 +136,8 @@ wms-extractor extract --help
 *   `--service-url`: URL of the WMS/WFS endpoint from which to retrieve data. If not provided, it will be derived from `geoserver-url`.
 *   `--service`: Service to use (WMS or WFS). Defaults to WFS.
 *   `--service-version`: The protocol version to use. Defaults to '1.1.1' for WMS and '1.0.0' for WFS.
-*   `--retrieval-mode`: Which method to use for batch record retrieval (`OFFSET` or `EXTENT`). Defaults to `OFFSET`.
-*   `--operation`: Which operation to use for querying a WMS endpoint (`GetMap` or `GetFeatureInfo`). Defaults to `GetMap`.
+*   `--retrieval-mode`: Which method to use for batch record retrieval (`OFFSET`, `EXTENT`, or `EXTENT_FIXED_BUFFER`). Defaults to `OFFSET`.
+*   `--operation`: Which operation to use for querying the service. WMS supports `GetMap` or `GetFeatureInfo`; WFS uses `GetFeature` (auto-selected). Defaults to `GetMap` for WMS.
 *   `--flavor`: Vendor of the WMS service (`Geoserver` or `QGISserver`), useful to specify for GetFeatureInfo based retrieval. Defaults to `Geoserver`.
 *   `--sort-key`: Key to use for paged retrieval (required when server requires it).
 *   `--batch-size`: Batch size to use for retrieval. Defaults to 1000.
@@ -154,6 +152,9 @@ wms-extractor extract --help
 *   `--out-srs`: CRS to request data in. Defaults to `EPSG:4326`.
 *   `--bounds`: Bounding box to restrict the query to (format: `<xmin>,<ymin>,<xmax>,<ymax>`).
 *   `--max-box-dims`: When querying using EXTENT mode, the maximum size of the bounding box to use (format: `<deltax>,<deltay>`).
+*   `--fixed-buffer`: Pixel buffer size for `EXTENT_FIXED_BUFFER` mode. Required when using `EXTENT_FIXED_BUFFER` retrieval mode with `GetFeatureInfo`.
+*   `--wms-map-size`: Virtual map size in pixels for WMS requests (default 256). Primarily affects `GetFeatureInfo` calls where it determines the query point and buffer calculations.
+*   `--custom-dumper`: Path to a Python file containing a `SpecialDumper` class that subclasses `OGCServiceDumper` to override default behavior.
 *   `--skip-index`: Skip n elements in index (useful to skip records causing failure, only applicable for OFFSET retrieval).  Defaults to 0.
 
 **Examples:**

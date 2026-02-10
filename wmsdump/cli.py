@@ -355,7 +355,8 @@ def explore(log_level,
 @click.option('--operation', '-o',
               type=click.Choice(enum_values(Operation), case_sensitive=False),
               default=DEFAULTS['operation'].value, show_default=True,
-              help='which operation to use for querying a WMS endpoint')
+              help='which operation to use for querying the service. '
+                   'WMS supports GetMap or GetFeatureInfo; WFS uses GetFeature (auto-selected)')
 @click.option('--flavor',
               type=click.Choice(enum_values(Flavor), case_sensitive=False),
               default=DEFAULTS['flavor'].value, show_default=True,
