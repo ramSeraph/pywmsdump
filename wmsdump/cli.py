@@ -1,3 +1,4 @@
+import importlib.util
 import json
 import logging
 import re
@@ -106,6 +107,31 @@ class FileWriter:
 
 EXPECTED_BOUNDS_FORMAT = '<xmin>,<ymin>,<xmax>,<ymax>'
 EXPECTED_MAX_BOX_FORMAT = '<deltax>,<deltay>'
+
+
+def load_custom_dumper(file_path):
+    """Load a SpecialDumper class from a Python file."""
+    path = Path(file_path)
+    if not path.exists():
+        raise click.BadParameter(f'Custom dumper file not found: {file_path}')
+
+    spec = importlib.util.spec_from_file_location("custom_dumper", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    if not hasattr(module, 'SpecialDumper'):
+        raise click.BadParameter(
+            'Custom dumper file must contain a class named "SpecialDumper"'
+        )
+
+    dumper_class = module.SpecialDumper
+    if not issubclass(dumper_class, OGCServiceDumper):
+        raise click.BadParameter(
+            'SpecialDumper must be a subclass of OGCServiceDumper'
+        )
+
+    return dumper_class
+
 
 def get_box_dims(b_str):
     parts = b_str.split(',')
@@ -380,6 +406,10 @@ def explore(log_level,
               type=int,
               help='pixel buffer size for EXTENT_FIXED_BUFFER mode. Required when using '
                    'EXTENT_FIXED_BUFFER retrieval mode with GetFeatureInfo.')
+@click.option('--custom-dumper',
+              type=click.Path(exists=True),
+              help='path to a Python file containing a SpecialDumper class that '
+                   'subclasses OGCServiceDumper to override default behavior')
 @click.option('--skip-index',
               type=int, default=0, show_default=True,
               help='skip n elements in index.. useful to skip records causing failure. '
@@ -413,6 +443,7 @@ def extract(log_level,
             bounds,
             max_box_dims,
             fixed_buffer,
+            custom_dumper,
             skip_index):
     apply_common_options(log_level, no_ssl_verify, request_timeout, header)
 
@@ -503,8 +534,13 @@ def extract(log_level,
     writer = FileWriter(output_file,
                         keep_idx=(retrieval_mode in (RetrievalMode.EXTENT, RetrievalMode.EXTENT_FIXED_BUFFER)))
 
+    DumperClass = OGCServiceDumper
+    if custom_dumper:
+        DumperClass = load_custom_dumper(custom_dumper)
+        logger.info(f'using custom dumper class from {custom_dumper}')
+
     try:
-        dumper = OGCServiceDumper(service_url, layername, service,
+        dumper = DumperClass(service_url, layername, service,
                                   service_version=service_version,
                                   operation=operation,
                                   retrieval_mode=retrieval_mode,
