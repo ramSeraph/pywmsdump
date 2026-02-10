@@ -411,6 +411,10 @@ def explore(log_level,
               type=int, default=DEFAULTS['wms_map_size'], show_default=True,
               help='virtual map size in pixels for WMS requests. Primarily affects '
                    'GetFeatureInfo calls where it determines the query point and buffer calculations.')
+@click.option('--drop-id/--no-drop-id',
+              default=DEFAULTS['drop_id'], show_default=True,
+              help='whether to drop the id field from features. '
+                   'Applied after GeoRSS feature merging but before deduplication.')
 @click.option('--custom-dumper',
               type=click.Path(exists=True),
               help='path to a Python file containing a SpecialDumper class that '
@@ -449,6 +453,7 @@ def extract(log_level,
             max_box_dims,
             fixed_buffer,
             wms_map_size,
+            drop_id,
             custom_dumper,
             skip_index):
     apply_common_options(log_level, no_ssl_verify, request_timeout, header)
@@ -567,6 +572,7 @@ def extract(log_level,
                                   max_box_dims=max_box_dims,
                                   fixed_buffer=fixed_buffer,
                                   wms_map_size=wms_map_size,
+                                  drop_id=drop_id,
                                   get_nth=writer.get,
                                   req_params=req_params)
     except Exception as e:

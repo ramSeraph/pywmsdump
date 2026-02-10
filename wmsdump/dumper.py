@@ -62,6 +62,7 @@ DEFAULTS = {
     'kml_keep_original_props': False,
     'fixed_buffer': None,
     'wms_map_size': 256,
+    'drop_id': False,
 }
 
 def truncate_nested_coordinates(coords, precision):
@@ -111,6 +112,7 @@ class OGCServiceDumper:
                  max_box_dims=None,
                  fixed_buffer=DEFAULTS['fixed_buffer'],
                  wms_map_size=DEFAULTS['wms_map_size'],
+                 drop_id=DEFAULTS['drop_id'],
                  session=None,
                  get_nth=None,
                  req_params={}):
@@ -161,6 +163,7 @@ class OGCServiceDumper:
         self.max_box_dims = max_box_dims
         self.fixed_buffer = fixed_buffer
         self.wms_map_size = wms_map_size
+        self.drop_id = drop_id
 
         self.retrieval_mode = retrieval_mode
 
@@ -599,11 +602,17 @@ class OGCServiceDumper:
                 self.state.update_coverage(cell_key, Extent.EXPLORED)
 
 
+    def _maybe_drop_id(self, feature):
+        if self.drop_id and 'id' in feature:
+            del feature['id']
+
     def __iter__(self):
         if self.retrieval_mode == RetrievalMode.OFFSET:
             while True:
                 feats = self.get_features(self.batch_size)
-                yield from feats
+                for feat in feats:
+                    self._maybe_drop_id(feat)
+                    yield feat
 
                 self.state.update(self.batch_size, len(feats))
 
@@ -611,9 +620,11 @@ class OGCServiceDumper:
                     break
         elif self.retrieval_mode == RetrievalMode.EXTENT_FIXED_BUFFER:
             for feature in self.scrape_envelope_fixed_buffer(self.initial_bounds, "0"):
+                self._maybe_drop_id(feature)
                 if self.state.add_feature(feature):
                     yield feature
         else:
             for feature in self.scrape_an_envelope(self.initial_bounds, "0"):
+                self._maybe_drop_id(feature)
                 if self.state.add_feature(feature):
                     yield feature
