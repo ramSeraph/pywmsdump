@@ -44,9 +44,6 @@ def get_global_bounds(crs_str):
     b = transformer.transform_bounds(*crs.area_of_use.bounds)
     return { 'xmin': b[0], 'ymin': b[1], 'xmax': b[2], 'ymax': b[3] }
 
-# Virtual map size for GetFeatureInfo calls
-WMS_MAP_SIZE = 256
-
 DEFAULTS = {
     'retrieval_mode': RetrievalMode.OFFSET,
     'operation': Operation.GetMap,
@@ -64,6 +61,7 @@ DEFAULTS = {
     'kml_strip_point': True,
     'kml_keep_original_props': False,
     'fixed_buffer': None,
+    'wms_map_size': 256,
 }
 
 def truncate_nested_coordinates(coords, precision):
@@ -112,6 +110,7 @@ class OGCServiceDumper:
                  bounds=None,
                  max_box_dims=None,
                  fixed_buffer=DEFAULTS['fixed_buffer'],
+                 wms_map_size=DEFAULTS['wms_map_size'],
                  session=None,
                  get_nth=None,
                  req_params={}):
@@ -161,6 +160,7 @@ class OGCServiceDumper:
 
         self.max_box_dims = max_box_dims
         self.fixed_buffer = fixed_buffer
+        self.wms_map_size = wms_map_size
 
         self.retrieval_mode = retrieval_mode
 
@@ -235,8 +235,8 @@ class OGCServiceDumper:
             'maxFeatures': count,
             'srs': self.out_srs,
             'format': fmt,
-            'width': WMS_MAP_SIZE,
-            'height': WMS_MAP_SIZE,
+            'width': self.wms_map_size,
+            'height': self.wms_map_size,
             'styles': '',
             'bbox': bbox_str
         }
@@ -250,9 +250,9 @@ class OGCServiceDumper:
     def get_params_WMS_GetFeatureInfo(self, count, bounds):
         bbox_str = bbox_to_str(bounds, None)
 
-        x = int(WMS_MAP_SIZE / 2)
-        y = int(WMS_MAP_SIZE / 2)
-        r = math.ceil(WMS_MAP_SIZE / ( 2.0 ** 0.5 ))
+        x = int(self.wms_map_size / 2)
+        y = int(self.wms_map_size / 2)
+        r = math.ceil(self.wms_map_size / ( 2.0 ** 0.5 ))
 
         params = {
             'service': Service.WMS.value,
@@ -264,8 +264,8 @@ class OGCServiceDumper:
             'srs': self.out_srs,
             'info_format': 'application/json',
             'with_geometry': 'true',
-            'width': WMS_MAP_SIZE,
-            'height': WMS_MAP_SIZE,
+            'width': self.wms_map_size,
+            'height': self.wms_map_size,
             'styles': '',
             'bbox': bbox_str,
             'x': x,
@@ -412,8 +412,8 @@ class OGCServiceDumper:
 
     def get_grid_dimensions(self):
         """Calculate grid dimensions based on fixed_buffer size."""
-        cols = math.ceil(WMS_MAP_SIZE / self.fixed_buffer)
-        rows = math.ceil(WMS_MAP_SIZE / self.fixed_buffer)
+        cols = math.ceil(self.wms_map_size / self.fixed_buffer)
+        rows = math.ceil(self.wms_map_size / self.fixed_buffer)
         return cols, rows
 
     def get_cell_envelope(self, envelope, cell_index, cols, rows):
@@ -442,8 +442,8 @@ class OGCServiceDumper:
         # Calculate pixel position for the center of this grid cell
         col = cell_index % cols
         row = cell_index // cols
-        x = int((col + 0.5) * (WMS_MAP_SIZE / cols))
-        y = int((row + 0.5) * (WMS_MAP_SIZE / rows))
+        x = int((col + 0.5) * (self.wms_map_size / cols))
+        y = int((row + 0.5) * (self.wms_map_size / rows))
 
         params = {
             'service': Service.WMS.value,
@@ -455,8 +455,8 @@ class OGCServiceDumper:
             'srs': self.out_srs,
             'info_format': 'application/json',
             'with_geometry': 'true',
-            'width': WMS_MAP_SIZE,
-            'height': WMS_MAP_SIZE,
+            'width': self.wms_map_size,
+            'height': self.wms_map_size,
             'styles': '',
             'bbox': bbox_str,
             'x': x,
