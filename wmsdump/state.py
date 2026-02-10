@@ -6,7 +6,13 @@ from pathlib import Path
 
 import jsonschema
 
+from .enums import Service, Operation, RetrievalMode, Extent, parse_version
+
 logger = logging.getLogger(__name__)
+
+# Build patterns from enum values
+SERVICE_PATTERN = '|'.join(s.value for s in [Service.WFS, Service.WMS])
+OPERATION_PATTERN = '|'.join(o.value for o in Operation)
 
 COMMON_PROPS = {
     "url": {
@@ -21,7 +27,7 @@ COMMON_PROPS = {
     "service": {
         "description": "the ogc service used.. one of WMS or WFS",
         "type": "string",
-        "pattern": "WFS|WMS"
+        "pattern": SERVICE_PATTERN
     },
     "version": {
         "description": "version of WMS or WFS protocol in use",
@@ -31,7 +37,7 @@ COMMON_PROPS = {
     "operation": {
         "description": "the ogc operation used.. one of GetMap, GetFeatureInfo or GetFeature",
         "type": "string",
-        "pattern": "GetMap|GetFeatureInfo|GetFeature"
+        "pattern": OPERATION_PATTERN
     }
 }
 
@@ -80,9 +86,9 @@ EXTENT_SCHEMA = {
 def validate_state_dict(state_data):
     mode = state_data.get('mode', None)
     schema = None
-    if mode == 'EXTENT':
+    if mode == RetrievalMode.EXTENT.value:
         schema = EXTENT_SCHEMA
-    elif mode == 'OFFSET':
+    elif mode == RetrievalMode.OFFSET.value:
         schema = OFFSET_SCHEMA
     else:
         return False, f'{mode=} not supported'
@@ -94,11 +100,6 @@ def validate_state_dict(state_data):
 
     return True, None
 
-
-class Extent(Enum):
-    NOT_PRESENT = 0
-    OPEN = 1
-    EXPLORED = 2
 
 class State:
     def __init__(self, 
@@ -118,9 +119,9 @@ class State:
 
     def from_dict(**params):
         mode = params.pop('mode', None)
-        if mode == 'EXTENT':
+        if mode == RetrievalMode.EXTENT:
             return ExtentState(**params)
-        if mode == 'OFFSET':
+        if mode == RetrievalMode.OFFSET:
             return OffsetState(**params)
 
         raise Exception(f'Unsupported mode: {mode}')
@@ -157,23 +158,24 @@ class State:
         return {
             "url": self.url,
             "layername": self.layername,
-            "service": self.service,
-            "version": self.version,
-            "operation": self.operation,
-            "mode": self.mode
+            "service": self.service.value,
+            "version": self.version.value,
+            "operation": self.operation.value,
+            "mode": self.mode.value
         }
 
 class ExtentState(State):
     def __init__(self, explored_tree={}, **params):
         super().__init__(**params)
-        self.mode = 'EXTENT'
-        self.explored_tree = explored_tree
+        self.mode = RetrievalMode.EXTENT
+        # Convert integer values to Extent enums when loading
+        self.explored_tree = {k: Extent(v) for k, v in explored_tree.items()}
         self.done = {}
         self.current_count = 0
         self.get_nth = None
 
     def update_coverage(self, key, status):
-        self.explored_tree[key] = status.value
+        self.explored_tree[key] = status
         if self.updatecb is not None:
             self.updatecb(self.get_dict())
 
@@ -203,8 +205,9 @@ class ExtentState(State):
     def get_dict(self):
         d = super().get_dict()
 
+        # Convert Extent enums to integers for JSON serialization
         d.update({
-            'explored_tree': self.explored_tree 
+            'explored_tree': {k: v.value for k, v in self.explored_tree.items()}
         })
         return d
 
@@ -217,7 +220,7 @@ class OffsetState(State):
                  **params):
 
         super().__init__(**params)
-        self.mode = 'OFFSET'
+        self.mode = RetrievalMode.OFFSET
 
         self.sort_key = sort_key
         self.downloaded_count = downloaded_count
@@ -257,6 +260,25 @@ class OffsetState(State):
         return d
 
 
+def convert_state_data_to_enums(state_data):
+    """Convert string/int values in state data to enums."""
+    if 'service' in state_data:
+        state_data['service'] = Service(state_data['service'])
+    if 'operation' in state_data:
+        state_data['operation'] = Operation(state_data['operation'])
+    if 'mode' in state_data:
+        state_data['mode'] = RetrievalMode(state_data['mode'])
+    if 'version' in state_data and 'service' in state_data:
+        state_data['version'] = parse_version(state_data['service'], state_data['version'])
+    return state_data
+
+
+def load_state_from_json(state_file):
+    """Load state data from JSON file and convert to enums."""
+    state_data = json.loads(Path(state_file).read_text())
+    return convert_state_data_to_enums(state_data)
+
+
 def get_state_from_files(state_file, output_file, **params):
     output_file_exists = Path(output_file).exists()
     state_file_exists = Path(state_file).exists()
@@ -286,9 +308,11 @@ def get_state_from_files(state_file, output_file, **params):
             logger.error(f'state in file is invalid. Reason: {reason}')
             return None
 
+        # Convert to enums after validation
+        state_data = convert_state_data_to_enums(state_data)
         state = State.from_dict(**state_data)
 
-        if state.mode == 'OFFSET':
+        if state.mode == RetrievalMode.OFFSET:
             logger.info(f'Counting existing records in {output_file}')
             seen_count = 0
             with open(output_file, 'r') as f:

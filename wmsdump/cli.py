@@ -17,6 +17,7 @@ from wmsdump.dumper import (
     OGCServiceDumper, DEFAULTS,
     bbox_to_str, get_global_bounds
 )
+from wmsdump.enums import Service, Operation, RetrievalMode, Format, Flavor, parse_version
 from wmsdump.logging import setup_logging
 from wmsdump.errors import (
     SortKeyRequiredException, InvalidSortKeyException,
@@ -28,6 +29,10 @@ from wmsdump.errors import (
 logger = logging.getLogger(__name__)
 
 req_params = {}
+
+def enum_values(enum_class):
+    """Get list of values from an enum for use with click.Choice."""
+    return [e.value for e in enum_class]
 
 def add_to_url(url, piece):
     if url.endswith('/'):
@@ -205,12 +210,12 @@ def main(log_level, no_ssl_verify, request_timeout, header):
               help='Url of the wms/wfs endpoint from which we can probe for capabilities.'
                    'If not provided, will be derived from geoserver-url')
 @click.option('--service', '-s',
-              type=click.Choice(['WMS', 'WFS'], case_sensitive=False),
-              default='WFS', show_default=True,
+              type=click.Choice(enum_values(Service), case_sensitive=False),
+              default=Service.WFS.value, show_default=True,
               help='service to use for extracting data, one of WFS or WMS')
 @click.option('--service-version', '-v',
               help='the protocol version to use. defaults to'
-                   f' \'{DEFAULTS["wms_version"]}\' for WMS and \'{DEFAULTS["wfs_version"]}\' for WFS')
+                   f' \'{DEFAULTS["wms_version"].value}\' for WMS and \'{DEFAULTS["wfs_version"].value}\' for WFS')
 @click.option('--namespace', '-n',
               help='only look for layers in a given namespace at the server,'
                    'only supported on geoserver implementations of wms')
@@ -222,6 +227,9 @@ def main(log_level, no_ssl_verify, request_timeout, header):
               help='scrape the geoserver web page instead of reading capabilities.'
                    ' Useful when capabilities is broken because of large number of layers')
 def explore(geoserver_url, service_url, service, service_version, namespace, scrape_webpage, output_file):
+    # Convert CLI string to enum
+    service = Service(service)
+    
     if geoserver_url is None and service_url is None:
         logger.error('Invalid invocation: '
                      'One of "--service-url" or "--geoserver-url" must be provided')
@@ -242,7 +250,9 @@ def explore(geoserver_url, service_url, service, service_version, namespace, scr
         logger.info(f'setting wms url to "{service_url}"')
 
     if service_version is None:
-        service_version = DEFAULTS['wms_version'] if service == 'WMS' else DEFAULTS['wfs_version']
+        service_version = DEFAULTS['wms_version'] if service == Service.WMS else DEFAULTS['wfs_version']
+    else:
+        service_version = parse_version(service, service_version)
 
     layer_list = []
     service_info = {}
@@ -262,7 +272,7 @@ def explore(geoserver_url, service_url, service, service_version, namespace, scr
             return
         logger.info('Could obtain some partial results.. dumping them')
 
-    print_service_info(service, service_info)
+    print_service_info(service.value, service_info)
     handle_layer_list(layer_list, output_file)
 
 
@@ -281,25 +291,25 @@ def explore(geoserver_url, service_url, service, service_version, namespace, scr
               help='Url of the wms/wfs endpoint from which we can retrieve data. '
                    'If not provided, will be derived from geoserver-url')
 @click.option('--service', '-s',
-              type=click.Choice(['WMS', 'WFS'], case_sensitive=False),
-              default='WFS', show_default=True,
+              type=click.Choice(enum_values(Service), case_sensitive=False),
+              default=Service.WFS.value, show_default=True,
               help='service to use for extracting data, one of WFS or WMS')
 @click.option('--service-version', '-v',
               help='the protocol version to use. defaults to'
-                   f' \'{DEFAULTS["wms_version"]}\' for WMS and \'{DEFAULTS["wfs_version"]}\' for WFS')
+                   f' \'{DEFAULTS["wms_version"].value}\' for WMS and \'{DEFAULTS["wfs_version"].value}\' for WFS')
 @click.option('--retrieval-mode', '-m',
-              type=click.Choice(['OFFSET', 'EXTENT'], case_sensitive=False),
-              default=DEFAULTS['retrieval_mode'], show_default=True,
+              type=click.Choice(enum_values(RetrievalMode), case_sensitive=False),
+              default=DEFAULTS['retrieval_mode'].value, show_default=True,
               help='which method to use to batch record retrieval, OFFSET uses record offset paging, '
                    'EXTENT uses bbox splitting and drilling down by spatial extent, '
                    'when using GetFeatureInfo this will be overriden to EXTENT')
 @click.option('--operation', '-o',
-              type=click.Choice(['GetMap', 'GetFeatureInfo'], case_sensitive=False),
-              default=DEFAULTS['operation'], show_default=True,
+              type=click.Choice(enum_values(Operation), case_sensitive=False),
+              default=DEFAULTS['operation'].value, show_default=True,
               help='which operation to use for querying a WMS endpoint')
 @click.option('--flavor', 
-              type=click.Choice(['Geoserver', 'QGISserver'], case_sensitive=False),
-              default=DEFAULTS['flavor'], show_default=True,
+              type=click.Choice(enum_values(Flavor), case_sensitive=False),
+              default=DEFAULTS['flavor'].value, show_default=True,
               help='vendor of the WMS services, useful to specify for GetFeatureInfo based retrieval')
 @click.option('--sort-key', '-k',
               help='key to use to do paged retrieval')
@@ -324,8 +334,8 @@ def explore(geoserver_url, service_url, service, service_version, namespace, scr
               help='decimal point precision of geometry to be returned, '
                    'truncation is done on client side. -1 means no truncation')
 @click.option('--getmap-format', '-f',
-              type=click.Choice(['KML', 'GEORSS'], case_sensitive=False),
-              default=DEFAULTS['getmap_format'], show_default=True,
+              type=click.Choice(enum_values(Format), case_sensitive=False),
+              default=DEFAULTS['getmap_format'].value, show_default=True,
               help='which format to use while pulling using WMS GetMap')
 @click.option('--kml-strip-point/--no-kml-strip-point',
               default=DEFAULTS['kml_strip_point'], show_default=True,
@@ -358,16 +368,25 @@ def extract(layername, output_file, output_dir,
             retry_delay, bounds,
             max_box_dims, skip_index):
 
+    # Convert CLI strings to enums
+    service = Service(service)
+    operation = Operation(operation)
+    retrieval_mode = RetrievalMode(retrieval_mode)
+    getmap_format = Format(getmap_format)
+    flavor = Flavor(flavor)
+
     if service_version is None:
-        service_version = DEFAULTS['wms_version'] if service == 'WMS' else DEFAULTS['wfs_version']
+        service_version = DEFAULTS['wms_version'] if service == Service.WMS else DEFAULTS['wfs_version']
+    else:
+        service_version = parse_version(service, service_version)
 
-    if service == 'WMS' and operation == 'GetFeatureInfo':
-        if retrieval_mode != 'EXTENT':
+    if service == Service.WMS and operation == Operation.GetFeatureInfo:
+        if retrieval_mode != RetrievalMode.EXTENT:
             logger.info('Using GetFeatureInfo for retrieval.. overriding mode to EXTENT')
-            retrieval_mode = 'EXTENT'
+            retrieval_mode = RetrievalMode.EXTENT
 
-    if service == 'WFS':
-        operation = 'GetFeature'
+    if service == Service.WFS:
+        operation = Operation.GetFeature
 
     if geoserver_url is None and service_url is None:
         logger.error('Invalid invocation: '
@@ -403,7 +422,7 @@ def extract(layername, output_file, output_dir,
             logger.error(f'Invalid bounds string: "{bounds}"')
             return
 
-    if retrieval_mode == 'EXTENT' and max_box_dims is not None:
+    if retrieval_mode == RetrievalMode.EXTENT and max_box_dims is not None:
         try:
             max_box_dims = get_box_dims(max_box_dims)
         except Exception:
@@ -427,7 +446,7 @@ def extract(layername, output_file, output_dir,
     if state is None:
         return
 
-    if skip_index != 0 and retrieval_mode != 'OFFSET':
+    if skip_index != 0 and retrieval_mode != RetrievalMode.OFFSET:
         logger.error('skip-index can\'t be used for non OFFSET based retrieval')
         return
 
@@ -439,7 +458,7 @@ def extract(layername, output_file, output_dir,
         state.update(skip_index, 0)
 
     writer = FileWriter(output_file,
-                        keep_idx=(retrieval_mode == 'EXTENT'))
+                        keep_idx=(retrieval_mode == RetrievalMode.EXTENT))
 
     dumper = OGCServiceDumper(service_url, layername, service,
                               service_version=service_version,
@@ -480,9 +499,9 @@ def extract(layername, output_file, output_dir,
         logger.error('WFS is not supported on this endpoint.. '
                      'try using --service/-s WMS')
     except ServiceUnsupportedException:
-        alt_service = 'WMS' if service == 'WFS' else 'WFS'
-        logger.error(f'{service} is not supported on this endpoint.. '
-                     f'try using --service/-s {alt_service}')
+        alt_service = Service.WMS if service == Service.WFS else Service.WFS
+        logger.error(f'{service.value} is not supported on this endpoint.. '
+                     f'try using --service/-s {alt_service.value}')
     except KMLUnsupportedException:
         logger.error('kml is not supported on this endpoint.. '
                      'try using --getmap-format/-f GEORSS')

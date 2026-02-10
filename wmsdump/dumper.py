@@ -13,9 +13,10 @@ try:
 except ImportError:
     pyproj_available = False
 
-from .state import State, Extent
+from .state import State
 from .georss_helper import georss_extract_features
 from .kml_helper import kml_extract_features
+from .enums import Service, Operation, RetrievalMode, Format, Flavor, Extent, WMSVersion, WFSVersion
 from .errors import (
     handle_error_xml, KnownException, ZeroAreaException,
     optionally_save_to_file
@@ -49,11 +50,11 @@ def get_global_bounds(crs_str):
 
 
 DEFAULTS = {
-    'retrieval_mode': 'OFFSET',
-    'operation': 'GetMap',
-    'flavor': 'Geoserver',
-    'wms_version': '1.1.1',
-    'wfs_version': '1.0.0',
+    'retrieval_mode': RetrievalMode.OFFSET,
+    'operation': Operation.GetMap,
+    'flavor': Flavor.Geoserver,
+    'wms_version': WMSVersion.V1_1_1,
+    'wfs_version': WFSVersion.V1_0_0,
     'batch_size': 1000,
     'requests_to_pause': 10,
     'pause_seconds': 2,
@@ -61,7 +62,7 @@ DEFAULTS = {
     'retry_delay': 5,
     'geometry_precision': -1,
     'out_srs': 'EPSG:4326',
-    'getmap_format': 'KML',
+    'getmap_format': Format.KML,
     'kml_strip_point': True,
     'kml_keep_original_props': False,
 }
@@ -115,28 +116,28 @@ class OGCServiceDumper:
                  get_nth=None,
                  req_params={}):
 
-        if service not in ['WMS', 'WFS']:
+        if service not in [Service.WMS, Service.WFS]:
             raise Exception('Service expected to be one of WMS or WFS')
         self.service = service
 
         if service_version is None:
-            service_version = DEFAULTS['wms_version'] if service == 'WMS' else DEFAULTS['wfs_version']
+            service_version = DEFAULTS['wms_version'] if service == Service.WMS else DEFAULTS['wfs_version']
         self.service_version = service_version
 
-        if self.service == 'WFS':
-            operation = 'GetFeature'
+        if self.service == Service.WFS:
+            operation = Operation.GetFeature
         self.operation = operation
 
-        self.flavor = flavor
-        if flavor not in ['Geoserver', 'QGISserver']:
+        if flavor not in [Flavor.Geoserver, Flavor.QGISserver]:
             raise Exception('flavor should be one of Geoserver or QGISserver')
+        self.flavor = flavor
 
-        if retrieval_mode not in ['OFFSET', 'EXTENT']:
-            raise Exception('retrieval mode should be one of OFFSET or EXTENSION')
+        if retrieval_mode not in [RetrievalMode.OFFSET, RetrievalMode.EXTENT]:
+            raise Exception('retrieval mode should be one of OFFSET or EXTENT')
 
-        if self.operation == 'GetFeatureInfo' and retrieval_mode != 'EXTENT':
+        if self.operation == Operation.GetFeatureInfo and retrieval_mode != RetrievalMode.EXTENT:
             logger.info('Overriding retrieval mode to EXTENT for GetFeatureInfo call')
-            retrieval_mode == 'EXTENT'
+            retrieval_mode = RetrievalMode.EXTENT
 
         self.out_srs = out_srs
         if bounds is None:
@@ -172,7 +173,7 @@ class OGCServiceDumper:
                                          mode=self.retrieval_mode,
                                          sort_key=self.sort_key)
 
-        if retrieval_mode == 'EXTENT' and get_nth is None:
+        if retrieval_mode == RetrievalMode.EXTENT and get_nth is None:
             raise Exception('get_nth func needs to be passed to help with deduplication if retrieval mode is EXTENT')
 
         self.state.get_nth = get_nth
@@ -186,8 +187,8 @@ class OGCServiceDumper:
     def get_params_WFS(self, count, bounds, no_index, no_sort):
 
         params = {
-            'service': 'WFS',
-            'version': self.service_version,
+            'service': Service.WFS.value,
+            'version': self.service_version.value,
             'request': 'GetFeature',
             'typeName': self.layername,
             'outputFormat': "application/json",
@@ -196,7 +197,7 @@ class OGCServiceDumper:
         if not no_index:
             params['startIndex'] = self.state.index_done_till
 
-        fc_key = 'count' if self.service_version == '2.0.0' else 'maxFeatures'
+        fc_key = 'count' if self.service_version == WFSVersion.V2_0_0 else 'maxFeatures'
         params[fc_key] = count
 
         if not no_sort and self.sort_key is not None:
@@ -209,10 +210,10 @@ class OGCServiceDumper:
 
     def get_params_WMS_GetMap(self, count, bounds, no_index, no_sort):
         bbox_str =  bbox_to_str(bounds, None)
-        fmt = 'application/atom xml' if self.getmap_format == 'GEORSS' else 'application/vnd.google-earth.kml+xml'
+        fmt = 'application/atom xml' if self.getmap_format == Format.GEORSS else 'application/vnd.google-earth.kml+xml'
         params = {
-            'service': 'WMS',
-            'version': self.service_version,
+            'service': Service.WMS.value,
+            'version': self.service_version.value,
             'request': 'GetMap',
             'layers': self.layername,
             'maxFeatures': count,
@@ -240,8 +241,8 @@ class OGCServiceDumper:
         r = math.ceil(WIDTH / ( 2.0 ** 0.5 ))
 
         params = {
-            'service': 'WMS',
-            'version': self.service_version,
+            'service': Service.WMS.value,
+            'version': self.service_version.value,
             'request': 'GetFeatureInfo',
             'layers': self.layername,
             'query_layers': self.layername,
@@ -259,7 +260,7 @@ class OGCServiceDumper:
             'j': y,
         }
 
-        if self.flavor != 'QGISserver':
+        if self.flavor != Flavor.QGISserver:
             params['buffer'] = r
         else:
             params['FI_LINE_TOLERANCE'] = r
@@ -271,20 +272,20 @@ class OGCServiceDumper:
 
 
     def get_params(self, count, no_index, no_sort):
-        if self.service == 'WFS':
+        if self.service == Service.WFS:
             return self.get_params_WFS(count, None, no_index, no_sort)
 
         return self.get_params_WMS_GetMap(count, self.initial_bounds, no_index, no_sort)
 
 
     def get_bounded_params(self, bounds, count):
-        if self.operation == 'GetFeature':
+        if self.operation == Operation.GetFeature:
             return self.get_params_WFS(count, bounds, True, True)
 
-        if self.operation == 'GetMap':
+        if self.operation == Operation.GetMap:
             return self.get_params_WMS_GetMap(count, bounds, True, True)
 
-        if self.operation == 'GetFeatureInfo':
+        if self.operation == Operation.GetFeatureInfo:
             return self.get_params_WMS_GetFeatureInfo(count, bounds)
 
         raise Exception(f'Unexpected operation: {self.operation}')
@@ -339,20 +340,20 @@ class OGCServiceDumper:
         return feats
 
     def parse_response_getmap(self, resp_text):
-        if self.getmap_format == 'GEORSS':
+        if self.getmap_format == Format.GEORSS:
             return self.parse_response_georss(resp_text)
         return self.parse_response_kml(resp_text)
 
     def parse_response(self, resp_text):
         optionally_save_to_file(resp_text)
-        if self.service == 'WFS':
+        if self.service == Service.WFS:
             return self.parse_response_geojson(resp_text)
 
         return self.parse_response_getmap(resp_text)
 
     def parse_bounded_response(self, resp_text):
         optionally_save_to_file(resp_text)
-        if self.operation == 'GetMap':
+        if self.operation == Operation.GetMap:
             return self.parse_response_getmap(resp_text)
 
         return self.parse_response_geojson(resp_text)
@@ -440,8 +441,7 @@ class OGCServiceDumper:
         return True
 
     def scrape_an_envelope(self, envelope, key):
-        status = self.state.explored_tree.get(key, Extent.NOT_PRESENT.value)
-        status = Extent(status)
+        status = self.state.explored_tree.get(key, Extent.NOT_PRESENT)
         if status == Extent.EXPLORED:
             return
 
@@ -475,7 +475,7 @@ class OGCServiceDumper:
 
 
     def __iter__(self):
-        if self.retrieval_mode == 'OFFSET':
+        if self.retrieval_mode == RetrievalMode.OFFSET:
             while True:
                 feats = self.get_features(self.batch_size)
                 for feat in feats:

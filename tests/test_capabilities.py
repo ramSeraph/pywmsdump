@@ -1,10 +1,12 @@
 import json
 
-from unittest import TestCase
 from pathlib import Path
+from unittest import TestCase
 
 from wmsdump.capabilities import parse_capabilities
-from wmsdump.errors import WFSUnsupportedException, ServiceUnsupportedException
+from wmsdump.enums import Service
+from wmsdump.errors import ServiceUnsupportedException, WFSUnsupportedException
+
 
 class TestCapabilitiesParsing(TestCase):
     def setUp(self):
@@ -25,7 +27,7 @@ class TestCapabilitiesParsing(TestCase):
 
         layer_list = []
         service_info = {}
-        parse_capabilities('WMS', xml_txt, layer_list, service_info)
+        parse_capabilities(Service.WMS, xml_txt, layer_list, service_info)
 
         self.assertEqual(layer_list, expected['layer_list'])
         self.assertEqual(service_info, expected['service_info'])
@@ -36,7 +38,7 @@ class TestCapabilitiesParsing(TestCase):
 
         layer_list = []
         service_info = {}
-        parse_capabilities('WMS', xml_txt, layer_list, service_info)
+        parse_capabilities(Service.WMS, xml_txt, layer_list, service_info)
 
         self.assertEqual(layer_list, expected['layer_list'])
         self.assertEqual(service_info, expected['service_info'])
@@ -48,7 +50,7 @@ class TestCapabilitiesParsing(TestCase):
         layer_list = []
         service_info = {}
         with self.assertRaises(Exception):
-            parse_capabilities('WMS', xml_txt, layer_list, service_info)
+            parse_capabilities(Service.WMS, xml_txt, layer_list, service_info)
 
         self.assertEqual(layer_list, expected['layer_list'])
         self.assertEqual(service_info, expected['service_info'])
@@ -59,7 +61,7 @@ class TestCapabilitiesParsing(TestCase):
 
         layer_list = []
         service_info = {}
-        parse_capabilities('WFS', xml_txt, layer_list, service_info)
+        parse_capabilities(Service.WFS, xml_txt, layer_list, service_info)
 
         self.assertEqual(layer_list, expected['layer_list'])
         self.assertEqual(service_info, expected['service_info'])
@@ -70,7 +72,7 @@ class TestCapabilitiesParsing(TestCase):
         layer_list = []
         service_info = {}
         with self.assertRaises(WFSUnsupportedException):
-            parse_capabilities('WFS', xml_txt, layer_list, service_info)
+            parse_capabilities(Service.WFS, xml_txt, layer_list, service_info)
 
         self.assertEqual(layer_list, [])
         self.assertEqual(service_info, {})
@@ -81,7 +83,7 @@ class TestCapabilitiesParsing(TestCase):
         layer_list = []
         service_info = {}
         with self.assertRaises(ServiceUnsupportedException):
-            parse_capabilities('WFS', xml_txt, layer_list, service_info)
+            parse_capabilities(Service.WFS, xml_txt, layer_list, service_info)
 
         self.assertEqual(layer_list, [])
         self.assertEqual(service_info, {})

@@ -6,13 +6,14 @@ import requests
 import xmltodict
 
 from .errors import check_error_msg, optionally_save_to_file
+from .enums import Service
 
 logger = logging.getLogger(__name__)
 
 def get_capabilities(url, service, service_version, namespace=None, **req_args):
     query_params = {
-        "service": service,
-        "version": service_version,
+        "service": service.value,
+        "version": service_version.value,
         "request": "GetCapabilities"
     }
     if namespace is not None:
@@ -84,7 +85,7 @@ def parse_capabilities(service, xml_txt, layer_list, service_info):
                 layer_list.append(item)
         return True
 
-    if service == 'WMS':
+    if service == Service.WMS:
         xmltodict.parse(xml_txt, item_depth=5, item_callback=process_wms_5)
     else:
         xmltodict.parse(xml_txt, item_depth=6, item_callback=process_wfs_6)
