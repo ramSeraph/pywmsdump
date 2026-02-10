@@ -1,5 +1,4 @@
 import json
-
 from pathlib import Path
 from unittest import TestCase
 
@@ -86,4 +85,16 @@ class TestCapabilitiesParsing(TestCase):
             parse_capabilities(Service.WFS, xml_txt, layer_list, service_info)
 
         self.assertEqual(layer_list, [])
+        self.assertEqual(service_info, {})
+
+    def test_wfs_disabled_qgisserver(self):
+        xml_txt = self.load_file('wfs_disabled_qgisserver.xml')
+
+        layer_list = []
+        service_info = {}
+        with self.assertRaises(WFSUnsupportedException):
+            parse_capabilities(Service.WFS, xml_txt, layer_list, service_info)
+
+        self.assertEqual(layer_list, [])
+        self.assertEqual(service_info, {})
         self.assertEqual(service_info, {})

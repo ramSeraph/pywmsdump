@@ -5,7 +5,7 @@ import requests
 import xmltodict
 
 from .enums import Service
-from .errors import check_error_msg, optionally_save_to_file
+from .errors import check_error_msg, handle_error_xml, optionally_save_to_file
 
 logger = logging.getLogger(__name__)
 
@@ -37,13 +37,21 @@ def convert_item(item):
     return item.get('#text', None)
 
 def parse_capabilities(service, xml_txt, layer_list, service_info):
+    # Clean up XML - some servers return trailing % characters
+    xml_txt = xml_txt.strip().strip('%').strip()
+
     exceptions = []
+    needs_full_error_parse = False
 
     def process_error_2(path, item):
+        nonlocal needs_full_error_parse
         if matches(path, ['ServiceExceptionReport', 'ServiceException']):
-            item = convert_item(item)
-            if item is not None:
-                exceptions.append(item)
+            converted = convert_item(item)
+            if converted is not None:
+                exceptions.append(converted)
+            elif isinstance(item, dict) and any(k.startswith('@') for k in item.keys()):
+                # Element has attributes but #text not available at this depth
+                needs_full_error_parse = True
         return True
 
     def process_error_3(path, item):
@@ -95,6 +103,9 @@ def parse_capabilities(service, xml_txt, layer_list, service_info):
 
     if len(exceptions) > 0:
         check_error_msg(exceptions[0])
+    elif needs_full_error_parse:
+        # Streaming parse detected error element but couldn't extract text
+        handle_error_xml(xml_txt)
 
 
 def fill_layer_list(layer_list, service_info, service_url, service, service_version, namespace=None, **req_args):

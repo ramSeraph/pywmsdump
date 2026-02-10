@@ -1,0 +1,3 @@
+<ServiceExceptionReport version="1.3.0">
+ <ServiceException code="Service configuration error">Service unknown or unsupported</ServiceException>
+</ServiceExceptionReport>%

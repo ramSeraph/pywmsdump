@@ -1,10 +1,9 @@
 import json
-
-from unittest import TestCase
 from pathlib import Path
+from unittest import TestCase
 
+from wmsdump.errors import KMLUnsupportedException, LayerMissingException
 from wmsdump.kml_helper import kml_extract_features
-from wmsdump.errors import LayerMissingException, KMLUnsupportedException
 
 
 class TestKMLParsing(TestCase):

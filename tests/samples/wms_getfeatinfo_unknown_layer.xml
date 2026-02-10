@@ -1,0 +1,3 @@
+<ServiceExceptionReport version="1.3.0">
+ <ServiceException code="LayerNotDefined">Layer "school" does not exist or is not permitted</ServiceException>
+</ServiceExceptionReport>

@@ -1,13 +1,10 @@
 import json
-
-from unittest import TestCase
 from pathlib import Path
+from unittest import TestCase
 
+from wmsdump.errors import GeoRSSUnsupportedException, LayerMissingException, SortKeyRequiredException
 from wmsdump.georss_helper import georss_extract_features
-from wmsdump.errors import (
-    LayerMissingException, GeoRSSUnsupportedException,
-    SortKeyRequiredException
-)
+
 
 class TestGeorssParsing(TestCase):
     def setUp(self):

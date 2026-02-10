@@ -1,8 +1,9 @@
 from unittest import TestCase
+
 from wmsdump.dumper import truncate_geometry
 
 p1 = [77.89824947, 21.91597942]
-t_p1 = [77.898, 21.916] 
+t_p1 = [77.898, 21.916]
 
 p2 = [77.898237, 21.9153487]
 t_p2 = [77.898, 21.915]
@@ -35,17 +36,21 @@ class TestPrecision(TestCase):
         self.polygon_inp = { 'type': 'Polygon', 'coordinates': [[p2, p3, p4, p2], [p1, p2, p3, p1]] }
         self.polygon_outp_3 = { 'type': 'Polygon', 'coordinates': [[t_p2, t_p3, t_p4, t_p2], [t_p1, t_p2, t_p3, t_p1]] }
 
-        self.multipolygon_inp = { 'type': 'MultiPolygon', 'coordinates': [[[p2, p3, p4, p2], [p1, p2, p3, p1]],
-                                                                          [[p3, p4, p2, p3]]]}
-        self.multipolygon_outp_3 = { 'type': 'MultiPolygon', 'coordinates': [[[t_p2, t_p3, t_p4, t_p2], [t_p1, t_p2, t_p3, t_p1]],
-                                                                             [[t_p3, t_p4, t_p2, t_p3]]]}
+        self.multipolygon_inp = {
+            'type': 'MultiPolygon',
+            'coordinates': [[[p2, p3, p4, p2], [p1, p2, p3, p1]], [[p3, p4, p2, p3]]]
+        }
+        self.multipolygon_outp_3 = {
+            'type': 'MultiPolygon',
+            'coordinates': [[[t_p2, t_p3, t_p4, t_p2], [t_p1, t_p2, t_p3, t_p1]], [[t_p3, t_p4, t_p2, t_p3]]]
+        }
 
         self.multigeom_inp = {
             'type': 'GeometryCollection',
             'geometries': [
                 {'type': 'Point', 'coordinates': p1},
                 {'type': 'LineString', 'coordinates': [p2, p3]},
-                {'type': 'MultiPoint', 'coordinates': [p4, p5]}, 
+                {'type': 'MultiPoint', 'coordinates': [p4, p5]},
             ]
         }
         self.multigeom_outp_3 = {

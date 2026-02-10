@@ -9,7 +9,8 @@ SORT_KEY_ERR_MSGS = [ 'Cannot do natural order without a primary key, ' + \
 INVALID_PROP_NAME_ERR_MSGS = [ 'Illegal property name',
                                'Sort property \'[\\w:]+\' not available in [\\w:]+' ]
 WFS_DISABLED_ERR_MSGS = [ 'Service WFS is disabled',
-                          'WFS request not enabled' ]
+                          'WFS request not enabled',
+                          'Service unknown or unsupported' ]
 SERVICE_DISABLED_ERR_MSGS = [ 'Can\'t recognize service requested.' ]
 ZERO_AREA_ERR_MSGS = [ 'The request bounding box has zero area' ]
 KML_NOT_SUPPORTED_MSGS = [ 'There is no support for creating maps in kml format',
@@ -18,7 +19,9 @@ KML_NOT_SUPPORTED_MSGS = [ 'There is no support for creating maps in kml format'
                            'There is no support for creating maps in '
                            'application/vnd.google-earth.kml+xml format' ]
 GEORSS_NOT_SUPPORTED_MSGS = [ 'Creating maps using application/atom xml is not allowed' ]
-LAYER_MISSING_MSGS = [ 'Could not find layer' ]
+LAYER_MISSING_MSGS = [ 'Could not find layer',
+                       'does not exist',
+                       'Feature type [\\w:]+ unknown' ]
 
 class KnownException(Exception):
     pass
