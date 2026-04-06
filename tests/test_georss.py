@@ -61,3 +61,6 @@ class TestGeorssParsing(TestCase):
 
     def test_merge_polygons(self):
         self.match_output('georss_merge_polygons.xml', 'georss_merge_polygons.geojsonl')
+
+    def test_empty_where(self):
+        self.match_output('georss_empty_where.xml', 'georss_empty_where.geojsonl')

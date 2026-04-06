@@ -28,8 +28,10 @@ def extract_feature(entry):
     content = entry.get('content', {}).get('#text', '')
     props = get_props_from_html(content)
 
-    where = entry['georss:where']
-    if 'georss:polygon' in where:
+    where = entry.get('georss:where', None)
+    if where is None:
+        geom = None
+    elif 'georss:polygon' in where:
         points = get_points(where['georss:polygon'])
         geom = { 'type': 'Polygon', 'coordinates': [points] }
     elif 'georss:line' in where:
@@ -87,7 +89,8 @@ def combine_features(feats):
             continue
 
         props = non_empty_props[0] if len(non_empty_props) > 0 else {}
-        new_geom = combine_geoms([ f['geometry'] for f in f_feats ])
+        geoms = [ f['geometry'] for f in f_feats if f['geometry'] is not None ]
+        new_geom = combine_geoms(geoms) if geoms else None
         new_feat = { 'type': 'Feature', 'id': fid, 'properties': props, 'geometry': new_geom }
         new_feats.append(new_feat)
 

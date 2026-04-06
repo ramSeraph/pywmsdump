@@ -24,7 +24,10 @@ def fix_if_required(p):
 
 
 def get_polygons(feat):
-    s = shape(feat['geometry'])
+    geom = feat['geometry']
+    if geom is None:
+        return None
+    s = shape(geom)
     if s.geom_type not in ['Polygon', 'MultiPolygon']:
         return None
     s = fix_if_required(s)

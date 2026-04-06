@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><feed xmlns:georss="http://www.georss.org/georss" xmlns="http://www.w3.org/2005/Atom"><title>plot_boundary_iis</title><id>http://10.192.93.47:8080/geoserver/cite/wms?service=wms&amp;request=GetMap&amp;version=1.1.1&amp;format=application%2Fatom%20xml&amp;layers=plot_boundary_iis&amp;styles=plot_boundary_iis_final&amp;sortby=id&amp;height=256&amp;width=256&amp;transparent=false&amp;bbox=-180.0%2C-90.0%2C180.0%2C90.0&amp;srs=EPSG%3A4326&amp;maxfeatures=1&amp;startindex=160824</id><link href="http://10.192.93.47:8080/geoserver/cite/wms?service=wms&amp;request=GetMap&amp;version=1.1.1&amp;format=application%2Fatom%20xml&amp;layers=plot_boundary_iis&amp;styles=plot_boundary_iis_final&amp;sortby=id&amp;height=256&amp;width=256&amp;transparent=false&amp;bbox=-180.0%2C-90.0%2C180.0%2C90.0&amp;srs=EPSG%3A4326&amp;maxfeatures=1&amp;startindex=160824" rel="self"/><updated>2026-04-06T19:32:51+05:30</updated><entry><title>plot_boundary_iis.fid--561913dc_19d6310cb4f_5921</title><author><name>Claudius Ptolomaeus</name></author><id>http://10.192.93.47:8080/geoserver/cite/wms/reflect?format=application%2Fatom%2Bxml&amp;layers=cite%3Aplot_boundary_iis&amp;featureid=plot_boundary_iis.fid--561913dc_19d6310cb4f_5921</id><link href="http://10.192.93.47:8080/geoserver/cite/wms/reflect?format=application%2Fatom%2Bxml&amp;layers=cite%3Aplot_boundary_iis&amp;featureid=plot_boundary_iis.fid--561913dc_19d6310cb4f_5921" rel="self"/><updated>2026-04-06T19:32:55+05:30</updated><content type="html"><![CDATA[<h4>plot_boundary_iis</h4>
+
+<ul class="textattributes">
+  <li><strong><span class="atr-name">park_id</span>:</strong> <span class="atr-value">10</span></li>
+  <li><strong><span class="atr-name">plotno</span>:</strong> <span class="atr-value">59/2/20</span></li>
+  <li><strong><span class="atr-name">plotcat</span>:</strong> <span class="atr-value">Industrial Plot</span></li>
+  <li><strong><span class="atr-name">plotsize</span>:</strong> <span class="atr-value">1266.600</span></li>
+  <li><strong><span class="atr-name">plotrate</span>:</strong> <span class="atr-value">0</span></li>
+  <li><strong><span class="atr-name">maincharg</span>:</strong> <span class="atr-value">0.0</span></li>
+
+  <li><strong><span class="atr-name">owner</span>:</strong> <span class="atr-value">M/S. H. GURU INSTRUMENTS(NI) PVT LTD</span></li>
+
+
+  <li><strong><span class="atr-name">plotstatus</span>:</strong> <span class="atr-value">Allotted</span></li>
+  <li><strong><span class="atr-name">project</span>:</strong> <span class="atr-value">PROCESS CONTROL INSTRUMENTS</span></li>
+  <li><strong><span class="atr-name">entry_date</span>:</strong> <span class="atr-value">2007-01-20 00:00:00</span></li>
+  <li><strong><span class="atr-name">st_name</span>:</strong> <span class="atr-value">UTTAR PRADESH</span></li>
+
+  <li><strong><span class="atr-name">st_code</span>:</strong> <span class="atr-value">09</span></li>
+  <li><strong><span class="atr-name">userid</span>:</strong> <span class="atr-value">2114</span></li>
+  <li><strong><span class="atr-name">park_name</span>:</strong> <span class="atr-value">Sahibabad Site-IV</span></li>
+
+  <li><strong><span class="atr-name">lat</span>:</strong> <span class="atr-value">28.6711836371154973</span></li>
+  <li><strong><span class="atr-name">lon</span>:</strong> <span class="atr-value">77.366160893214996</span></li>
+  <li><strong><span class="atr-name">payment_org</span>:</strong> <span class="atr-value">Nivesh Mitra Single Window System, Government of Uttar Pradesh</span></li>
+  <li><strong><span class="atr-name">payment_link</span>:</strong> <span class="atr-value">https://niveshmitra.up.nic.in/ImpSec.aspx?ID=agro</span></li>
+
+  <li><strong><span class="atr-name">pid</span>:</strong> <span class="atr-value">175669</span></li>
+  <li><strong><span class="atr-name">entry_date_backup</span>:</strong> <span class="atr-value">2007-01-20 00:00:00.000</span></li>
+
+  <li><strong><span class="atr-name">id</span>:</strong> <span class="atr-value">458006</span></li>
+  <li><strong><span class="atr-name">gid</span>:</strong> <span class="atr-value">313593</span></li>
+
+  <li><strong><span class="atr-name">upload_mode</span>:</strong> <span class="atr-value">Manual Update</span></li>
+</ul>
+]]></content><georss:where/></entry><entry><id>http://10.192.93.47:8080/geoserver/cite/wms/reflect?format=application%2Fatom%2Bxml&amp;layers=cite%3Aplot_boundary_iis&amp;featureid=plot_boundary_iis.fid--561913dc_19d6310cb4f_5921#1</id><link href="http://10.192.93.47:8080/geoserver/cite/wms/reflect?format=application%2Fatom%2Bxml&amp;layers=cite%3Aplot_boundary_iis&amp;featureid=plot_boundary_iis.fid--561913dc_19d6310cb4f_5921" rel="related"/><title>plot_boundary_iis.fid--561913dc_19d6310cb4f_5921</title><georss:where/></entry></feed>
