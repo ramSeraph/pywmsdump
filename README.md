@@ -82,7 +82,7 @@ The following options are available on both `explore` and `extract` subcommands:
 *    `-t`, `--request-timeout`: timeout for the http requests in seconds. Default is no timeout.
 *    `-H`, `--header`: Header to be added to all network requests, in the format "Key:Value". Can be used multiple times.
 
-> **Deprecation Notice:** These options also exist at the top level (`wms-extractor --log-level ...`) but that usage is **deprecated**. Always pass them directly to the subcommand (e.g., `wms-extractor extract --log-level DEBUG ...`).
+> **Deprecation Notice:** These options were recently added to the subcommand level. Specifying them at the top level (`wms-extractor --log-level ...`) still works but is **deprecated**. Always pass them directly to the subcommand (e.g., `wms-extractor extract --log-level DEBUG ...`).
 
 ### 1. Explore
 
@@ -101,6 +101,10 @@ wms-extractor explore --help
 *   `-n`, `--namespace`: Only look for layers in a given namespace (Geoserver specific).
 *   `-o`, `--output-file`: File to write the layer list to.
 *   `-w`, `--scrape-webpage`: Scrape the GeoServer web page instead of reading capabilities. Useful when capabilities are broken.
+*   `-l`, `--log-level`: Log level. One of DEBUG,INFO,WARNING,ERROR,CRITICAL. Defaults to INFO.
+*   `--no-ssl-verify`: switch off ssl verification for all network calls.
+*   `-t`, `--request-timeout`: timeout for the http requests in seconds. Default is no timeout.
+*   `-H`, `--header`: Header to be added to all network requests, in the format "Key:Value". Can be used multiple times.
 
 **Examples:**
 
@@ -159,6 +163,10 @@ wms-extractor extract --help
 *   `--drop-id / --no-drop-id`: Whether to drop the id field from features. Applied after GeoRSS feature merging but before deduplication. Defaults to `False`.
 *   `--custom-dumper`: Path to a Python file containing a `SpecialDumper` class that subclasses `OGCServiceDumper` to override default behavior.
 *   `--skip-index`: Skip n elements in index (useful to skip records causing failure, only applicable for OFFSET retrieval).  Defaults to 0.
+*   `-l`, `--log-level`: Log level. One of DEBUG,INFO,WARNING,ERROR,CRITICAL. Defaults to INFO.
+*   `--no-ssl-verify`: switch off ssl verification for all network calls.
+*   `-t`, `--request-timeout`: timeout for the http requests in seconds. Default is no timeout.
+*   `-H`, `--header`: Header to be added to all network requests, in the format "Key:Value". Can be used multiple times.
 
 **Examples:**
 
