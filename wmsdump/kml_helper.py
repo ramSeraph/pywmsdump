@@ -81,7 +81,11 @@ def kml_extract_features(xml_text,
     xml_text = re.sub(r'&#([a-zA-Z0-9]+);?', r'[#\1;]', xml_text)
     handle_error_xml(xml_text)
     fh = io.StringIO(xml_text)
-    feature_collections = kml2geojson.main.convert(fh)
+    conversion_result = kml2geojson.main.convert(fh)
+    if isinstance(conversion_result, dict):
+        feature_collections = conversion_result['feature_collections']
+    else:
+        feature_collections = conversion_result
     data = feature_collections[0]
     feats = data['features']
     for feat in feats:
@@ -90,4 +94,3 @@ def kml_extract_features(xml_text,
                                                    strip_singular_points_from_multi_geoms)
 
     return feats
-

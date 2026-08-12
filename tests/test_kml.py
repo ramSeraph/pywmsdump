@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from unittest import TestCase
+from unittest.mock import patch
 
 from wmsdump.errors import KMLUnsupportedException, LayerMissingException
 from wmsdump.kml_helper import kml_extract_features
@@ -40,6 +41,26 @@ class TestKMLParsing(TestCase):
 
     def test_kml_linestrings(self):
         self.match_output('kml_linestrings.xml', 'kml_linestrings.geojsonl')
+
+    def test_kml2geojson_5_result_shape(self):
+        feature = {'type': 'Feature', 'properties': {}, 'geometry': None}
+        conversion_result = [{'type': 'FeatureCollection', 'features': [feature]}]
+
+        with patch('wmsdump.kml_helper.kml2geojson.main.convert', return_value=conversion_result):
+            feats = kml_extract_features('<kml/>', True, False)
+
+        self.assertEqual(feats, [feature])
+
+    def test_kml2geojson_6_result_shape(self):
+        feature = {'type': 'Feature', 'properties': {}, 'geometry': None}
+        conversion_result = {
+            'feature_collections': [{'type': 'FeatureCollection', 'features': [feature]}],
+        }
+
+        with patch('wmsdump.kml_helper.kml2geojson.main.convert', return_value=conversion_result):
+            feats = kml_extract_features('<kml/>', True, False)
+
+        self.assertEqual(feats, [feature])
 
     def test_layer_missing(self):
         xml_txt = self.load_file('layer_missing.xml')
