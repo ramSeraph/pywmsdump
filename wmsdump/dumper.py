@@ -17,6 +17,7 @@ from .errors import KnownException, ZeroAreaException, handle_error_xml, optiona
 from .georss_helper import georss_extract_features
 from .kml_helper import kml_extract_features
 from .state import State
+from .termination import ExtractionStopped
 
 logger = logging.getLogger(__name__)
 
@@ -115,7 +116,8 @@ class OGCServiceDumper:
                  drop_id=DEFAULTS['drop_id'],
                  session=None,
                  get_nth=None,
-                 req_params={}):
+                 req_params={},
+                 stop_requested=None):
 
         if service not in [Service.WMS, Service.WFS]:
             raise Exception('Service expected to be one of WMS or WFS')
@@ -202,6 +204,22 @@ class OGCServiceDumper:
             self.session = requests.session()
 
         self.req_count = 0
+        self.stop_requested = stop_requested
+
+    def check_stop(self):
+        if self.stop_requested is not None and self.stop_requested():
+            raise ExtractionStopped()
+
+    def wait(self, seconds):
+        """Keep retry/rate-limit waits interruptible without interrupting writes."""
+        if self.stop_requested is None:
+            time.sleep(seconds)
+            return
+        deadline = time.monotonic() + seconds
+        while time.monotonic() < deadline:
+            self.check_stop()
+            time.sleep(min(0.2, max(0, deadline - time.monotonic())))
+        self.check_stop()
 
     def get_params_WFS(self, count, bounds, no_index, no_sort):
 
@@ -312,6 +330,7 @@ class OGCServiceDumper:
         attempt = 0
 
         while True:
+            self.check_stop()
             attempt += 1
 
             try:
@@ -319,11 +338,12 @@ class OGCServiceDumper:
                 if not resp.ok:
                     raise Exception(f'Request failed - status: {resp.status_code}, text: {resp.text}')
             except Exception:
+                self.check_stop()
                 logger.info(f'request failed - attempt:{attempt}/{self.max_attempts}.. '
                             f'retrying in {self.retry_delay*attempt} secs')
                 if attempt >= self.max_attempts:
                     raise
-                time.sleep(self.retry_delay * attempt)
+                self.wait(self.retry_delay * attempt)
                 continue
 
             return resp.text
@@ -380,10 +400,11 @@ class OGCServiceDumper:
 
         if self.req_count == self.requests_to_pause:
             logger.info(f'pausing for {self.pause_seconds} secs')
-            time.sleep(self.pause_seconds)
+            self.wait(self.pause_seconds)
             self.req_count = 0
 
     def get_features(self, count, no_index=False, no_sort=False):
+        self.check_stop()
         self.pause_if_required()
 
         params = self.get_params(count, no_index, no_sort)
@@ -400,6 +421,7 @@ class OGCServiceDumper:
         return feats
 
     def get_bounded_features(self, bounds, count, key):
+        self.check_stop()
         self.pause_if_required()
 
         params = self.get_bounded_params(bounds, count)

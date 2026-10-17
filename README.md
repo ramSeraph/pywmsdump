@@ -146,6 +146,7 @@ wms-extractor extract --help
 *   `-o`, `--operation`: Which operation to use for querying the service. WMS supports `GetMap` or `GetFeatureInfo`; WFS uses `GetFeature` (auto-selected). Defaults to `GetMap` for WMS.
 *   `--flavor`: Vendor of the WMS service (`Geoserver` or `QGISserver`), useful to specify for GetFeatureInfo based retrieval. Defaults to `Geoserver`.
 *   `-k`, `--sort-key`: Key to use for paged retrieval (required when server requires it).
+*   `--force-sort-key-change`: Continue from the saved offset with a changed sort key. This can duplicate or skip records; other resume checks still apply.
 *   `-b`, `--batch-size`: Batch size to use for retrieval. Defaults to 1000.
 *   `-p`, `--pause-seconds`: Amount of time to pause between a batch of requests. Defaults to 2.
 *   `--requests-to-pause`: Number of requests to make before pausing. Defaults to 10.
@@ -245,6 +246,16 @@ punch-holes input.geojsonl output.geojsonl
 ## State Management
 
 `wmsdump` automatically creates a `.state` file alongside the output file. This file stores the progress of the extraction. If the extraction is interrupted, `wmsdump` will resume from the last known state when run again with the same parameters. To start a new extraction, delete both the output file and the `.state` file.
+
+If initialization was interrupted before the first checkpoint, an existing zero-byte output file without a `.state` file is treated as a fresh extraction. Any leftover `.state.tmp` file is overwritten by the next checkpoint. Nonempty output without a `.state` file is rejected and left untouched.
+
+You can correct a sort key and rerun without deleting files when the output is empty and the saved offset and record count are both zero. After any progress, changing the key requires deleting both files to restart, or explicitly passing `--force-sort-key-change` to continue from the saved offset. Forced continuation can duplicate or skip records because the ordering changes. The next checkpoint records the new key. Library callers can opt in with `force_sort_key_change=True` in `get_state_from_files`; all other identity and output-integrity checks still apply.
+
+The extraction CLI handles `SIGTERM` and `SIGINT` cooperatively. It finishes and checkpoints the current batch before stopping, retains the state file, and synchronizes output and state with `fsync()` on shutdown. An in-flight HTTP request is allowed to finish or time out; use `--request-timeout` to bound how long a stalled request can delay stopping. Retry and rate-limit waits respond to a stop request without waiting out their full delay. Signal handlers are restored when extraction exits.
+
+Normal checkpoints flush Python's output buffer before replacing the state file atomically. They record `output_bytes`, the committed GeoJSONL byte offset. On resume after a process crash or `SIGKILL`, any uncommitted tail is truncated and fetched again. A file shorter than its checkpoint is rejected. Legacy states without this field retain the existing record-count validation. Run only one writer per output/state pair. Per-batch checkpoints do not call `fsync()` and do not guarantee recovery from OS crashes or power loss.
+
+Library users can pass a `stop_requested` callable to `OGCServiceDumper`; it is checked at request boundaries and during retry/rate-limit waits, raising `wmsdump.termination.ExtractionStopped`. The library does not install signal handlers automatically. `get_state_from_files` requires an explicit `flush_output` callback, such as `flush_output=writer.flush`, so every checkpoint follows the output flush. Omitting it or passing a non-callable raises `TypeError` before any recovery or file changes. Custom dumpers should preserve these request/checkpoint boundaries when overriding iteration or request methods.
 
 ## Environment Variables
 

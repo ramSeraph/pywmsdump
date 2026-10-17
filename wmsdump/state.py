@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from pathlib import Path
 
 import jsonschema
@@ -266,8 +267,11 @@ class OffsetState(State):
                           f'doesn\'t match existing count({downloaded_count})'
 
         if self.sort_key != sort_key:
-            return False, f'sort_key in state({self.sort_key}) ' + \
-                          f'doesn\'t match existing sort_key({sort_key})'
+            return False, (
+                f'sort_key in state({self.sort_key}) does not match invocation sort_key({sort_key}). '
+                'Delete the output and state files to restart, or use --force-sort-key-change '
+                'to continue (may duplicate or skip records)'
+            )
         return True, None
 
     def update(self, index_delta, downloaded_count_delta):
@@ -306,14 +310,79 @@ def load_state_from_json(state_file):
     return convert_state_data_to_enums(state_data)
 
 
-def get_state_from_files(state_file, output_file, **params):
+def recover_output(state_file, output_file):
+    """Roll back a process-crash tail to the last committed byte offset.
+
+    Old states without output_bytes retain their existing count validation.
+    Never infer a missing output prefix or advance a checkpoint to match a tail.
+    Call only when this process is the sole writer and its buffers are closed.
+    """
+    state_data = json.loads(Path(state_file).read_text())
+    committed = state_data.get('output_bytes')
+    if committed is None:
+        return
+    if type(committed) is not int or committed < 0:
+        raise ValueError('Invalid committed output byte offset')
+    with open(output_file, 'r+b') as output:
+        output.seek(0, os.SEEK_END)
+        actual = output.tell()
+        if actual < committed:
+            raise ValueError('Output is shorter than the committed checkpoint; cannot safely resume')
+        if committed:
+            output.seek(committed - 1)
+            if output.read(1) != b'\n':
+                raise ValueError('Committed output byte offset is not a GeoJSONL line boundary')
+        if actual > committed:
+            logger.warning('Discarding %s uncommitted output bytes for replay', actual - committed)
+            output.truncate(committed)
+
+
+def sync_checkpoint(state_file, output_file):
+    """Synchronize output before state at clean termination, not every batch."""
+    for name in (output_file, state_file):
+        with open(name, 'rb') as f:
+            os.fsync(f.fileno())
+    if os.name != 'nt':
+        fd = os.open(Path(state_file).parent, os.O_RDONLY)
+        try:
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+
+
+def can_restart_with_new_sort_key(state, output_file):
+    """A changed sort key is safe only before any output or offset progress."""
+    return (
+        state.mode == RetrievalMode.OFFSET
+        and state.index_done_till == 0
+        and state.downloaded_count == 0
+        and Path(output_file).stat().st_size == 0
+    )
+
+
+def get_state_from_files(state_file, output_file, *, flush_output, force_sort_key_change=False, **params):
+    """Load resumable state, flushing the supplied writer before each checkpoint.
+
+    flush_output is required and must flush any Python buffering owned by the
+    output writer (for example, writer.flush).
+    Normal checkpoints provide process-crash consistency while the OS is alive;
+    they do not fsync each batch for power-loss durability.
+    Changing sort keys after progress requires force_sort_key_change=True and
+    may duplicate or skip records. All other resume checks still apply.
+    """
+    if not callable(flush_output):
+        raise TypeError('flush_output must be a callable that flushes the output writer')
+
     output_file_exists = Path(output_file).exists()
     state_file_exists = Path(state_file).exists()
 
     if output_file_exists and not state_file_exists:
-        logger.error(f'{output_file} exists already.. but {state_file} does not. '
-                      'Can\'t continue.. delete the existing file to proceed')
-        return None
+        if Path(output_file).is_file() and Path(output_file).stat().st_size == 0:
+            logger.info(f'{output_file} is empty and {state_file} is missing; starting a fresh extraction')
+        else:
+            logger.error(f'{output_file} exists already.. but {state_file} does not. '
+                          'Can\'t continue.. delete the existing file to proceed')
+            return None
 
     if state_file_exists and not output_file_exists:
         logger.error(f'{state_file} exists already.. but {output_file} does not. '
@@ -339,33 +408,68 @@ def get_state_from_files(state_file, output_file, **params):
         state_data = convert_state_data_to_enums(state_data)
         state = State.from_dict(**state_data)
 
+        resume_params = dict(params)
+        fresh_start = can_restart_with_new_sort_key(state, output_file)
+        if state.mode == RetrievalMode.OFFSET and (fresh_start or force_sort_key_change):
+            resume_params['sort_key'] = state.sort_key
+
+        # Validate invocation identity before truncating any uncommitted tail.
+        identity_params = dict(resume_params)
+        if state.mode == RetrievalMode.OFFSET:
+            identity_params['downloaded_count'] = state.downloaded_count
+        else:
+            identity_params.pop('sort_key', None)
+        in_sync, reason = state.is_in_sync(**identity_params)
+        if not in_sync:
+            logger.error(f'state not in sync. Reason: {reason}')
+            return None
+        try:
+            recover_output(state_file, output_file)
+        except ValueError as e:
+            logger.error(str(e))
+            return None
+
         if state.mode == RetrievalMode.OFFSET:
             logger.info(f'Counting existing records in {output_file}')
             seen_count = 0
             with open(output_file) as f:
                 for line in f:
                     seen_count += 1
-            params['downloaded_count'] = seen_count
+            resume_params['downloaded_count'] = seen_count
         else:
-            del params['sort_key']
+            del resume_params['sort_key']
             logger.info(f'Reading existing records in {output_file}')
             with open(output_file) as f:
                 for line in f:
                     state.add_raw_feature_no_dedup(line.strip('\n'))
 
-        in_sync, reason = state.is_in_sync(**params)
+        in_sync, reason = state.is_in_sync(**resume_params)
         if not in_sync:
             logger.error(f'state not in sync. Reason: {reason}')
             return None
+
+        if state.mode == RetrievalMode.OFFSET and state.sort_key != params.get('sort_key'):
+            new_sort_key = params.get('sort_key')
+            if fresh_start:
+                logger.info('No extraction progress saved; using sort key %r', new_sort_key)
+            else:
+                logger.warning('Forcing sort key change from %r to %r at offset %s; '
+                               'records may be duplicated or skipped',
+                               state.sort_key, new_sort_key, state.index_done_till)
+            state.sort_key = new_sort_key
     else:
         state = State.from_dict(**params)
 
     def update_file(s):
-        Path(state_file).write_text(json.dumps(s))
-        # to avoid state being written without a output file being present
-        # as the above condition doesn't allow resumption
+        flush_output()
         if not Path(output_file).exists():
             Path(output_file).write_text('')
+        checkpoint = dict(s, output_bytes=Path(output_file).stat().st_size)
+        temporary = Path(str(state_file) + '.tmp')
+        with temporary.open('w') as f:
+            json.dump(checkpoint, f)
+            f.flush()
+        os.replace(temporary, state_file)
     state.updatecb = update_file
 
     return state

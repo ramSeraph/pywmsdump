@@ -23,7 +23,8 @@ from wmsdump.errors import (
 )
 from wmsdump.geoserver import get_layer_list_from_page
 from wmsdump.logging import setup_logging
-from wmsdump.state import get_state_from_files
+from wmsdump.state import can_restart_with_new_sort_key, get_state_from_files, recover_output, sync_checkpoint
+from wmsdump.termination import ExtractionStopped, GracefulStop
 
 logger = logging.getLogger(__name__)
 
@@ -104,6 +105,10 @@ class FileWriter:
         if self.fh is not None:
             self.fh.close()
             self.fh = None
+
+    def flush(self):
+        if self.fh is not None:
+            self.fh.flush()
 
 EXPECTED_BOUNDS_FORMAT = '<xmin>,<ymin>,<xmax>,<ymax>'
 EXPECTED_MAX_BOX_FORMAT = '<deltax>,<deltay>'
@@ -363,6 +368,8 @@ def explore(log_level,
               help='vendor of the WMS services, useful to specify for GetFeatureInfo based retrieval')
 @click.option('--sort-key', '-k',
               help='key to use to do paged retrieval')
+@click.option('--force-sort-key-change', is_flag=True,
+              help='continue from the saved offset with a changed sort key; may duplicate or skip records')
 @click.option('--batch-size', '-b',
               type=int, default=DEFAULTS['batch_size'], show_default=True,
               help='batch size to use for retrieval')
@@ -440,6 +447,7 @@ def extract(log_level,
             operation,
             out_srs,
             sort_key,
+            force_sort_key_change,
             batch_size,
             geometry_precision,
             requests_to_pause,
@@ -520,7 +528,12 @@ def extract(log_level,
 
     state_file = output_file + '.state'
 
+    # Delay building the dedup index until crash recovery has trimmed the tail.
+    writer = FileWriter(output_file, keep_idx=False)
+
     state = get_state_from_files(state_file, output_file,
+                                 flush_output=writer.flush,
+                                 force_sort_key_change=force_sort_key_change,
                                  url=service_url,
                                  layername=layername,
                                  service=service,
@@ -542,8 +555,9 @@ def extract(log_level,
     if skip_index > 0:
         state.update(skip_index, 0)
 
-    writer = FileWriter(output_file,
-                        keep_idx=(retrieval_mode in (RetrievalMode.EXTENT, RetrievalMode.EXTENT_FIXED_BUFFER)))
+    writer.keep_idx = retrieval_mode in (RetrievalMode.EXTENT, RetrievalMode.EXTENT_FIXED_BUFFER)
+    if writer.keep_idx:
+        writer.init_idx()
 
     DumperClass = OGCServiceDumper
     if custom_dumper:
@@ -580,38 +594,64 @@ def extract(log_level,
         return
 
     dump_samples = False
-    try:
-        for feat in dumper:
-            writer.write(feat)
-        Path(state_file).unlink()
-        logger.info('Done!!!')
-    except SortKeyRequiredException:
-        logger.error('failed to iterate over records as no sorting key is specified. '
-                     'use "--sort-key/-k"?')
-        dump_samples = True
-    except InvalidSortKeyException:
-        logger.error('failed to iterate over records as the sorting key specified is invalid')
-        dump_samples = True
-    except WFSUnsupportedException:
-        logger.error('WFS is not supported on this endpoint.. '
-                     'try using --service/-s WMS')
-    except ServiceUnsupportedException:
-        alt_service = Service.WMS if service == Service.WFS else Service.WFS
-        logger.error(f'{service.value} is not supported on this endpoint.. '
-                     f'try using --service/-s {alt_service.value}')
-    except KMLUnsupportedException:
-        logger.error('kml is not supported on this endpoint.. '
-                     'try using --getmap-format/-f GEORSS')
-    except GeoRSSUnsupportedException:
-        logger.error('GeoRSS is not supported on this endpoint.. '
-                     'try using --getmap-format/-f KML')
-    except LayerMissingException:
-        logger.error('the layer specified is not supported on this endpoint.. '
-                     'check available layers using the "explore" command')
-    finally:
-        writer.close()
+    with GracefulStop() as stopping:
+        # Assign after construction to preserve older custom dumper constructors.
+        dumper.stop_requested = lambda: stopping.requested
+        save_checkpoint = state.updatecb
 
-    if dump_samples:
+        def save_and_check_stop(data):
+            save_checkpoint(data)
+            if stopping.requested:
+                raise ExtractionStopped()
+
+        state.updatecb = save_and_check_stop
+        try:
+            # Establish a rollback boundary even before the first response arrives.
+            state.updatecb(state.get_dict())
+            for feat in dumper:
+                writer.write(feat)
+            writer.flush()
+            sync_checkpoint(state_file, output_file)
+            if stopping.requested:
+                raise ExtractionStopped()
+            Path(state_file).unlink()
+            logger.info('Done!!!')
+        except ExtractionStopped:
+            logger.info('Stop requested; retaining checkpoint for resumption')
+        except SortKeyRequiredException:
+            logger.error('failed to iterate over records as no sorting key is specified')
+            dump_samples = True
+        except InvalidSortKeyException:
+            logger.error('failed to iterate over records as the sorting key specified is invalid')
+            dump_samples = True
+        except WFSUnsupportedException:
+            logger.error('WFS is not supported on this endpoint.. '
+                         'try using --service/-s WMS')
+        except ServiceUnsupportedException:
+            alt_service = Service.WMS if service == Service.WFS else Service.WFS
+            logger.error(f'{service.value} is not supported on this endpoint.. '
+                         f'try using --service/-s {alt_service.value}')
+        except KMLUnsupportedException:
+            logger.error('kml is not supported on this endpoint.. '
+                         'try using --getmap-format/-f GEORSS')
+        except GeoRSSUnsupportedException:
+            logger.error('GeoRSS is not supported on this endpoint.. '
+                         'try using --getmap-format/-f KML')
+        except LayerMissingException:
+            logger.error('the layer specified is not supported on this endpoint.. '
+                         'check available layers using the "explore" command')
+        finally:
+            writer.close()
+            if stopping.requested and Path(state_file).exists():
+                recover_output(state_file, output_file)
+                sync_checkpoint(state_file, output_file)
+
+    if dump_samples and not stopping.requested:
+        if can_restart_with_new_sort_key(state, output_file):
+            logger.info('No extraction progress saved; rerun with a valid --sort-key/-k')
+        else:
+            logger.info('To change the sort key, delete the output and state files to restart, '
+                        'or use --force-sort-key-change to continue (may duplicate or skip records)')
         logger.info('dumping a couple of records to inspect and pick a sorting key')
         feats = dumper.get_features(2, no_index=True, no_sort=True)
         for feat in feats:
