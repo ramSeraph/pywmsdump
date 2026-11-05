@@ -10,6 +10,14 @@ A library and command-line tool for extracting **vector layer** data from OGC se
 
 OFFSET recovery uses the saved byte boundary and record count without rescanning the output. Use `--verify-record-count` when an explicit recount is needed. EXTENT modes still read the output to rebuild their deduplication index.
 
+Fixed-buffer subdivision now follows WMS image rows from north to south. Start a new `EXTENT_FIXED_BUFFER` extraction when upgrading from code with the previous inverted subdivision; its saved cell paths and output may reflect exploration of the wrong geographic cells.
+
+## Tests
+
+Run the offline test suite with `uv sync --dev` followed by `uv run pytest`.
+Tests use recorded parser fixtures, mocked HTTP responses, and temporary output/checkpoint files;
+they do not require a live WMS/WFS server. GitHub Actions runs the suite on pushes and pull requests.
+
 ## Features
 
 *   **Supports WMS and WFS:** Extracts data from both Web Map Service (WMS) and Web Feature Service (WFS) endpoints.

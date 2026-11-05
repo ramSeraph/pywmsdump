@@ -194,8 +194,9 @@ class OGCServiceDumper:
                                          mode=self.retrieval_mode,
                                          sort_key=self.sort_key)
 
-        if retrieval_mode == RetrievalMode.EXTENT and get_nth is None:
-            raise Exception('get_nth func needs to be passed to help with deduplication if retrieval mode is EXTENT')
+        if retrieval_mode in extent_modes and not callable(get_nth):
+            raise Exception('get_nth func needs to be passed to help with deduplication '
+                            'for extent-based retrieval modes')
 
         self.state.get_nth = get_nth
 
@@ -449,9 +450,10 @@ class OGCServiceDumper:
         cell_height = (envelope['ymax'] - envelope['ymin']) / rows
         return dict(
             xmin=envelope['xmin'] + col * cell_width,
-            ymin=envelope['ymin'] + row * cell_height,
+            # WMS image rows run from north to south, just like the query pixels.
+            ymin=envelope['ymax'] - (row + 1) * cell_height,
             xmax=envelope['xmin'] + (col + 1) * cell_width,
-            ymax=envelope['ymin'] + (row + 1) * cell_height,
+            ymax=envelope['ymax'] - row * cell_height,
         )
 
     def get_params_WMS_GetFeatureInfo_FixedBuffer(self, count, bounds, cell_index, cols, rows):
@@ -493,6 +495,8 @@ class OGCServiceDumper:
 
     def get_cell_features(self, envelope, cell_index, cols, rows, count, key):
         """Get features for a specific grid cell."""
+        self.check_stop()
+        self.pause_if_required()
         params = self.get_params_WMS_GetFeatureInfo_FixedBuffer(count, envelope, cell_index, cols, rows)
 
         logger.info(f'making a request for {count} records with key={key} cell={cell_index}')

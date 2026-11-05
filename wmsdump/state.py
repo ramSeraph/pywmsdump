@@ -14,10 +14,6 @@ UNSUPPORTED_CHECKPOINT = (
     'Resume with the version that created it, or start a new extraction.'
 )
 
-# Build patterns from enum values
-SERVICE_PATTERN = '|'.join(s.value for s in [Service.WFS, Service.WMS])
-OPERATION_PATTERN = '|'.join(o.value for o in Operation)
-
 COMMON_PROPS = {
     "output_bytes": {
         "description": "committed output byte offset",
@@ -36,17 +32,17 @@ COMMON_PROPS = {
     "service": {
         "description": "the ogc service used.. one of WMS or WFS",
         "type": "string",
-        "pattern": SERVICE_PATTERN
+        "enum": [s.value for s in Service]
     },
     "version": {
         "description": "version of WMS or WFS protocol in use",
         "type": "string",
-        "pattern": "[0-9]+\\.[0-9]+\\.[0-9]+",
+        "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
     },
     "operation": {
         "description": "the ogc operation used.. one of GetMap, GetFeatureInfo or GetFeature",
         "type": "string",
-        "pattern": OPERATION_PATTERN
+        "enum": [o.value for o in Operation]
     }
 }
 
@@ -83,10 +79,10 @@ EXTENT_SCHEMA = {
             "patternProperties": {
                 "^[0-3]+$": {
                     "type": "integer",
-                    "minimum": 0,
-                    "maximum": 3
+                    "enum": [status.value for status in Extent]
                 }
-            }
+            },
+            "additionalProperties": False
         }
     }
 }
@@ -101,16 +97,18 @@ EXTENT_FIXED_BUFFER_SCHEMA = {
             "patternProperties": {
                 "^[0-9]+(\\|[0-9]+)*$": {
                     "type": "integer",
-                    "minimum": 0,
-                    "maximum": 3
+                    "enum": [status.value for status in Extent]
                 }
-            }
+            },
+            "additionalProperties": False
         }
     }
 }
 
 
 def validate_state_dict(state_data):
+    if not isinstance(state_data, dict):
+        return False, 'Checkpoint must be a JSON object'
     if 'output_bytes' not in state_data:
         return False, UNSUPPORTED_CHECKPOINT
     mode = state_data.get('mode', None)
@@ -128,6 +126,11 @@ def validate_state_dict(state_data):
         jsonschema.validate(state_data, schema)
     except jsonschema.exceptions.ValidationError as ex:
         return False, ex.message
+
+    try:
+        parse_version(Service(state_data['service']), state_data['version'])
+    except ValueError as ex:
+        return False, str(ex)
 
     return True, None
 
@@ -459,7 +462,7 @@ def get_state_from_files(state_file, output_file, *, flush_output, force_sort_ke
                             state_data['output_bytes'], state.downloaded_count)
                 resume_params['downloaded_count'] = state.downloaded_count
         else:
-            del resume_params['sort_key']
+            resume_params.pop('sort_key', None)
             logger.info(f'Reading existing records in {output_file}')
             with open(output_file) as f:
                 for line in f:
