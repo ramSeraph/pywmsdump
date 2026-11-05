@@ -10,7 +10,9 @@ A library and command-line tool for extracting **vector layer** data from OGC se
 
 OFFSET recovery uses the saved byte boundary and record count without rescanning the output. Use `--verify-record-count` when an explicit recount is needed. EXTENT modes still read the output to rebuild their deduplication index.
 
-Fixed-buffer subdivision now follows WMS image rows from north to south. Start a new `EXTENT_FIXED_BUFFER` extraction when upgrading from code with the previous inverted subdivision; its saved cell paths and output may reflect exploration of the wrong geographic cells.
+## Fixed-buffer compatibility in 0.3.1
+
+Fixed-buffer subdivision now follows WMS image rows from north to south. Start a new `EXTENT_FIXED_BUFFER` extraction when upgrading from 0.3.0 or earlier; its saved cell paths and output may reflect exploration of the wrong geographic cells.
 
 ## Tests
 
