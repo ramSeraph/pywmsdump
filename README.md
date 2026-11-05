@@ -4,6 +4,12 @@ A library and command-line tool for extracting **vector layer** data from OGC se
 
 > **Note:** This tool only supports vector layers. Raster layers are not supported.
 
+## Checkpoint compatibility in 0.3.0
+
+**Breaking change:** Saved checkpoints must contain `output_bytes`. Older checkpoint formats without this field are unsupported in every retrieval mode. They are rejected without reading or modifying the output; there is no automatic migration or recount fallback. Finish those downloads with the version that created them, or start a new extraction.
+
+OFFSET recovery uses the saved byte boundary and record count without rescanning the output. Use `--verify-record-count` when an explicit recount is needed. EXTENT modes still read the output to rebuild their deduplication index.
+
 ## Features
 
 *   **Supports WMS and WFS:** Extracts data from both Web Map Service (WMS) and Web Feature Service (WFS) endpoints.
@@ -147,6 +153,7 @@ wms-extractor extract --help
 *   `--flavor`: Vendor of the WMS service (`Geoserver` or `QGISserver`), useful to specify for GetFeatureInfo based retrieval. Defaults to `Geoserver`.
 *   `-k`, `--sort-key`: Key to use for paged retrieval (required when server requires it).
 *   `--force-sort-key-change`: Continue from the saved offset with a changed sort key. This can duplicate or skip records; other resume checks still apply.
+*   `--verify-record-count`: Recount the committed output on OFFSET resume, even when the checkpoint includes a byte offset. By default, byte checkpoints resume without scanning the output.
 *   `-b`, `--batch-size`: Batch size to use for retrieval. Defaults to 1000.
 *   `-p`, `--pause-seconds`: Amount of time to pause between a batch of requests. Defaults to 2.
 *   `--requests-to-pause`: Number of requests to make before pausing. Defaults to 10.
@@ -253,7 +260,7 @@ You can correct a sort key and rerun without deleting files when the output is e
 
 The extraction CLI handles `SIGTERM` and `SIGINT` cooperatively. It finishes and checkpoints the current batch before stopping, retains the state file, and synchronizes output and state with `fsync()` on shutdown. An in-flight HTTP request is allowed to finish or time out; use `--request-timeout` to bound how long a stalled request can delay stopping. Retry and rate-limit waits respond to a stop request without waiting out their full delay. Signal handlers are restored when extraction exits.
 
-Normal checkpoints flush Python's output buffer before replacing the state file atomically. They record `output_bytes`, the committed GeoJSONL byte offset. On resume after a process crash or `SIGKILL`, any uncommitted tail is truncated and fetched again. A file shorter than its checkpoint is rejected. Legacy states without this field retain the existing record-count validation. Run only one writer per output/state pair. Per-batch checkpoints do not call `fsync()` and do not guarantee recovery from OS crashes or power loss.
+Normal checkpoints flush Python's output buffer before replacing the state file atomically. They record `output_bytes`, the committed GeoJSONL byte offset. On resume after a process crash or `SIGKILL`, any uncommitted tail is truncated and fetched again. A file shorter than its checkpoint, or a byte offset that does not end at a newline, is rejected. For OFFSET mode, a valid byte checkpoint resumes using its saved record count without scanning the output. This assumes the committed file and checkpoint have not been edited; use `--verify-record-count` (or `verify_record_count=True` in `get_state_from_files`) to recount the committed output when needed. Checkpoints without `output_bytes` are unsupported and rejected before the output is read or modified. Resume those with the version that created them, or start a new extraction. EXTENT and EXTENT_FIXED_BUFFER modes still scan the output to rebuild their deduplication state. Run only one writer per output/state pair. Per-batch checkpoints do not call `fsync()` and do not guarantee recovery from OS crashes or power loss.
 
 Library users can pass a `stop_requested` callable to `OGCServiceDumper`; it is checked at request boundaries and during retry/rate-limit waits, raising `wmsdump.termination.ExtractionStopped`. The library does not install signal handlers automatically. `get_state_from_files` requires an explicit `flush_output` callback, such as `flush_output=writer.flush`, so every checkpoint follows the output flush. Omitting it or passing a non-callable raises `TypeError` before any recovery or file changes. Custom dumpers should preserve these request/checkpoint boundaries when overriding iteration or request methods.
 

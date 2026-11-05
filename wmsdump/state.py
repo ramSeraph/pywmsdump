@@ -9,11 +9,21 @@ from .enums import Extent, Operation, RetrievalMode, Service, parse_version
 
 logger = logging.getLogger(__name__)
 
+UNSUPPORTED_CHECKPOINT = (
+    'Unsupported checkpoint format: missing output_bytes. '
+    'Resume with the version that created it, or start a new extraction.'
+)
+
 # Build patterns from enum values
 SERVICE_PATTERN = '|'.join(s.value for s in [Service.WFS, Service.WMS])
 OPERATION_PATTERN = '|'.join(o.value for o in Operation)
 
 COMMON_PROPS = {
+    "output_bytes": {
+        "description": "committed output byte offset",
+        "type": "integer",
+        "minimum": 0
+    },
     "url": {
         "description": "the wms endpoint url",
         "type": "string",
@@ -40,7 +50,7 @@ COMMON_PROPS = {
     }
 }
 
-COMMON_REQUIRED = [ 'url', 'layername', 'service', 'version', 'operation', 'mode' ]
+COMMON_REQUIRED = [ 'url', 'layername', 'service', 'version', 'operation', 'mode', 'output_bytes' ]
 
 OFFSET_SCHEMA = {
     "type" : "object",
@@ -101,6 +111,8 @@ EXTENT_FIXED_BUFFER_SCHEMA = {
 
 
 def validate_state_dict(state_data):
+    if 'output_bytes' not in state_data:
+        return False, UNSUPPORTED_CHECKPOINT
     mode = state_data.get('mode', None)
     schema = None
     if mode == RetrievalMode.EXTENT.value:
@@ -313,14 +325,14 @@ def load_state_from_json(state_file):
 def recover_output(state_file, output_file):
     """Roll back a process-crash tail to the last committed byte offset.
 
-    Old states without output_bytes retain their existing count validation.
+    Checkpoints without output_bytes are unsupported and rejected.
     Never infer a missing output prefix or advance a checkpoint to match a tail.
     Call only when this process is the sole writer and its buffers are closed.
     """
     state_data = json.loads(Path(state_file).read_text())
-    committed = state_data.get('output_bytes')
-    if committed is None:
-        return
+    if 'output_bytes' not in state_data:
+        raise ValueError(UNSUPPORTED_CHECKPOINT)
+    committed = state_data['output_bytes']
     if type(committed) is not int or committed < 0:
         raise ValueError('Invalid committed output byte offset')
     with open(output_file, 'r+b') as output:
@@ -360,13 +372,18 @@ def can_restart_with_new_sort_key(state, output_file):
     )
 
 
-def get_state_from_files(state_file, output_file, *, flush_output, force_sort_key_change=False, **params):
+def get_state_from_files(state_file, output_file, *, flush_output, force_sort_key_change=False,
+                         verify_record_count=False, **params):
     """Load resumable state, flushing the supplied writer before each checkpoint.
 
     flush_output is required and must flush any Python buffering owned by the
     output writer (for example, writer.flush).
     Normal checkpoints provide process-crash consistency while the OS is alive;
     they do not fsync each batch for power-loss durability.
+    OFFSET recovery trusts the saved count after validating a byte checkpoint;
+    pass verify_record_count=True to recount the committed output. Checkpoints
+    without output_bytes are unsupported and rejected. EXTENT modes still
+    read the output to rebuild their deduplication state.
     Changing sort keys after progress requires force_sort_key_change=True and
     may duplicate or skip records. All other resume checks still apply.
     """
@@ -430,12 +447,17 @@ def get_state_from_files(state_file, output_file, *, flush_output, force_sort_ke
             return None
 
         if state.mode == RetrievalMode.OFFSET:
-            logger.info(f'Counting existing records in {output_file}')
-            seen_count = 0
-            with open(output_file) as f:
-                for line in f:
-                    seen_count += 1
-            resume_params['downloaded_count'] = seen_count
+            if verify_record_count:
+                logger.info(f'Counting existing records in {output_file}')
+                seen_count = 0
+                with open(output_file) as f:
+                    for line in f:
+                        seen_count += 1
+                resume_params['downloaded_count'] = seen_count
+            else:
+                logger.info('Resuming from byte checkpoint %s with %s saved records; skipping recount',
+                            state_data['output_bytes'], state.downloaded_count)
+                resume_params['downloaded_count'] = state.downloaded_count
         else:
             del resume_params['sort_key']
             logger.info(f'Reading existing records in {output_file}')

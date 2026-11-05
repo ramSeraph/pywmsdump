@@ -173,7 +173,7 @@ def test_wrong_invocation_does_not_truncate_output(tmp_path, force_sort_key_chan
 
 
 @pytest.mark.parametrize('force_sort_key_change', [False, True])
-def test_legacy_state_still_validated_without_inventing_offset(tmp_path, force_sort_key_change):
+def test_old_checkpoint_rejected_without_inventing_offset(tmp_path, caplog, force_sort_key_change):
     output, state_file, writer, state = setup_checkpoint(tmp_path)
     state_file.write_text(json.dumps(state.get_dict()))
     writer.write(feature(1))
@@ -181,6 +181,7 @@ def test_legacy_state_still_validated_without_inventing_offset(tmp_path, force_s
     assert get_state_from_files(state_file, output, flush_output=writer.flush,
                                 force_sort_key_change=force_sort_key_change, **PARAMS) is None
     assert output.read_text().count('\n') == 1
+    assert 'Unsupported checkpoint format: missing output_bytes' in caplog.text
 
 
 @pytest.mark.parametrize('old_key,error', [(None, SortKeyRequiredException), ('invalid', InvalidSortKeyException)])
